@@ -3,7 +3,10 @@
  * Mọi thao tác ghi qua hàm RPC của cơ sở dữ liệu (chỉ vai trò ASM gọi được). Bản thử: dữ liệu giả, tính tổng hợp ngay trên máy (đủ cho vài trăm dòng). */
 var ASM = (function () {
   IC.upload = '<path d="M12 16V4m0 0-4 4m4-4 4 4M5 20h14"/>'; IC.download = '<path d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/>'; IC.swap = '<path d="M7 7h12l-3-3M17 17H5l3 3"/>'; IC.book = '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/>'; IC.shop = '<path d="M4 9 5.5 4h13L20 9M4 9h16v11H4zM9 20v-6h6v6"/>';
-  var NAV = [['a_tq', 'Tổng quan', 'home'], ['a_kho', 'Kho Data', 'list'], ['a_pc', 'Phân công', 'swap'], ['a_nap', 'Nạp Data', 'upload'], ['a_bc', 'Kết quả & xuất', 'chart'], ['a_tl', 'Thư viện', 'book'], ['acc', 'Tài khoản', 'user']];
+  IC.more = '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'; IC.shield = '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>';
+  var NAV = [['a_tq', 'Tổng quan', 'home'], ['a_kho', 'Kho Data', 'list'], ['a_pc', 'Phân công', 'swap'], ['a_nap', 'Nạp Data', 'upload'], ['a_bc', 'Kết quả & xuất', 'chart'], ['a_tk', 'Nhân sự & tài khoản', 'team'], ['a_tl', 'Thư viện', 'book'], ['a_pd', 'Phác đồ', 'shield'], ['acc', 'Của tôi', 'user']];
+  var MOBILE = ['a_tq', 'a_kho', 'a_pc', 'a_tk'];
+  var X = { pages: {}, binders: [], u: {} };
   var ST = { shop: '', band: '', f: '', q: '', pg: 1, sel: {}, selAll: false, imp: null, bcShop: '', bcSt: '' };
   var PAGE = 25;
   function today0() { var d = new Date(); d.setHours(0, 0, 0, 0); return d }
@@ -24,11 +27,17 @@ var ASM = (function () {
   /* ---------- khung ---------- */
   function shell() {
     function b(x) { return '<button class="nav ' + (S.page === x[0] ? 'on' : '') + '" data-p="' + x[0] + '">' + ic(x[2]) + x[1] + '</button>' }
-    $('#side').innerHTML = '<div class="brand">' + LOGO + '</div><div class="grp">Điều phối</div>' + NAV.slice(0, 3).map(b).join('') + '<div class="grp">Dữ liệu</div>' + NAV.slice(3, 5).map(b).join('') + '<div class="grp">Hệ thống</div>' + NAV.slice(5).map(b).join('') +
+    $('#side').innerHTML = '<div class="brand">' + LOGO + '</div><div class="grp">Điều phối</div>' + NAV.slice(0, 3).map(b).join('') + '<div class="grp">Dữ liệu</div>' + NAV.slice(3, 5).map(b).join('') + '<div class="grp">Nhân sự &amp; nội dung</div>' + NAV.slice(5, 8).map(b).join('') + '<div class="grp">Hệ thống</div>' + NAV.slice(8).map(b).join('') +
       '<div class="me"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>ASM · Giám đốc kinh doanh KV</small></div></div>';
-    $('#tabs').style.setProperty('--n', NAV.length);
-    $('#tabs').innerHTML = NAV.map(function (x) { return '<button class="tab ' + (S.page === x[0] ? 'on' : '') + '" data-p="' + x[0] + '">' + ic(x[2]) + x[1].replace('Kết quả & xuất', 'Xuất').replace('Tài khoản', 'Tôi') + '</button>' }).join('');
+    var mob = NAV.filter(function (x) { return MOBILE.indexOf(x[0]) >= 0 }), inMore = MOBILE.indexOf(S.page) < 0;
+    $('#tabs').style.setProperty('--n', mob.length + 1);
+    $('#tabs').innerHTML = mob.map(function (x) { return '<button class="tab ' + (S.page === x[0] ? 'on' : '') + '" data-p="' + x[0] + '">' + ic(x[2]) + x[1].replace('Nhân sự & tài khoản', 'Nhân sự') + '</button>' }).join('') + '<button class="tab ' + (inMore ? 'on' : '') + '" id="tmore">' + ic('more') + 'Thêm</button>';
     document.querySelectorAll('[data-p]').forEach(function (e) { e.onclick = function () { S.page = e.dataset.p; ST.pg = 1; ST.sel = {}; render() } });
+    var tm = $('#tmore'); if (tm) tm.onclick = function () {
+      var d = document.createElement('div'); d.className = 'modal'; d.innerHTML = '<div class="card" style="width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom))"><h2 style="font-size:17px;margin:2px 4px 8px">Tất cả mục</h2>' + NAV.map(function (x) { return '<button class="nav ' + (S.page === x[0] ? 'on' : '') + '" data-mp="' + x[0] + '">' + ic(x[2]) + x[1] + '</button>' }).join('') + '</div>';
+      document.body.appendChild(d); d.onclick = function (e) { if (e.target === d) d.remove() };
+      [].slice.call(d.querySelectorAll('[data-mp]')).forEach(function (b) { b.onclick = function () { S.page = b.dataset.mp; ST.pg = 1; ST.sel = {}; d.remove(); render() } })
+    }
   }
   function head(t, p, extra) { return mtop() + '<div class="row2"><div class="greet"><h1>' + t + '</h1>' + (p ? '<p>' + p + '</p>' : '') + '</div>' + (extra || '') + '</div>' }
 
@@ -183,12 +192,12 @@ var ASM = (function () {
   }
 
   /* ---------- Thư viện, Tài khoản ---------- */
-  function pgTl() { return head('Thư viện', 'Duyệt và quản lý mẫu tin, giá, khuyến mãi, phác đồ.', '') + '<div class="card empty">Phần này sẽ nối thư viện P07 (duyệt mẫu, đưa vào gợi ý nhắn tin cho nhân viên) ở bước tiếp theo.</div>' }
-  function pgAcc() { return head('Tài khoản', '', '') + '<div class="card"><div class="alert"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>' + esc(ME.email) + ' · ASM</small></div></div><button class="btn b3" id="out" style="width:100%">Đăng xuất</button></div>' }
+  function pgAcc() { return head('Tài khoản của tôi', '', '') + '<div class="card"><div class="alert"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>' + esc(ME.email) + ' · ASM</small></div></div><button class="btn b3" id="cpw" style="width:100%;margin-bottom:8px">Đổi mật khẩu</button><button class="btn b3" id="out" style="width:100%">Đăng xuất</button></div>' }
+  X.u = { head: head, sel: sel, shops: shops, staffOf: staffOf, qlOf: qlOf, pct: pct, ST: ST };
 
   /* ---------- vẽ và gắn sự kiện ---------- */
   function render() {
-    shell(); var m = $('#main'), p = S.page; m.innerHTML = ({ a_tq: pgTq, a_kho: pgKho, a_pc: pgPc, a_nap: pgNap, a_bc: pgBc, a_tl: pgTl, acc: pgAcc }[p] || pgTq)();
+    shell(); var m = $('#main'), p = S.page; m.innerHTML = ({ a_tq: pgTq, a_kho: pgKho, a_pc: pgPc, a_nap: pgNap, a_bc: pgBc, acc: pgAcc }[p] || X.pages[p] || pgTq)();
     var x, on = function (sel, ev, fn) { var el = $(sel); if (el) el[ev] = function (e) { return fn.call(el, el, e) } };
     document.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { S.page = b.dataset.go; render() } });
     on('#fshop', 'onchange', function (x) { ST.shop = x.value; render() });
@@ -209,7 +218,8 @@ var ASM = (function () {
     on('#nok', 'onclick', function (x) { x.disabled = true; var rows = ST.imp.filter(function (r) { return !r.err }).map(function (r) { return { ma_tcqg: r.ma_tcqg, ho_ten: r.ho_ten, ngay_sinh: r.iso, gioi_tinh: r.gioi_tinh, ten_lh: r.ten_lien_he, quan_he: r.quan_he, sdt: r.sdt } });
       rpc('u_asm_import', { p_rows: rows, p_req: rid() }).then(function (r) { ST.impRes = r; ST.imp = null; ST.impText = ''; toast('Đã nạp ' + r.them_moi + ' khách'); return load(true) }).then(render, function (e) { x.disabled = false; fail(e) }) });
     on('#bshop', 'onchange', function (x) { ST.bcShop = x.value; render() }); on('#bst', 'onchange', function (x) { ST.bcSt = x.value; render() });
-    on('#xl', 'onclick', exportTurns); on('#xn', 'onclick', exportStaff); on('#out', 'onclick', logout);
+    on('#xl', 'onclick', exportTurns); on('#xn', 'onclick', exportStaff); on('#out', 'onclick', logout); on('#cpw', 'onclick', pwModal);
+    X.binders.forEach(function (f) { f(on) });
   }
-  return { render: render };
+  return { render: render, X: X };
 })();
