@@ -68,6 +68,31 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
  .tab{border:0;background:none;display:grid;justify-items:center;gap:2px;padding:6px 0;color:var(--soft);font-size:11.5px;font-weight:600;min-height:52px}.tab.on{color:var(--teal-d)}
  table{display:block;overflow-x:auto}.toast{top:12px;width:calc(100% - 24px);min-width:0}
 }
+
+/* ===== Giao diện điện thoại: không tràn ngang, chữ gọn, thanh menu dưới kiểu app ===== */
+html,body{max-width:100%;overflow-x:hidden}
+.stats6{grid-template-columns:repeat(6,1fr)}.stats4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:959px){
+ body{font-size:15px}
+ main{padding:10px 14px}
+ .greet h1{font-size:21px;line-height:1.25;letter-spacing:-.3px}.greet p{font-size:13.5px}
+ .card{padding:14px;border-radius:16px}.card h2{font-size:14.5px}
+ .stats{gap:10px}.st{padding:12px}.st .l{font-size:12.5px}.st .v{font-size:23px}
+ .stats6{display:flex;overflow-x:auto;scroll-snap-type:x proximity;margin:0 -14px;padding:0 14px 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.stats6::-webkit-scrollbar{display:none}
+ .stats6 .st{flex:none;min-width:112px;scroll-snap-align:start}
+ .stats4{grid-template-columns:repeat(2,1fr)}
+ .name{font-size:16px}.phone{font-size:19px}.meta{font-size:13px}.tag{font-size:12px;padding:2px 9px}
+ .btn{min-height:44px;font-size:15px}.chip{font-size:13px;padding:6px 12px;min-height:36px}
+ th{font-size:11px}td{padding:9px 8px;font-size:14px}
+ .shell{padding-bottom:96px}
+ .tabs{left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:22px;padding:5px;box-shadow:0 8px 28px rgba(8,42,62,.18);background:var(--card)}
+ @supports(backdrop-filter:blur(8px)){.tabs{background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
+ .tab{border-radius:17px;font-size:10.5px;font-weight:600;gap:3px;min-height:50px;padding:6px 0 5px;letter-spacing:.1px}
+ .tab svg.i{width:22px;height:22px}
+ .tab.on{background:var(--tint);color:var(--teal-d)}
+ .toast{top:max(10px,env(safe-area-inset-top))}
+ .alert .btn{white-space:nowrap;min-height:38px;padding:0 12px;font-size:14px}
+}
 </style>
 </head>
 <body>
@@ -93,7 +118,7 @@ function ago(d){if(!d)return '';var m=Math.round((Date.now()-d)/60000);if(m<1)re
 function dstr(d){return d?pad(d.getDate())+'/'+pad(d.getMonth()+1)+' '+pad(d.getHours())+':'+pad(d.getMinutes()):''}
 function ageDays(d){return d?Math.floor((Date.now()-d)/86400000):0}
 var LOGO='<img alt="Tiêm chủng Long Châu" src="https://cdn.tiemchunglongchau.com.vn/Size_XL_56px_Color_Blue_Logo_Position_Left_Logo_Text2_Line_Digital_Information_Note_False_Show_FPT_Retail_True_476b85e044.svg" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="fb">LC</div>';
-var IC={home:'<path d="M4 12l8-8 8 8M6 10v10h12V10"/>',list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',team:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.3 2.2 3.8 5"/>',call:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',msg:'<path d="M4 5h16v11H8l-4 4z"/>',back:'<path d="m15 18-6-6 6-6"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'};
+var IC={more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',home:'<path d="M4 12l8-8 8 8M6 10v10h12V10"/>',list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',team:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.3 2.2 3.8 5"/>',call:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',msg:'<path d="M4 5h16v11H8l-4 4z"/>',back:'<path d="m15 18-6-6 6-6"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'};
 function ic(n){return '<svg class="i" viewBox="0 0 24 24">'+IC[n]+'</svg>'}
 var PERF=window.__perf=[];
 /* ===== Lớp dữ liệu Supabase ===== */
@@ -130,9 +155,10 @@ function nav(){var a=[['today','Hôm nay','home'],['data','Data được giao','
 function shell(){var n=nav(),open=D.turns.filter(function(t){return mine_(t)&&open_(t)&&catOf(t)==='need'}).length;
  function b(x){return '<button class="nav '+(S.page===x[0]?'on':'')+'" data-p="'+x[0]+'">'+ic(x[2])+x[1]+(x[0]==='today'&&open?'<span class="n">'+open+'</span>':'')+'</button>'}
  var ql=ME.vai_tro==='QUAN_LY';$('#side').innerHTML='<div class="brand">'+LOGO+'</div><div class="grp">Công việc</div>'+n.slice(0,ql?3:2).map(b).join('')+'<div class="grp">Hiệu quả</div>'+n.slice(ql?3:2,ql?5:4).map(b).join('')+'<div class="grp">Hệ thống</div>'+n.slice(-1).map(b).join('')+'<div class="me"><div class="ava">'+esc(ini(ME.ho_ten))+'</div><div><b>'+esc(ME.ho_ten)+'</b><small>'+(ql?'Quản lý':'Nhân viên')+' · '+esc(shopName(ME.id_shop))+'</small></div></div>';
- $('#tabs').style.setProperty('--n',n.length);$('#tabs').innerHTML=n.map(function(x){return '<button class="tab '+(S.page===x[0]?'on':'')+'" data-p="'+x[0]+'">'+ic(x[2])+x[1].replace(' được giao','')+'</button>'}).join('');
+ var mob=n.length>5?n.slice(0,4):n,rest_=n.length>5?n.slice(4):[],inMore=rest_.some(function(x){return x[0]===S.page});$('#tabs').style.setProperty('--n',mob.length+(rest_.length?1:0));$('#tabs').innerHTML=mob.map(function(x){return '<button class="tab '+(S.page===x[0]?'on':'')+'" data-p="'+x[0]+'">'+ic(x[2])+x[1].replace(' được giao','')+'</button>'}).join('')+(rest_.length?'<button class="tab '+(inMore?'on':'')+'" id="tmore">'+ic('more')+'Thêm</button>':'');
+ var tm=$('#tmore');if(tm)tm.onclick=function(){var d=document.createElement('div');d.className='modal';d.innerHTML='<div class="card" style="width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom))"><h2 style="font-size:17px;margin:2px 4px 8px">Thêm</h2>'+rest_.map(function(x){return '<button class="nav '+(S.page===x[0]?'on':'')+'" data-mp="'+x[0]+'">'+ic(x[2])+x[1]+'</button>'}).join('')+'</div>';document.body.appendChild(d);d.onclick=function(e){if(e.target===d)d.remove()};[].slice.call(d.querySelectorAll('[data-mp]')).forEach(function(b){b.onclick=function(){S.page=b.dataset.mp;S.sel=null;S.open=false;d.remove();render()}})};
  document.querySelectorAll('[data-p]').forEach(function(e){e.onclick=function(){S.page=e.dataset.p;S.sel=null;S.open=false;render()}})}
-function ini(s){var p=String(s||'?').trim().split(/\s+/);return (p[0][0]||'')+(p.length>1?p[p.length-1][0]:'')}
+function ini(s){var p=String(s||'?').replace(/\s*\([^)]*\)/g,'').trim().split(/\s+/);return (p[0][0]||'')+(p.length>1?p[p.length-1][0]:'')}
 function mtop(){return '<div class="mtop">'+LOGO+'<div class="sp"></div><div class="ava">'+esc(ini(ME.ho_ten))+'</div></div>'}
 /* ===== Hôm nay ===== */
 function today(){var M=D.turns.filter(mine_),ql=ME.vai_tro==='QUAN_LY',now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
