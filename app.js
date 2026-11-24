@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124a) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124b) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -758,96 +758,100 @@ var ASMSCAN = (function () {
 ;
 
 /* ===== asm-hr.js ===== */
-/* NHÂN SỰ – NẠP DANH SÁCH TỪ FILE TOÀN BỘ NHÂN SỰ: kéo thả file Excel/CSV, app tự tìm dòng tiêu đề, nhận ra cột Họ tên / Email / Chức danh / Shop,
- * so với tài khoản đang có rồi cho xem trước: Tạo mới / Cập nhật / Không đổi / Lỗi. Bấm Áp dụng mới ghi (từng người, qua hàm tạo/sửa tài khoản chỉ ASM gọi được).
- * Tài khoản mới có mật khẩu ngẫu nhiên, hiện một lần và tải được thành file CSV để gửi nhân viên. Không tự khóa người vắng trong file. */
+/* NHÂN SỰ – NẠP DANH SÁCH TỪ FILE TOÀN BỘ NHÂN SỰ (bản xuất của hệ thống nhân sự): kéo thả file Excel/CSV, app tự tìm dòng tiêu đề (kể cả tiêu đề 2 tầng), nhận cột Họ tên / Email / Chức danh /
+ * Mã shop / Cửa hàng / Trạng thái (nhiều cột giống tên thì chọn cột CÓ DỮ LIỆU), so với tài khoản và Shop đang có rồi cho xem trước: Tạo mới / Cập nhật / Không đổi / Lỗi / Bỏ qua.
+ * Anh đặt "Chức danh → vai trò" (Nhân viên / Quản lý / Bỏ qua) ngay trên màn xem trước. Shop chưa có được tạo từ file (Mã shop + tên cửa hàng).
+ * Bấm Áp dụng mới ghi, từng người, qua hàm chỉ ASM gọi được. Tài khoản mới có mật khẩu ngẫu nhiên hiện một lần, tải được CSV. Không tự khóa người vắng trong file. */
 var ASMHR = (function () {
-  var P = window.LIBP, H = { rows: null, name: '', info: null, thay: false, res: null, busy: false, drag: false };
+  var P = window.LIBP, H = { aoa: null, name: '', info: null, thay: false, createShops: true, onlyActive: true, rules: {}, res: null, busy: false, drag: false };
   var COLS = [
-    { k: 'ho_ten', nhan: 'Họ tên', alias: ['ho va ten', 'ho ten', 'ten nhan vien', 'nhan vien', 'ten', 'ho ten nhan vien', 'full name', 'name'], bb: 1 },
+    { k: 'ho_ten', nhan: 'Họ tên', alias: ['ho va ten', 'ho ten', 'ten nhan vien', 'nhan vien', 'ho ten nhan vien', 'full name', 'name', 'ten'], bb: 1 },
     { k: 'email', nhan: 'Email', alias: ['mail', 'dia chi email', 'email cong ty', 'email nhan vien', 'email lien he'], bb: 1 },
-    { k: 'chuc_danh', nhan: 'Chức danh', alias: ['vai tro', 'chuc vu', 'vi tri', 'chuc vu cong viec', 'position', 'role'] },
-    { k: 'shop', nhan: 'Shop', alias: ['ma shop', 'ten shop', 'co so', 'trung tam', 'cua hang', 'dia diem lam viec', 'dia diem', 'don vi', 'noi lam viec', 'ma co so', 'ten co so', 'ten trung tam'] },
-    { k: 'sdt', nhan: 'Số điện thoại', alias: ['sdt', 'dien thoai', 'so dt', 'phone'] }, { k: 'ma_nv', nhan: 'Mã nhân viên', alias: ['ma nv', 'ma so nhan vien', 'ma nhan vien'] }];
+    { k: 'chuc_danh', nhan: 'Chức danh', alias: ['vai tro', 'chuc vu cong viec', 'vi tri', 'position', 'role', 'chuc vu'] },
+    { k: 'ma_shop', nhan: 'Mã shop', alias: ['ma co so', 'ma cua hang', 'ma nha thuoc', 'ma don vi', 'shop id'] },
+    { k: 'ten_shop', nhan: 'Cửa hàng', alias: ['ten shop', 'ten co so', 'co so lam viec', 'co so', 'nha thuoc', 'ten cua hang', 'shop', 'dia diem lam viec', 'noi lam viec', 'trung tam'] },
+    { k: 'trang_thai', nhan: 'Trạng thái', alias: ['tinh trang', 'trang thai lam viec'] },
+    { k: 'sdt', nhan: 'Số điện thoại', alias: ['sdt', 'dien thoai', 'so dt', 'phone'] }, { k: 'ma_nv', nhan: 'Mã nhân viên', alias: ['ma nv', 'ma so nhan vien'] }];
   var KQ = { moi: ['t-ok', 'Tạo mới'], sua: ['t-today', 'Cập nhật'], giu: ['t-new', 'Không đổi'], loi: ['t-bad', 'Lỗi'], bo: ['t-new', 'Bỏ qua'] };
+  var VT = { QUAN_LY: 'Quản lý', NHAN_VIEN: 'Nhân viên', BO: 'Bỏ qua' };
 
   function xlsx(cb) { if (window.XLSX) return cb(); var s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload = cb; s.onerror = function () { toast('Không tải được bộ đọc Excel. Kiểm tra mạng.', 0, 1) }; document.head.appendChild(s) }
   function genPw() { var a = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', o = '', b = new Uint32Array(10); (window.crypto || window.msCrypto).getRandomValues(b); for (var i = 0; i < 10; i++) o += a[b[i] % a.length]; return o + '7' }
   function tag(c, t) { return '<span class="tag ' + c + '">' + esc(t) + '</span>' }
-  function accs() { return Object.keys(D.acc).map(function (k) { return D.acc[k] }) }
-  function shopsAct() { return Object.keys(D.shops).map(function (k) { return D.shops[k] }).filter(function (s) { return s.trang_thai === 'HOAT_DONG' }) }
-  function core(s) { return P.bo(String(s || '').replace(/\([^)]*\)/g, '')).replace(/^(shop|trung tam|nha thuoc|co so)\s+/, '').trim() }
-  function findShop(v) {
-    var t = P.bo(v); if (!t) return { err: 'Thiếu Shop' }; var all = shopsAct(), hit = all.filter(function (s) { return P.bo(s.ma_shop) === t || P.bo(s.id_shop) === t });
-    if (!hit.length) { var tc = core(v); hit = all.filter(function (s) { var c = core(s.ten_shop); return c && (c === tc || (tc.length >= 3 && (c.indexOf(tc) >= 0 || tc.indexOf(c) >= 0))) }) }
-    if (!hit.length) hit = all.filter(function (s) { return s.ma_shop && t.replace(/ /g, '').indexOf(String(s.ma_shop)) >= 0 });
-    return hit.length === 1 ? { s: hit[0] } : { err: hit.length ? 'Nhiều Shop khớp "' + v + '"' : 'Không thấy Shop "' + v + '"' }
-  }
-  function role(v) { var t = P.bo(v); if (!t) return 'NHAN_VIEN'; if (/(^| )(asm|giam doc)( |$)/.test(t)) return 'ASM'; return /quan ly|(^| )ql( |$)|cua hang truong|truong (shop|trung tam|nha thuoc)/.test(t) ? 'QUAN_LY' : 'NHAN_VIEN' }
-  var VT = { QUAN_LY: 'Quản lý', NHAN_VIEN: 'Nhân viên' };
+  function core(s) { return P.bo(String(s || '').replace(/\([^)]*\)/g, '')).replace(/^(shop|trung tam|nha thuoc|co so|lc|vx)\s+/, '').replace(/^(hni|hn)\s+/, '').trim() }
+  /* quy tắc mặc định theo chức danh (anh sửa được trên màn xem trước) */
+  function defaultRule(t) { var b = P.bo(t); if (!b) return 'NHAN_VIEN'; if (/giam doc|(^| )asm( |$)/.test(b)) return 'BO'; if (/(^| )bac si( |$)|bao ve/.test(b)) return 'BO'; if (/truong quan ly|cua hang truong|quan ly (cua hang|shop)/.test(b)) return 'QUAN_LY'; return 'NHAN_VIEN' }
 
-  /* tìm dòng tiêu đề: khớp đúng tên/alias trước, không có thì khớp chứa cụm (ví dụ "Cơ sở làm việc" chứa "cơ sở") */
+  /* tìm dòng tiêu đề; mỗi cột chọn trong các cột cùng tên cột CÓ NHIỀU DỮ LIỆU nhất */
   function findHdr(aoa) {
     var best = null;
     for (var r = 0; r < Math.min(aoa.length, 40); r++) {
-      var row = aoa[r] || [], map = {}, taken = {}, n = 0;
+      var row = aoa[r] || [], map = {}, taken = {}, n = 0, fill = function (j) { var c = 0; for (var i = r + 1; i < Math.min(aoa.length, r + 60); i++) { var v = (aoa[i] || [])[j]; if (v != null && String(v).trim() !== '') c++ } return c };
       COLS.forEach(function (c) {
-        var names = [c.nhan, c.k].concat(c.alias || []).map(function (a) { return P.bo(a) }), pick = -1, j, b;
-        for (j = 0; j < row.length && pick < 0; j++) if (!taken[j] && row[j] != null && names.indexOf(P.bo(row[j])) >= 0) pick = j;
-        for (j = 0; j < row.length && pick < 0; j++) { if (taken[j] || row[j] == null) continue; b = ' ' + P.bo(row[j]) + ' '; if (b.length > 3 && names.some(function (a) { return a.length >= 4 && b.indexOf(' ' + a + ' ') >= 0 })) pick = j }
-        if (pick >= 0) { map[c.k] = pick; taken[pick] = 1; n++ }
+        var names = [c.nhan, c.k].concat(c.alias || []).map(function (a) { return P.bo(a) }), cand = [], j, b;
+        for (j = 0; j < row.length; j++) { if (taken[j] || row[j] == null) continue; var h = P.bo(row[j]); if (!h) continue; var ix = names.indexOf(h); if (ix >= 0) cand.push({ j: j, p: ix }); else { b = ' ' + h + ' '; var k2 = -1; names.some(function (a, i) { if (a.length >= 4 && b.indexOf(' ' + a + ' ') >= 0) { k2 = i; return true } return false }); if (k2 >= 0) cand.push({ j: j, p: 100 + k2 }) } }
+        if (!cand.length) return; cand.forEach(function (x) { x.f = fill(x.j) }); cand.sort(function (a, b2) { return (b2.f > 0) - (a.f > 0) || a.p - b2.p || b2.f - a.f }); map[c.k] = cand[0].j; taken[cand[0].j] = 1; n++
       });
       if (!best || n > best.n) best = { r: r, map: map, n: n }
     }
     return best || { r: 0, map: {}, n: 0 }
   }
-  function analyse(aoa) {
-    var hd = findHdr(aoa), miss = COLS.filter(function (c) { return c.bb && hd.map[c.k] === undefined });
-    if (!hd.n || miss.length) return { loi: 'Không nhận ra cột bắt buộc: ' + miss.map(function (c) { return c.nhan }).join(', ') + '. Các cột đọc được ở dòng ' + (hd.r + 1) + ': ' + (aoa[hd.r] || []).filter(function (v) { return v != null && String(v).trim() }).slice(0, 12).join(' | ') };
-    var byEmail = {}; accs().forEach(function (a) { byEmail[String(a.email).toLowerCase()] = a }); var seen = {}, rows = [], cell = function (r, k) { var j = hd.map[k]; return j === undefined ? '' : String(r[j] == null ? '' : r[j]).trim() };
-    for (var i = hd.r + 1; i < aoa.length; i++) {
-      var r = aoa[i] || []; if (!r.some(function (v) { return v != null && String(v).trim() })) continue;
-      var o = { dong: i + 1, ho_ten: cell(r, 'ho_ten'), email: cell(r, 'email').toLowerCase().replace(/\s+/g, ''), chuc_danh: cell(r, 'chuc_danh'), shopTxt: cell(r, 'shop'), vai_tro: role(cell(r, 'chuc_danh')) };
-      if (!o.ho_ten && !o.email) continue;
-      if (!o.ho_ten) o.kq = 'loi', o.ghi = 'Thiếu họ tên';
-      else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(o.email)) o.kq = 'loi', o.ghi = 'Email không hợp lệ';
-      else if (seen[o.email]) o.kq = 'loi', o.ghi = 'Trùng email với dòng ' + seen[o.email];
-      else if (o.vai_tro === 'ASM') o.kq = 'bo', o.ghi = 'Chức danh ASM, không tạo ở đây';
-      else {
-        seen[o.email] = o.dong; var ex = byEmail[o.email], sh = findShop(o.shopTxt);
-        if (ex && ex.vai_tro === 'ASM') o.kq = 'bo', o.ghi = 'Là tài khoản ASM';
-        else if (sh.err && !(ex && !o.shopTxt)) o.kq = 'loi', o.ghi = sh.err;
-        else {
-          o.id_shop = sh.s ? sh.s.id_shop : ex.id_shop;
-          if (!ex) { o.kq = 'moi'; o.ghi = 'Tài khoản mới · ' + VT[o.vai_tro] + ' · ' + shopName(o.id_shop); o.mk = genPw() }
-          else { o.ma_tk = ex.ma_tk; var ch = []; if (ex.ho_ten !== o.ho_ten) ch.push('tên'); if (ex.id_shop !== o.id_shop) ch.push('Shop ' + shopName(ex.id_shop) + ' → ' + shopName(o.id_shop)); if (cell(r, 'chuc_danh') && ex.vai_tro !== o.vai_tro) ch.push(VT[ex.vai_tro] + ' → ' + VT[o.vai_tro]); if (!cell(r, 'chuc_danh')) o.vai_tro = ex.vai_tro; o.kq = ch.length ? 'sua' : 'giu'; o.ghi = ch.length ? 'Đổi: ' + ch.join(', ') : 'Giống tài khoản hiện có' + (ex.trang_thai === 'NGUNG' ? ' (đang bị khóa)' : '') }
-        }
-      }
-      rows.push(o)
-    }
-    var inFile = {}; rows.forEach(function (o) { inFile[o.email] = 1 }); var vang = accs().filter(function (a) { return a.vai_tro !== 'ASM' && a.trang_thai === 'HOAT_DONG' && !inFile[String(a.email).toLowerCase()] }).length;
-    return { rows: rows, vang: vang, sheet: '', dongTieuDe: hd.r + 1 }
+  function findShop(code, name, shops) {
+    var c = String(code || '').trim(), tc = core(name), hit = [];
+    if (c) hit = shops.filter(function (s) { return String(s.ma_shop) === c || s.id_shop === 'S' + c });
+    if (!hit.length && tc) hit = shops.filter(function (s) { var x = core(s.ten_shop); return x && (x === tc || (tc.length >= 6 && (x.indexOf(tc) >= 0 || tc.indexOf(x) >= 0))) });
+    return hit.length === 1 ? { s: hit[0] } : { none: true, n: hit.length }
   }
+  /* PHÂN TÍCH (hàm thuần, kiểm thử được): aoa + {shops:[], accs:[]} + tùy chọn */
+  function parse(aoa, ctx, o) {
+    var hd = findHdr(aoa), miss = COLS.filter(function (c) { return c.bb && hd.map[c.k] === undefined });
+    if (!hd.n || miss.length) return { loi: 'Không nhận ra cột bắt buộc: ' + miss.map(function (c) { return c.nhan }).join(', ') + '. Các cột đọc được ở dòng ' + (hd.r + 1) + ': ' + (aoa[hd.r] || []).filter(function (v) { return v != null && String(v).trim() }).slice(0, 14).join(' | ') };
+    var cell = function (r, k) { var j = hd.map[k]; return j === undefined ? '' : String(r[j] == null ? '' : r[j]).trim() }, byEmail = {}, titles = {}, seen = {}, rows = [], newShops = {}, shops = ctx.shops.slice();
+    ctx.accs.forEach(function (a) { byEmail[String(a.email).toLowerCase()] = a });
+    var raw = []; for (var i = hd.r + 1; i < aoa.length; i++) { var r = aoa[i] || []; if (!r.some(function (v) { return v != null && String(v).trim() })) continue; var ho = cell(r, 'ho_ten'), em = cell(r, 'email').toLowerCase().replace(/\s+/g, ''); if (!ho && !em) continue; raw.push({ dong: i + 1, r: r, ho: ho, em: em, cd: cell(r, 'chuc_danh') }); var t = raw[raw.length - 1].cd; if (t) titles[t] = (titles[t] || 0) + 1 }
+    var rules = {}; Object.keys(titles).forEach(function (t) { rules[t] = (o.rules && o.rules[t]) || defaultRule(t) });
+    raw.forEach(function (x) {
+      var r = x.r, rule = x.cd ? rules[x.cd] : 'NHAN_VIEN', st = cell(r, 'trang_thai'), code = cell(r, 'ma_shop'), nm = cell(r, 'ten_shop');
+      var row = { dong: x.dong, ho_ten: x.ho, email: x.em, chuc_danh: x.cd, shopTxt: nm || code, ma_shop: code, ten_shop: nm, vai_tro: rule === 'QUAN_LY' ? 'QUAN_LY' : 'NHAN_VIEN' }; rows.push(row);
+      if (!x.ho) { row.kq = 'loi'; row.ghi = 'Thiếu họ tên'; return }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x.em)) { row.kq = 'loi'; row.ghi = 'Email không hợp lệ'; return }
+      if (seen[x.em]) { row.kq = 'loi'; row.ghi = 'Trùng email với dòng ' + seen[x.em]; return } seen[x.em] = x.dong;
+      if (rule === 'BO') { row.kq = 'bo'; row.ghi = 'Chức danh "' + x.cd + '" đặt là Bỏ qua'; return }
+      if (o.onlyActive && st && !/dang lam|hoat dong|^lam viec$/.test(P.bo(st))) { row.kq = 'bo'; row.ghi = 'Không đang làm (' + st + ')'; return }
+      var ex = byEmail[x.em]; if (ex && ex.vai_tro === 'ASM') { row.kq = 'bo'; row.ghi = 'Là tài khoản ASM'; return }
+      var sh = findShop(code, nm, shops), id = sh.s ? sh.s.id_shop : null;
+      if (!id) { if (code && nm && o.createShops && /^[A-Za-z0-9]{3,20}$/.test(code)) { id = 'S' + code; var ns = newShops[id] || (newShops[id] = { ma: code, ten: nm, n: 0 }); ns.n++; row.shopMoi = true } else if (ex && !code && !nm) id = ex.id_shop; else { row.kq = 'loi'; row.ghi = !code && !nm ? 'Thiếu Shop' : sh.n > 1 ? 'Nhiều Shop khớp' : 'Chưa có Shop "' + (nm || code) + '" (bật "Tạo Shop chưa có")'; return } }
+      row.id_shop = id; var shName = sh.s ? sh.s.ten_shop : (newShops[id] ? newShops[id].ten : id);
+      if (!ex) { row.kq = 'moi'; row.ghi = VT[row.vai_tro] + ' · ' + shName + (row.shopMoi ? ' (Shop mới)' : ''); row.mk = genPw() }
+      else { row.ma_tk = ex.ma_tk; var ch = []; if (ex.ho_ten !== x.ho) ch.push('tên'); if (ex.id_shop !== id) ch.push('Shop'); if (x.cd && ex.vai_tro !== row.vai_tro) ch.push(VT[ex.vai_tro] + ' → ' + VT[row.vai_tro]); if (!x.cd) row.vai_tro = ex.vai_tro; row.kq = ch.length ? 'sua' : 'giu'; row.ghi = ch.length ? 'Đổi: ' + ch.join(', ') : 'Giống tài khoản hiện có' + (ex.trang_thai === 'NGUNG' ? ' (đang bị khóa)' : '') }
+    });
+    var inFile = {}; rows.forEach(function (x) { inFile[x.email] = 1 }); var vang = ctx.accs.filter(function (a) { return a.vai_tro !== 'ASM' && a.trang_thai === 'HOAT_DONG' && !inFile[String(a.email).toLowerCase()] }).length;
+    return { rows: rows, vang: vang, titles: Object.keys(titles).map(function (t) { return { t: t, n: titles[t], rule: rules[t] } }).sort(function (a, b) { return b.n - a.n }), newShops: Object.keys(newShops).map(function (k) { return newShops[k] }), dongTieuDe: hd.r + 1, map: hd.map }
+  }
+  function accs() { return Object.keys(D.acc).map(function (k) { return D.acc[k] }) }
+  function shopsAct() { return Object.keys(D.shops).map(function (k) { return D.shops[k] }).filter(function (s) { return s.trang_thai === 'HOAT_DONG' }) }
+  function redo() { if (!H.aoa) return; var keep = H.info && H.info.sheet; H.info = parse(H.aoa, { shops: shopsAct(), accs: accs() }, { rules: H.rules, onlyActive: H.onlyActive, createShops: H.createShops }); if (H.info.rows) H.info.sheet = keep }
   function handle(name, buf) {
     xlsx(function () {
       try {
         var wb = XLSX.read(buf, { type: 'array', cellDates: true, codepage: 65001 }), best = null;
         wb.SheetNames.forEach(function (n) { var aoa = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null, blankrows: true }), hd = findHdr(aoa); if (!best || hd.n > best.n) best = { n: hd.n, aoa: aoa, name: n } });
-        H.info = analyse(best.aoa); H.info.sheet = best.name; H.name = name; H.res = null; render()
+        H.aoa = best.aoa; H.name = name; H.res = null; H.rules = {}; redo(); if (H.info.rows) H.info.sheet = best.name; render()
       } catch (e) { toast('Không đọc được file: ' + e.message, 0, 1) }
     })
   }
   function card() {
     var h = '<div class="card"><h2>Nạp danh sách nhân sự từ file <span class="pill">kéo file toàn bộ nhân sự vào đây</span></h2>';
-    h += '<div id="hr-drop" style="border:2px dashed ' + (H.drag ? 'var(--teal)' : 'var(--line)') + ';border-radius:16px;padding:18px;text-align:center;background:' + (H.drag ? 'var(--tint)' : 'var(--bg)') + '"><div style="font-weight:600">Kéo thả file Excel/CSV vào đây</div><div class="meta" style="margin:4px 0 10px">App tự nhận cột Họ tên, Email, Chức danh, Shop (tên cột khác một chút vẫn nhận). Xem trước rồi mới tạo.</div><label class="btn b2" style="cursor:pointer">' + ic('upload') + 'Hoặc chọn file<input type="file" id="hr-file" accept=".xlsx,.xls,.csv" hidden></label></div>';
+    h += '<div id="hr-drop" style="border:2px dashed ' + (H.drag ? 'var(--teal)' : 'var(--line)') + ';border-radius:16px;padding:18px;text-align:center;background:' + (H.drag ? 'var(--tint)' : 'var(--bg)') + '"><div style="font-weight:600">Kéo thả file Excel/CSV vào đây</div><div class="meta" style="margin:4px 0 10px">App tự nhận cột Họ tên, Email, Chức danh, Mã shop, Cửa hàng, Trạng thái (tên cột khác một chút vẫn nhận). Xem trước rồi mới tạo.</div><label class="btn b2" style="cursor:pointer">' + ic('upload') + 'Hoặc chọn file<input type="file" id="hr-file" accept=".xlsx,.xls,.csv" hidden></label></div>';
     var f = H.info; if (f && f.loi) h += '<div class="err" style="margin-top:10px">' + esc(f.loi) + '</div>';
     if (f && f.rows) {
       var c = { moi: 0, sua: 0, giu: 0, loi: 0, bo: 0 }; f.rows.forEach(function (o) { c[o.kq]++ }); var todo = c.moi + c.sua;
       h += '<div class="meta" style="margin:10px 0 6px">' + esc(H.name) + (f.sheet ? ' · sheet ' + esc(f.sheet) : '') + ' · dòng tiêu đề ' + f.dongTieuDe + ' · ' + f.rows.length + ' dòng</div><div class="stats stats4" style="grid-template-columns:repeat(5,1fr)">' + [['Tạo mới', c.moi, 'var(--ok)'], ['Cập nhật', c.sua, 'var(--teal-d)'], ['Không đổi', c.giu, 'inherit'], ['Lỗi', c.loi, c.loi ? 'var(--bad)' : 'inherit'], ['Bỏ qua', c.bo, 'inherit']].map(function (x) { return '<div class="card st"><div class="l">' + x[0] + '</div><div class="v" style="color:' + x[2] + '">' + x[1] + '</div></div>' }).join('') + '</div>';
-      if (f.vang) h += '<div class="alert"><i>ℹ</i><div><b>' + f.vang + ' tài khoản đang hoạt động không có trong file</b><small>App không tự khóa họ. Nếu họ đã nghỉ, khóa ở bảng bên dưới.</small></div></div>';
-      h += '<label class="sw" style="margin:8px 0"><input type="checkbox" id="hr-thay" ' + (H.thay ? 'checked' : '') + '><div><b>Cho phép thay Quản lý cũ</b><small>Nếu file ghi một Quản lý mới cho Shop đã có Quản lý khác, người cũ chuyển về Nhân viên. Mỗi Shop chỉ có một Quản lý. Tắt thì dòng đó báo lỗi.</small></div></label>';
-      h += '<div class="tw"><table><thead><tr><th>Dòng</th><th>Kết quả</th><th>Họ tên</th><th>Email</th><th>Chức danh</th><th>Shop</th><th>Ghi chú</th></tr></thead><tbody>' + f.rows.map(function (o) { var k = KQ[o.kq]; return '<tr><td>' + o.dong + '</td><td>' + tag(k[0], k[1]) + '</td><td><b>' + esc(o.ho_ten) + '</b></td><td>' + esc(o.email) + '</td><td>' + esc(o.id_shop ? VT[o.vai_tro] : o.chuc_danh) + '</td><td>' + esc(o.id_shop ? shopName(o.id_shop) : o.shopTxt) + '</td><td class="meta" style="white-space:normal">' + esc(o.ghi || '') + '</td></tr>' }).join('') + '</tbody></table></div>';
-      h += '<div class="acts" style="margin-top:10px"><button class="btn b1" id="hr-go"' + (todo && !H.busy ? '' : ' disabled') + '>' + (H.busy ? 'Đang áp dụng…' : 'Áp dụng ' + todo + ' thay đổi (' + c.moi + ' mới, ' + c.sua + ' cập nhật)') + '</button><button class="btn b3" id="hr-drop-x">Bỏ file này</button></div>'
+      h += '<div class="card pgskip" style="margin:8px 0"><h2>Chức danh → vai trò trong app <span class="pill">anh sửa được</span></h2><div class="tw"><table><thead><tr><th>Chức danh trong file</th><th>Số người</th><th>Vai trò</th></tr></thead><tbody>' + f.titles.map(function (t, i) { return '<tr><td>' + esc(t.t) + '</td><td>' + t.n + '</td><td><select data-hrt="' + i + '" style="border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--card);min-height:38px">' + ['NHAN_VIEN', 'QUAN_LY', 'BO'].map(function (k) { return '<option value="' + k + '"' + (t.rule === k ? ' selected' : '') + '>' + VT[k] + '</option>' }).join('') + '</select></td></tr>' }).join('') + '</tbody></table></div><div class="meta" style="padding:6px">Mỗi Shop chỉ có một Quản lý. "Bỏ qua" = không tạo tài khoản cho chức danh đó.</div></div>';
+      h += '<div style="display:grid;gap:8px"><label class="sw"><input type="checkbox" id="hr-act" ' + (H.onlyActive ? 'checked' : '') + '><div><b>Chỉ lấy người đang làm</b><small>Bỏ qua người nghỉ sinh, nghỉ việc… theo cột Trạng thái.</small></div></label><label class="sw"><input type="checkbox" id="hr-shop" ' + (H.createShops ? 'checked' : '') + '><div><b>Tạo Shop chưa có trong hệ thống (' + f.newShops.length + ' Shop)</b><small>' + (f.newShops.length ? f.newShops.slice(0, 5).map(function (s) { return esc(s.ma) + ' · ' + esc(s.ten.slice(0, 40)) }).join('<br>') + (f.newShops.length > 5 ? '<br>…' : '') : 'Tất cả Shop trong file đã có.') + '</small></div></label><label class="sw"><input type="checkbox" id="hr-thay" ' + (H.thay ? 'checked' : '') + '><div><b>Cho phép thay Quản lý cũ</b><small>Nếu file ghi một Quản lý mới cho Shop đã có Quản lý khác, người cũ chuyển về Nhân viên. Tắt thì dòng đó báo lỗi.</small></div></label></div>';
+      if (f.vang) h += '<div class="alert" style="margin-top:8px"><i>ℹ</i><div><b>' + f.vang + ' tài khoản đang hoạt động không có trong file</b><small>App không tự khóa họ. Nếu họ đã nghỉ, khóa ở bảng bên dưới.</small></div></div>';
+      h += '<div class="tw" style="margin-top:8px"><table><thead><tr><th>Dòng</th><th>Kết quả</th><th>Họ tên</th><th>Email</th><th>Chức danh</th><th>Shop</th><th>Ghi chú</th></tr></thead><tbody>' + f.rows.map(function (o) { var k = KQ[o.kq]; return '<tr><td>' + o.dong + '</td><td>' + tag(k[0], k[1]) + '</td><td><b>' + esc(o.ho_ten) + '</b></td><td>' + esc(o.email) + '</td><td>' + esc(o.chuc_danh) + '</td><td>' + esc((o.ten_shop || o.shopTxt || '').slice(0, 44)) + '</td><td class="meta" style="white-space:normal">' + esc(o.ghi || '') + '</td></tr>' }).join('') + '</tbody></table></div>';
+      h += '<div class="acts" style="margin-top:10px"><button class="btn b1" id="hr-go"' + (todo && !H.busy ? '' : ' disabled') + '>' + (H.busy ? 'Đang áp dụng…' : 'Áp dụng ' + todo + ' thay đổi (' + c.moi + ' mới, ' + c.sua + ' cập nhật' + (f.newShops.length && H.createShops ? ', ' + f.newShops.length + ' Shop mới' : '') + ')') + '</button><button class="btn b3" id="hr-drop-x">Bỏ file này</button></div>'
     }
     if (H.res) {
       var ok = H.res.filter(function (x) { return x.ok }), bad = H.res.filter(function (x) { return !x.ok }), made = ok.filter(function (x) { return x.mk });
@@ -857,16 +861,19 @@ var ASMHR = (function () {
     return h + '</div>'
   }
   function apply() {
-    var todo = H.info.rows.filter(function (o) { return o.kq === 'moi' || o.kq === 'sua' }); if (!todo.length || H.busy) return; if (!confirm('Áp dụng ' + todo.length + ' thay đổi nhân sự?')) return; H.busy = true; H.res = []; render();
-    todo.reduce(function (p, o) {
-      return p.then(function () {
-        var req = o.kq === 'moi' ? rpc('u_asm_account_create', { p_ho_ten: o.ho_ten, p_email: o.email, p_vai_tro: o.vai_tro, p_id_shop: o.id_shop, p_mat_khau: o.mk, p_thay_ql: H.thay, p_req: rid() }) : rpc('u_asm_account_update', { p_ma_tk: o.ma_tk, p_ho_ten: o.ho_ten, p_vai_tro: o.vai_tro, p_id_shop: o.id_shop, p_trang_thai: (D.acc[o.ma_tk] || {}).trang_thai || 'HOAT_DONG', p_thay_ql: H.thay, p_req: rid() });
-        return req.then(function () { H.res.push({ ok: true, dong: o.dong, ho_ten: o.ho_ten, email: o.email, mk: o.kq === 'moi' ? o.mk : '', vai_tro: o.vai_tro, id_shop: o.id_shop }) }, function (e) { H.res.push({ ok: false, dong: o.dong, ho_ten: o.ho_ten, msg: (e && e.message) || (e && e.code) || 'Lỗi' }) })
-      })
-    }, Promise.resolve()).then(function () { H.busy = false; H.info = null; toast('Đã áp dụng danh sách nhân sự'); return load(true).then(render) })
+    var f = H.info, todo = f.rows.filter(function (o) { return o.kq === 'moi' || o.kq === 'sua' }); if (!todo.length || H.busy) return; if (!confirm('Áp dụng ' + todo.length + ' thay đổi nhân sự' + (f.newShops.length && H.createShops ? ' và tạo ' + f.newShops.length + ' Shop mới' : '') + '?')) return; H.busy = true; H.res = []; render();
+    var shopsToMake = H.createShops ? f.newShops.filter(function (s) { return todo.some(function (o) { return o.shopMoi && o.id_shop === 'S' + s.ma }) }) : [];
+    shopsToMake.reduce(function (p, s) { return p.then(function () { return rpc('u_asm_shop_save', { p_ma_shop: s.ma, p_ten_shop: s.ten, p_req: rid() }) }) }, Promise.resolve()).then(function () {
+      return todo.reduce(function (p, o) {
+        return p.then(function () {
+          var req = o.kq === 'moi' ? rpc('u_asm_account_create', { p_ho_ten: o.ho_ten, p_email: o.email, p_vai_tro: o.vai_tro, p_id_shop: o.id_shop, p_mat_khau: o.mk, p_thay_ql: H.thay, p_req: rid() }) : rpc('u_asm_account_update', { p_ma_tk: o.ma_tk, p_ho_ten: o.ho_ten, p_vai_tro: o.vai_tro, p_id_shop: o.id_shop, p_trang_thai: (D.acc[o.ma_tk] || {}).trang_thai || 'HOAT_DONG', p_thay_ql: H.thay, p_req: rid() });
+          return req.then(function () { H.res.push({ ok: true, dong: o.dong, ho_ten: o.ho_ten, email: o.email, mk: o.kq === 'moi' ? o.mk : '', vai_tro: o.vai_tro, id_shop: o.id_shop }) }, function (e) { H.res.push({ ok: false, dong: o.dong, ho_ten: o.ho_ten, msg: (e && e.message) || (e && e.code) || 'Lỗi' }) })
+        })
+      }, Promise.resolve())
+    }).then(function () { H.busy = false; H.info = null; H.aoa = null; toast('Đã áp dụng danh sách nhân sự'); return load(true).then(render) }, function (e) { H.busy = false; render(); fail(e) })
   }
   function csv() {
-    var rows = H.res.filter(function (x) { return x.ok && x.mk }), t = 'ho_ten,email,mat_khau_ban_dau,vai_tro,shop\n' + rows.map(function (x) { return [x.ho_ten, x.email, x.mk, VT[x.vai_tro], shopName(x.id_shop)].map(function (v) { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v }).join(',') }).join('\n');
+    var shopN = function (id) { return (D.shops[id] || {}).ten_shop || id }, rows = H.res.filter(function (x) { return x.ok && x.mk }), t = 'ho_ten,email,mat_khau_ban_dau,vai_tro,shop\n' + rows.map(function (x) { return [x.ho_ten, x.email, x.mk, VT[x.vai_tro], shopN(x.id_shop)].map(function (v) { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v }).join(',') }).join('\n');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + t], { type: 'text/csv;charset=utf-8' })); a.download = 'dang-nhap-nhan-su-' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove() }, 500)
   }
   function read(f) { var rd = new FileReader(); rd.onload = function () { handle(f.name, rd.result) }; rd.readAsArrayBuffer(f) }
@@ -874,10 +881,13 @@ var ASMHR = (function () {
     xlsx(function () { });
     var dz = document.getElementById('hr-drop');
     if (dz) { ['dragenter', 'dragover'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); if (!H.drag) { H.drag = true; dz.style.borderColor = 'var(--teal)'; dz.style.background = 'var(--tint)' } }) }); ['dragleave', 'drop'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); H.drag = false; dz.style.borderColor = 'var(--line)'; dz.style.background = 'var(--bg)' }) }); dz.addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) read(f) }) }
-    on('#hr-file', 'onchange', function (x) { var f = x.files[0]; if (f) read(f) }); on('#hr-thay', 'onchange', function (x) { H.thay = x.checked }); on('#hr-go', 'onclick', apply); on('#hr-csv', 'onclick', csv); on('#hr-drop-x', 'onclick', function () { H.info = null; H.res = null; render() })
+    on('#hr-file', 'onchange', function (x) { var f = x.files[0]; if (f) read(f) });
+    on('#hr-thay', 'onchange', function (x) { H.thay = x.checked }); on('#hr-act', 'onchange', function (x) { H.onlyActive = x.checked; redo(); render() }); on('#hr-shop', 'onchange', function (x) { H.createShops = x.checked; redo(); render() });
+    [].slice.call(document.querySelectorAll('[data-hrt]')).forEach(function (s) { s.onchange = function () { var t = H.info.titles[Number(s.dataset.hrt)]; H.rules[t.t] = s.value; redo(); render() } });
+    on('#hr-go', 'onclick', apply); on('#hr-csv', 'onclick', csv); on('#hr-drop-x', 'onclick', function () { H.info = null; H.aoa = null; H.res = null; render() })
   }
-  window.addEventListener('dragover', function (e) { e.preventDefault() }); window.addEventListener('drop', function (e) { e.preventDefault() });
-  return { card: card, bind: bind, handle: handle, analyse: analyse, state: H }
+  if (typeof window !== 'undefined' && window.addEventListener) { window.addEventListener('dragover', function (e) { e.preventDefault() }); window.addEventListener('drop', function (e) { e.preventDefault() }) }
+  return { card: card, bind: bind, handle: handle, parse: parse, findHdr: findHdr, state: H }
 })();
 
 ;
