@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124m) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124n) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -91,19 +91,22 @@ var PGR = (function () {
   }
   CONFIG.PHAC_DO = { ten: 'Phác đồ & từ điển vaccine', moTa: 'Mỗi dòng một vaccine (tên thương mại): nhóm bệnh, tuổi, phác đồ, nước sản xuất, chống chỉ định, phản ứng sau tiêm. App dùng để gợi ý "vaccine đã đến tuổi", làm nút Tra cứu vaccine cho nhân viên và nối đúng tư vấn, nguy cơ, khuyến mãi theo vaccine.', cheDo: 'THAY_THE',
     hau: function (o) {
+      /* File từ NotebookLM: tên đánh số "12. Bexsero" → bỏ số thứ tự; ký tự Hán lọt vào chữ ("Viêm脑") → "não" */
+      Object.keys(o).forEach(function (k) { if (typeof o[k] === 'string') o[k] = o[k].replace(/\s*脑/g, " não") });
+      if (o.ten_vaccine) o.ten_vaccine = String(o.ten_vaccine).replace(/^\s*\d+\s*[.)]\s+/, '').trim();
       var lu = String(o.luu_y || ''), m = /\s*[·•]\s*SX:\s*([^·\n]+?)\s*$/i.exec(lu);
       if (m) { if (!o.nuoc_sx) o.nuoc_sx = m[1].trim(); lu = lu.slice(0, m.index).trim() }
       lu = lu.replace(/^\*\s*/, '').trim(); if (lu && !o.do_tuoi) o.do_tuoi = lu;
       if (o.tuoi_ket_thuc_ngay === undefined || o.tuoi_ket_thuc_ngay === null || o.tuoi_ket_thuc_ngay === '') { var e = ageEnd(o.do_tuoi || lu); if (e != null && e > (Number(o.tuoi_bat_dau_ngay) || 0)) { o.tuoi_ket_thuc_ngay = e; o.ghi_chu = (o.ghi_chu ? o.ghi_chu + ' · ' : '') + 'Tuổi kết thúc tự suy từ độ tuổi chỉ định, cần bác sĩ xác nhận' } }
     },
     cot: [
-      { k: 'ten_vaccine', nhan: 'Tên vaccine', alias: ['vaccine', 'ten thuong mai', 'ten vac xin'], bb: 1 }, { k: 'phong_benh', nhan: 'Phòng bệnh', alias: ['nhom benh', 'benh phong ngua', 'benh'], bb: 1 },
+      { k: 'ten_vaccine', nhan: 'Tên vaccine', alias: ['vaccine', 'ten thuong mai', 'ten vac xin', 'stt ten vaccine', 'stt ten thuong mai'], bb: 1 }, { k: 'phong_benh', nhan: 'Phòng bệnh', alias: ['nhom benh', 'benh phong ngua', 'benh'], bb: 1 },
       { k: 'nhom_vaccine', nhan: 'Nhóm vaccine chuẩn', alias: ['nhom vaccine', 'nhom chuan'] },
       { k: 'tuoi_bat_dau_ngay', nhan: 'Tuổi bắt đầu (ngày)', alias: ['tuoi bat dau', 'tuoi toi thieu ngay', 'tu ngay tuoi'], bb: 1, kieu: 'so' }, { k: 'tuoi_ket_thuc_ngay', nhan: 'Tuổi kết thúc (ngày)', alias: ['tuoi ket thuc', 'tuoi toi da ngay'], kieu: 'so' },
       { k: 'so_mui', nhan: 'Số mũi', alias: ['so mui theo phac do'] }, { k: 'khoang_cach_ngay', nhan: 'Khoảng cách giữa các mũi (ngày)', alias: ['khoang cach', 'khoang cach giua cac mui', 'lich tiem'] },
       { k: 'noi_dung_tu_van', nhan: 'Nội dung tư vấn / phác đồ', alias: ['noi dung tu van', 'phac do', 'phac do tham khao', 'tu van'], bien: 1 },
       { k: 'luu_y', nhan: 'Lưu ý', alias: ['luu y chuyen mon'] }, { k: 'nuoc_sx', nhan: 'Nước sản xuất', alias: ['xuat xu', 'nuoc san xuat', 'nsx'] }, { k: 'do_tuoi', nhan: 'Độ tuổi chỉ định', alias: ['do tuoi', 'chi dinh', 'do tuoi chi dinh', 'doi tuong'] },
-      { k: 'chong_chi_dinh', nhan: 'Chống chỉ định / thận trọng', alias: ['chong chi dinh', 'than trong'] }, { k: 'phan_ung', nhan: 'Phản ứng sau tiêm thường gặp', alias: ['phan ung sau tiem', 'tac dung phu', 'phan ung'] }, { k: 'ghi_chu', nhan: 'Ghi chú' }] };
+      { k: 'chong_chi_dinh', nhan: 'Chống chỉ định / thận trọng', alias: ['chong chi dinh', 'than trong'] }, { k: 'phan_ung', nhan: 'Phản ứng sau tiêm thường gặp', alias: ['phan ung sau tiem', 'tac dung phu', 'phan ung'] }, { k: 'ghi_chu', nhan: 'Ghi chú', alias: ['ghi chu nguon nguon chua neu can y kien bs', 'ghi chu nguon', 'nguon'] }] };
   var ORDER = ['BANG_GIA', 'CTKM', 'MAU_TUOI', 'MAU_CHU_DE', 'MAU_SAU_TIEM', 'MAU_CHUNG', 'NGUY_CO', 'PHAC_DO'];
 
   function p2(n) { return n < 10 ? '0' + n : '' + n }
