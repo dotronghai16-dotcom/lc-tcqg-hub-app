@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124c) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124d) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -248,7 +248,7 @@ var ASM = (function () {
   function bandOf(c) { var m = ageMonths(c); if (m === null) return ''; return m < 2 ? '0' : m < 6 ? '1' : m < 12 ? '2' : m < 24 ? '3' : m < 60 ? '4' : '5' }
   function shops() { return Object.keys(D.shops).map(function (k) { return D.shops[k] }).filter(function (s) { return s.trang_thai === 'HOAT_DONG' }).sort(function (a, b) { return a.ma_shop.localeCompare(b.ma_shop) }) }
   function staffOf(id) { return Object.keys(D.acc).map(function (k) { return D.acc[k] }).filter(function (a) { return a.id_shop === id && a.trang_thai === 'HOAT_DONG' && (a.vai_tro === 'NHAN_VIEN' || a.vai_tro === 'QUAN_LY') }) }
-  function qlOf(id) { var q = staffOf(id).filter(function (a) { return a.vai_tro === 'QUAN_LY' })[0]; return q ? q.ho_ten : '–' }
+  function qlOf(id) { var q = staffOf(id).filter(function (a) { return a.vai_tro === 'QUAN_LY' }).map(function (a) { return a.ho_ten }); return q.length ? q.join(', ') : '–' }
   function turnsByCust() { var m = {}; D.turns.forEach(function (t) { (m[t.ma_khach] = m[t.ma_khach] || []).push(t) }); return m }
   function custState(ts) { if (!ts || !ts.length) return 'kho'; return ts.some(open_) ? 'dang' : 'xong' }
   function yes(t) { var c = cat(t.ma_ket_qua); return t.trang_thai === 'HOAN_THANH' && c && c.ma === 'DONG_Y' }
@@ -763,7 +763,7 @@ var ASMSCAN = (function () {
  * Anh đặt "Chức danh → vai trò" (Nhân viên / Quản lý / Bỏ qua) ngay trên màn xem trước. Shop chưa có được tạo từ file (Mã shop + tên cửa hàng).
  * Bấm Áp dụng mới ghi, từng người, qua hàm chỉ ASM gọi được. Tài khoản mới có mật khẩu ngẫu nhiên hiện một lần, tải được CSV. Không tự khóa người vắng trong file. */
 var ASMHR = (function () {
-  var P = window.LIBP, H = { aoa: null, name: '', info: null, thay: false, createShops: true, onlyActive: true, rules: {}, res: null, busy: false, drag: false };
+  var P = window.LIBP, H = { aoa: null, name: '', info: null, updRole: true, createShops: true, onlyActive: true, rules: {}, res: null, busy: false, drag: false };
   var COLS = [
     { k: 'ho_ten', nhan: 'Họ tên', alias: ['ho va ten', 'ho ten', 'ten nhan vien', 'nhan vien', 'ho ten nhan vien', 'full name', 'name', 'ten'], bb: 1 },
     { k: 'email', nhan: 'Email', alias: ['mail', 'dia chi email', 'email cong ty', 'email nhan vien', 'email lien he'], bb: 1 },
@@ -781,8 +781,7 @@ var ASMHR = (function () {
   function core(s) { return P.bo(String(s || '').replace(/\([^)]*\)/g, '')).replace(/^(shop|trung tam|nha thuoc|co so|lc|vx)\s+/, '').replace(/^(hni|hn)\s+/, '').trim() }
   /* quy tắc mặc định theo chức danh (anh sửa được trên màn xem trước) */
   function defaultRule(t) { var b = P.bo(t); if (!b) return 'NHAN_VIEN'; if (/giam doc|(^| )asm( |$)/.test(b)) return 'BO'; if (/(^| )bac si( |$)|bao ve/.test(b)) return 'BO'; if (/truong quan ly|pho quan ly|cua hang truong|quan ly (cua hang|shop)|truong ca/.test(b)) return 'QUAN_LY'; return 'NHAN_VIEN' }
-  /* Mỗi Shop chỉ có 1 Quản lý: khi trong file có nhiều người mang chức danh Quản lý cùng Shop, chọn người ưu tiên cao nhất (Trưởng QL > Phó QL > Trưởng ca > người đứng trước trong file) */
-  function qlRank(t) { var b = P.bo(t); if (/pho quan ly/.test(b)) return 2; if (/truong quan ly|cua hang truong|quan ly/.test(b)) return 3; if (/truong ca/.test(b)) return 1; return 0 }
+  /* Một Shop có thể có NHIỀU Quản lý (Hải 24/11): mọi người mang chức danh được đặt là Quản lý đều là Quản lý. */
   function describeEx(row) { var ex = row.ex, ch = []; if (ex.ho_ten !== row.ho_ten) ch.push('tên'); if (ex.id_shop !== row.id_shop) ch.push('Shop'); if (row.hasCd && ex.vai_tro !== row.vai_tro) ch.push(VT[ex.vai_tro] + ' → ' + VT[row.vai_tro]); row.kq = ch.length ? 'sua' : 'giu'; row.ghi = ch.length ? 'Đổi: ' + ch.join(', ') : 'Giống tài khoản hiện có' + (ex.trang_thai === 'NGUNG' ? ' (đang bị khóa)' : '') }
 
   /* tìm dòng tiêu đề; mỗi cột chọn trong các cột cùng tên cột CÓ NHIỀU DỮ LIỆU nhất */
@@ -826,22 +825,17 @@ var ASMHR = (function () {
       if (!id) { if (code && nm && o.createShops && /^[A-Za-z0-9]{3,20}$/.test(code)) { id = 'S' + code; var ns = newShops[id] || (newShops[id] = { ma: code, ten: nm, n: 0 }); ns.n++; row.shopMoi = true } else if (ex && !code && !nm) id = ex.id_shop; else { row.kq = 'loi'; row.ghi = !code && !nm ? 'Thiếu Shop' : sh.n > 1 ? 'Nhiều Shop khớp' : 'Chưa có Shop "' + (nm || code) + '" (bật "Tạo Shop chưa có")'; return } }
       row.id_shop = id; var shName = sh.s ? sh.s.ten_shop : (newShops[id] ? newShops[id].ten : id);
       if (!ex) { row.kq = 'moi'; row.ghi = VT[row.vai_tro] + ' · ' + shName + (row.shopMoi ? ' (Shop mới)' : ''); row.mk = genPw() }
-      else { row.ma_tk = ex.ma_tk; row.ex = ex; row.hasCd = !!x.cd; if (!x.cd) row.vai_tro = ex.vai_tro; describeEx(row) }
+      else { row.ma_tk = ex.ma_tk; row.ex = ex; row.hasCd = !!x.cd && o.updRole !== false; if (!row.hasCd) row.vai_tro = ex.vai_tro; describeEx(row) }
     });
-    /* 1 Quản lý / Shop: người ưu tiên giữ Quản lý, người còn lại thành Nhân viên (kèm ghi chú) */
-    var qlBy = {}, dupQL = 0; rows.forEach(function (o, i) { o.i = i; if ((o.kq === 'moi' || o.kq === 'sua' || o.kq === 'giu') && o.vai_tro === 'QUAN_LY') (qlBy[o.id_shop] = qlBy[o.id_shop] || []).push(o) });
-    Object.keys(qlBy).forEach(function (id) {
-      var a = qlBy[id]; if (a.length < 2) return; dupQL++; a.sort(function (p, q) { return qlRank(q.chuc_danh) - qlRank(p.chuc_danh) || p.i - q.i }); var keep = a[0];
-      a.slice(1).forEach(function (o) { o.vai_tro = 'NHAN_VIEN'; if (o.ex) { o.hasCd = true; describeEx(o); o.ghi +=' · Shop đã có Quản lý ' + keep.ho_ten + ' → làm Nhân viên' } else o.ghi = o.ghi.replace('Quản lý', 'Nhân viên') + ' · Shop đã có Quản lý ' + keep.ho_ten + ' → làm Nhân viên' })
-    });
-    var shopsIn = {}; rows.forEach(function (o) { if (o.id_shop && (o.kq === 'moi' || o.kq === 'sua' || o.kq === 'giu')) shopsIn[o.id_shop] = 1 });
-    var noQL = Object.keys(shopsIn).filter(function (id) { return !qlBy[id] && !ctx.accs.some(function (a) { return a.vai_tro === 'QUAN_LY' && a.id_shop === id && a.trang_thai === 'HOAT_DONG' }) }).length;
-    var inFile = {}; rows.forEach(function (x) { inFile[x.email] = 1 }); var vang = ctx.accs.filter(function (a) { return a.vai_tro !== 'ASM' && a.trang_thai === 'HOAT_DONG' && !inFile[String(a.email).toLowerCase()] }).length;
-    return { rows: rows, vang: vang, dupQL: dupQL, noQL: noQL, titles: Object.keys(titles).map(function (t) { return { t: t, n: titles[t], rule: rules[t] } }).sort(function (a, b) { return b.n - a.n }), newShops: Object.keys(newShops).map(function (k) { return newShops[k] }), dongTieuDe: hd.r + 1, map: hd.map }
+    /* chỉ để báo: Shop trong file mà chưa có Quản lý nào (cả trong file lẫn trong hệ thống) */
+    var shopsIn = {}, hasQL = {}; rows.forEach(function (o) { if (o.id_shop && (o.kq === 'moi' || o.kq === 'sua' || o.kq === 'giu')) { shopsIn[o.id_shop] = 1; if (o.vai_tro === 'QUAN_LY') hasQL[o.id_shop] = 1 } });
+    var noQL = Object.keys(shopsIn).filter(function (id) { return !hasQL[id] && !ctx.accs.some(function (a) { return a.vai_tro === 'QUAN_LY' && a.id_shop === id && a.trang_thai === 'HOAT_DONG' }) }).length;
+    var inFile = {}; rows.forEach(function (x) { inFile[x.email] = 1 }); var vangL = ctx.accs.filter(function (a) { return a.vai_tro !== 'ASM' && a.trang_thai === 'HOAT_DONG' && !inFile[String(a.email).toLowerCase()] });
+    return { rows: rows, vang: vangL.length, vangList: vangL.map(function (a) { return { ho_ten: a.ho_ten, vai_tro: a.vai_tro, id_shop: a.id_shop } }), noQL: noQL, titles: Object.keys(titles).map(function (t) { return { t: t, n: titles[t], rule: rules[t] } }).sort(function (a, b) { return b.n - a.n }), newShops: Object.keys(newShops).map(function (k) { return newShops[k] }), dongTieuDe: hd.r + 1, map: hd.map }
   }
   function accs() { return Object.keys(D.acc).map(function (k) { return D.acc[k] }) }
   function shopsAct() { return Object.keys(D.shops).map(function (k) { return D.shops[k] }).filter(function (s) { return s.trang_thai === 'HOAT_DONG' }) }
-  function redo() { if (!H.aoa) return; var keep = H.info && H.info.sheet; H.info = parse(H.aoa, { shops: shopsAct(), accs: accs() }, { rules: H.rules, onlyActive: H.onlyActive, createShops: H.createShops }); if (H.info.rows) H.info.sheet = keep }
+  function redo() { if (!H.aoa) return; var keep = H.info && H.info.sheet; H.info = parse(H.aoa, { shops: shopsAct(), accs: accs() }, { rules: H.rules, onlyActive: H.onlyActive, createShops: H.createShops, updRole: H.updRole }); if (H.info.rows) H.info.sheet = keep }
   function handle(name, buf) {
     xlsx(function () {
       try {
@@ -858,11 +852,10 @@ var ASMHR = (function () {
     if (f && f.rows) {
       var c = { moi: 0, sua: 0, giu: 0, loi: 0, bo: 0 }; f.rows.forEach(function (o) { c[o.kq]++ }); var todo = c.moi + c.sua;
       h += '<div class="meta" style="margin:10px 0 6px">' + esc(H.name) + (f.sheet ? ' · sheet ' + esc(f.sheet) : '') + ' · dòng tiêu đề ' + f.dongTieuDe + ' · ' + f.rows.length + ' dòng</div><div class="stats stats4" style="grid-template-columns:repeat(5,1fr)">' + [['Tạo mới', c.moi, 'var(--ok)'], ['Cập nhật', c.sua, 'var(--teal-d)'], ['Không đổi', c.giu, 'inherit'], ['Lỗi', c.loi, c.loi ? 'var(--bad)' : 'inherit'], ['Bỏ qua', c.bo, 'inherit']].map(function (x) { return '<div class="card st"><div class="l">' + x[0] + '</div><div class="v" style="color:' + x[2] + '">' + x[1] + '</div></div>' }).join('') + '</div>';
-      h += '<div class="card pgskip" style="margin:8px 0"><h2>Chức danh → vai trò trong app <span class="pill">anh sửa được</span></h2><div class="tw"><table><thead><tr><th>Chức danh trong file</th><th>Số người</th><th>Vai trò</th></tr></thead><tbody>' + f.titles.map(function (t, i) { return '<tr><td>' + esc(t.t) + '</td><td>' + t.n + '</td><td><select data-hrt="' + i + '" style="border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--card);min-height:38px">' + ['NHAN_VIEN', 'QUAN_LY', 'BO'].map(function (k) { return '<option value="' + k + '"' + (t.rule === k ? ' selected' : '') + '>' + VT[k] + '</option>' }).join('') + '</select></td></tr>' }).join('') + '</tbody></table></div><div class="meta" style="padding:6px">Mỗi Shop chỉ có một Quản lý. "Bỏ qua" = không tạo tài khoản cho chức danh đó.</div></div>';
-      h += '<div style="display:grid;gap:8px"><label class="sw"><input type="checkbox" id="hr-act" ' + (H.onlyActive ? 'checked' : '') + '><div><b>Chỉ lấy người đang làm</b><small>Bỏ qua người nghỉ sinh, nghỉ việc… theo cột Trạng thái.</small></div></label><label class="sw"><input type="checkbox" id="hr-shop" ' + (H.createShops ? 'checked' : '') + '><div><b>Tạo Shop chưa có trong hệ thống (' + f.newShops.length + ' Shop)</b><small>' + (f.newShops.length ? f.newShops.slice(0, 5).map(function (s) { return esc(s.ma) + ' · ' + esc(s.ten.slice(0, 40)) }).join('<br>') + (f.newShops.length > 5 ? '<br>…' : '') : 'Tất cả Shop trong file đã có.') + '</small></div></label><label class="sw"><input type="checkbox" id="hr-thay" ' + (H.thay ? 'checked' : '') + '><div><b>Cho phép thay Quản lý cũ</b><small>Nếu file ghi một Quản lý mới cho Shop đã có Quản lý khác, người cũ chuyển về Nhân viên. Tắt thì dòng đó báo lỗi.</small></div></label></div>';
-      if (f.dupQL) h += '<div class="alert" style="margin-top:8px"><i>ℹ</i><div><b>' + f.dupQL + ' Shop có nhiều hơn 1 người mang chức danh Quản lý</b><small>Mỗi Shop chỉ có 1 Quản lý. App giữ người ưu tiên nhất (Trưởng QL → Phó QL → Trưởng ca → người đứng trước trong file), những người còn lại tạo là Nhân viên (xem cột Ghi chú). Muốn đổi sau thì bấm "Đổi Quản lý" ở Shop đó.</small></div></div>';
-      if (f.noQL) h += '<div class="alert" style="margin-top:8px"><i>ℹ</i><div><b>' + f.noQL + ' Shop chưa có Quản lý</b><small>Chưa có ai mang chức danh Quản lý trong file cho các Shop này. Anh chọn Quản lý sau bằng "Đổi Quản lý".</small></div></div>';
-      if (f.vang) h +='<div class="alert" style="margin-top:8px"><i>ℹ</i><div><b>' + f.vang + ' tài khoản đang hoạt động không có trong file</b><small>App không tự khóa họ. Nếu họ đã nghỉ, khóa ở bảng bên dưới.</small></div></div>';
+      h += '<div class="card pgskip" style="margin:8px 0"><h2>Chức danh → vai trò trong app <span class="pill">anh sửa được</span></h2><div class="tw"><table><thead><tr><th>Chức danh trong file</th><th>Số người</th><th>Vai trò</th></tr></thead><tbody>' + f.titles.map(function (t, i) { return '<tr><td>' + esc(t.t) + '</td><td>' + t.n + '</td><td><select data-hrt="' + i + '" style="border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--card);min-height:38px">' + ['NHAN_VIEN', 'QUAN_LY', 'BO'].map(function (k) { return '<option value="' + k + '"' + (t.rule === k ? ' selected' : '') + '>' + VT[k] + '</option>' }).join('') + '</select></td></tr>' }).join('') + '</tbody></table></div><div class="meta" style="padding:6px">Một Shop có thể có nhiều Quản lý. "Bỏ qua" = không tạo tài khoản cho chức danh đó.</div></div>';
+      h += '<div style="display:grid;gap:8px"><label class="sw"><input type="checkbox" id="hr-act" ' + (H.onlyActive ? 'checked' : '') + '><div><b>Chỉ lấy người đang làm</b><small>Bỏ qua người nghỉ sinh, nghỉ việc… theo cột Trạng thái.</small></div></label><label class="sw"><input type="checkbox" id="hr-shop" ' + (H.createShops ? 'checked' : '') + '><div><b>Tạo Shop chưa có trong hệ thống (' + f.newShops.length + ' Shop)</b><small>' + (f.newShops.length ? f.newShops.slice(0, 5).map(function (s) { return esc(s.ma) + ' · ' + esc(s.ten.slice(0, 40)) }).join('<br>') + (f.newShops.length > 5 ? '<br>…' : '') : 'Tất cả Shop trong file đã có.') + '</small></div></label><label class="sw"><input type="checkbox" id="hr-role" ' + (H.updRole ? 'checked' : '') + '><div><b>Cập nhật vai trò theo chức danh cho người đã có tài khoản</b><small>Bật: người đã có tài khoản mà vai trò khác bảng trên sẽ được đổi. Tắt: người đã có giữ nguyên vai trò, file chỉ để thêm người mới và sửa tên/Shop. Người đúng tên, đúng Shop, đúng vai trò luôn được giữ nguyên.</small></div></label></div>';
+      if (f.noQL) h += '<div class="alert" style="margin-top:8px"><i>ℹ</i><div><b>' + f.noQL + ' Shop chưa có Quản lý</b><small>Chưa có ai mang chức danh Quản lý cho các Shop này. Anh chọn Quản lý sau bằng nút "Chọn Quản lý" ở bảng Shop bên dưới.</small></div></div>';
+      if (f.vang) h += '<div class="alert" style="margin-top:8px"><i>ℹ</i><div><b>' + f.vang + ' tài khoản đang hoạt động không có trong file</b><small>App không tự khóa hay xóa họ. Anh tự xử lý ở bảng Tài khoản bên dưới: Khóa nếu đã có lịch sử làm việc, Xóa nếu nhập sai hoặc chưa làm gì.</small><details style="margin-top:6px"><summary style="cursor:pointer;font-size:13px">Xem danh sách</summary><div style="font-size:13px;line-height:1.6;margin-top:4px">' + f.vangList.slice(0, 80).map(function (a) { return esc(a.ho_ten) + ' · ' + esc(VT[a.vai_tro] || a.vai_tro) + ' · ' + esc(shopName(a.id_shop)) }).join('<br>') + (f.vangList.length > 80 ? '<br>…' : '') + '</div></details></div></div>';
       h += '<div class="tw" style="margin-top:8px"><table><thead><tr><th>Dòng</th><th>Kết quả</th><th>Họ tên</th><th>Email</th><th>Chức danh</th><th>Shop</th><th>Ghi chú</th></tr></thead><tbody>' + f.rows.map(function (o) { var k = KQ[o.kq]; return '<tr><td>' + o.dong + '</td><td>' + tag(k[0], k[1]) + '</td><td><b>' + esc(o.ho_ten) + '</b></td><td>' + esc(o.email) + '</td><td>' + esc(o.chuc_danh) + '</td><td>' + esc((o.ten_shop || o.shopTxt || '').slice(0, 44)) + '</td><td class="meta" style="white-space:normal">' + esc(o.ghi || '') + '</td></tr>' }).join('') + '</tbody></table></div>';
       h += '<div class="acts" style="margin-top:10px"><button class="btn b1" id="hr-go"' + (todo && !H.busy ? '' : ' disabled') + '>' + (H.busy ? 'Đang áp dụng…' : 'Áp dụng ' + todo + ' thay đổi (' + c.moi + ' mới, ' + c.sua + ' cập nhật' + (f.newShops.length && H.createShops ? ', ' + f.newShops.length + ' Shop mới' : '') + ')') + '</button><button class="btn b3" id="hr-drop-x">Bỏ file này</button></div>'
     }
@@ -874,12 +867,12 @@ var ASMHR = (function () {
     return h + '</div>'
   }
   function apply() {
-    var f = H.info, todo = f.rows.filter(function (o) { return o.kq === 'moi' || o.kq === 'sua' }).sort(function (a, b) { return (b.kq === 'sua' && b.vai_tro === 'NHAN_VIEN') - (a.kq === 'sua' && a.vai_tro === 'NHAN_VIEN') }); if (!todo.length || H.busy) return; if (!confirm('Áp dụng ' + todo.length + ' thay đổi nhân sự' + (f.newShops.length && H.createShops ? ' và tạo ' + f.newShops.length + ' Shop mới' : '') + '?')) return; H.busy = true; H.res = []; render();
+    var f = H.info, todo = f.rows.filter(function (o) { return o.kq === 'moi' || o.kq === 'sua' }); if (!todo.length || H.busy) return; if (!confirm('Áp dụng ' + todo.length + ' thay đổi nhân sự' + (f.newShops.length && H.createShops ? ' và tạo ' + f.newShops.length + ' Shop mới' : '') + '?')) return; H.busy = true; H.res = []; render();
     var shopsToMake = H.createShops ? f.newShops.filter(function (s) { return todo.some(function (o) { return o.shopMoi && o.id_shop === 'S' + s.ma }) }) : [];
     shopsToMake.reduce(function (p, s) { return p.then(function () { return rpc('u_asm_shop_save', { p_ma_shop: s.ma, p_ten_shop: s.ten, p_req: rid() }) }) }, Promise.resolve()).then(function () {
       return todo.reduce(function (p, o) {
         return p.then(function () {
-          var req = o.kq === 'moi' ? rpc('u_asm_account_create', { p_ho_ten: o.ho_ten, p_email: o.email, p_vai_tro: o.vai_tro, p_id_shop: o.id_shop, p_mat_khau: o.mk, p_thay_ql: H.thay, p_req: rid() }) : rpc('u_asm_account_update', { p_ma_tk: o.ma_tk, p_ho_ten: o.ho_ten, p_vai_tro: o.vai_tro, p_id_shop: o.id_shop, p_trang_thai: (D.acc[o.ma_tk] || {}).trang_thai || 'HOAT_DONG', p_thay_ql: H.thay, p_req: rid() });
+          var req = o.kq === 'moi' ? rpc('u_asm_account_create', { p_ho_ten: o.ho_ten, p_email: o.email, p_vai_tro: o.vai_tro, p_id_shop: o.id_shop, p_mat_khau: o.mk, p_thay_ql: false, p_req: rid() }) : rpc('u_asm_account_update', { p_ma_tk: o.ma_tk, p_ho_ten: o.ho_ten, p_vai_tro: o.vai_tro, p_id_shop: o.id_shop, p_trang_thai: (D.acc[o.ma_tk] || {}).trang_thai || 'HOAT_DONG', p_thay_ql: false, p_req: rid() });
           return req.then(function () { H.res.push({ ok: true, dong: o.dong, ho_ten: o.ho_ten, email: o.email, mk: o.kq === 'moi' ? o.mk : '', vai_tro: o.vai_tro, id_shop: o.id_shop }) }, function (e) { H.res.push({ ok: false, dong: o.dong, ho_ten: o.ho_ten, msg: (e && e.message) || (e && e.code) || 'Lỗi' }) })
         })
       }, Promise.resolve())
@@ -895,7 +888,7 @@ var ASMHR = (function () {
     var dz = document.getElementById('hr-drop');
     if (dz) { ['dragenter', 'dragover'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); if (!H.drag) { H.drag = true; dz.style.borderColor = 'var(--teal)'; dz.style.background = 'var(--tint)' } }) }); ['dragleave', 'drop'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); H.drag = false; dz.style.borderColor = 'var(--line)'; dz.style.background = 'var(--bg)' }) }); dz.addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) read(f) }) }
     on('#hr-file', 'onchange', function (x) { var f = x.files[0]; if (f) read(f) });
-    on('#hr-thay', 'onchange', function (x) { H.thay = x.checked }); on('#hr-act', 'onchange', function (x) { H.onlyActive = x.checked; redo(); render() }); on('#hr-shop', 'onchange', function (x) { H.createShops = x.checked; redo(); render() });
+    on('#hr-role', 'onchange', function (x) { H.updRole = x.checked; redo(); render() }); on('#hr-act', 'onchange', function (x) { H.onlyActive = x.checked; redo(); render() }); on('#hr-shop', 'onchange', function (x) { H.createShops = x.checked; redo(); render() });
     [].slice.call(document.querySelectorAll('[data-hrt]')).forEach(function (s) { s.onchange = function () { var t = H.info.titles[Number(s.dataset.hrt)]; H.rules[t.t] = s.value; redo(); render() } });
     on('#hr-go', 'onclick', apply); on('#hr-csv', 'onclick', csv); on('#hr-drop-x', 'onclick', function () { H.info = null; H.aoa = null; H.res = null; render() })
   }
@@ -1050,7 +1043,8 @@ var ASMIMG = (function () {
   function tag(cls, t) { return '<span class="tag ' + cls + '">' + esc(t) + '</span>' }
   function accs() { return Object.keys(D.acc).map(function (k) { return D.acc[k] }).filter(function (a) { return a.vai_tro !== 'ASM' }) }
   function openN(ma) { return D.turns.filter(function (t) { return t.ma_tk_nhan === ma && open_(t) }).length }
-  function qlRow(shopId, except) { return accs().filter(function (a) { return a.vai_tro === 'QUAN_LY' && a.id_shop === shopId && a.trang_thai === 'HOAT_DONG' && a.ma_tk !== except })[0] }
+  function qlList(shopId) { return accs().filter(function (a) { return a.vai_tro === 'QUAN_LY' && a.id_shop === shopId && a.trang_thai === 'HOAT_DONG' }) }
+  function fdt(x) { if (!x) return ''; var d = new Date(x); return isNaN(d) ? '' : d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) }
 
   /* ================= NHÂN SỰ & TÀI KHOẢN ================= */
   function pgTk() {
@@ -1058,18 +1052,18 @@ var ASMIMG = (function () {
     var L = accs().filter(function (a) { return (!f.shop || a.id_shop === f.shop) && (!f.st || a.trang_thai === f.st) && (!ql || (a.ho_ten + ' ' + a.email).toLowerCase().indexOf(ql) >= 0) })
       .sort(function (a, b) { return String(a.id_shop).localeCompare(String(b.id_shop)) || (a.vai_tro === b.vai_tro ? a.ho_ten.localeCompare(b.ho_ten) : a.vai_tro === 'QUAN_LY' ? -1 : 1) });
     var cnt = { '': accs().length, HOAT_DONG: 0, NGUNG: 0 }; accs().forEach(function (a) { cnt[a.trang_thai] = (cnt[a.trang_thai] || 0) + 1 });
-    var h = head('Nhân sự & tài khoản', 'Tạo tài khoản, đổi Shop, đặt Quản lý cho từng Shop, khóa hoặc mở, đặt lại mật khẩu. Chỉ ASM làm được.', '<button class="btn b1" id="tk-new">+ Thêm tài khoản</button>');
+    var h = head('Nhân sự & tài khoản', 'Tạo tài khoản, đổi Shop, chọn Quản lý cho từng Shop (một Shop có thể có nhiều Quản lý), khóa hoặc mở, xóa, đặt lại mật khẩu. Chỉ ASM làm được.', '<button class="btn b1" id="tk-new">+ Thêm tài khoản</button>');
     h += window.ASMHR ? ASMHR.card() : '';
     h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">Quản lý của từng Shop</h2><div class="tw"><table><thead><tr><th>Shop</th><th>Quản lý</th><th>Nhân viên</th><th></th></tr></thead><tbody>' + SH.map(function (s) {
-      var m = qlRow(s.id_shop), nv = accs().filter(function (a) { return a.id_shop === s.id_shop && a.vai_tro === 'NHAN_VIEN' && a.trang_thai === 'HOAT_DONG' }).length;
-      return '<tr><td><b>' + esc(s.ten_shop) + '</b><small>' + esc(s.ma_shop) + '</small></td><td>' + (m ? esc(m.ho_ten) : '<span class="tag t-late">Chưa có Quản lý</span>') + '</td><td>' + nv + '</td><td><button class="btn b3" data-setql="' + esc(s.id_shop) + '" style="min-height:36px;font-size:13px">' + (m ? 'Đổi Quản lý' : 'Chọn Quản lý') + '</button></td></tr>'
+      var ms = qlList(s.id_shop), nv = accs().filter(function (a) { return a.id_shop === s.id_shop && a.vai_tro === 'NHAN_VIEN' && a.trang_thai === 'HOAT_DONG' }).length;
+      return '<tr><td><b>' + esc(s.ten_shop) + '</b><small>' + esc(s.ma_shop) + '</small></td><td>' + (ms.length ? ms.map(function (m) { return esc(m.ho_ten) }).join(', ') : '<span class="tag t-late">Chưa có Quản lý</span>') + '</td><td>' + nv + '</td><td><button class="btn b3" data-setql="' + esc(s.id_shop) + '" style="min-height:36px;font-size:13px">' + 'Chọn Quản lý' + '</button></td></tr>'
     }).join('') + '</tbody></table></div></div>';
     h += '<div class="top" style="flex-wrap:wrap"><div class="search">' + ic('search') + '<input id="tk-q" placeholder="Tìm tên hoặc email…" value="' + esc(f.q) + '"></div>' + sel('tk-shop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), f.shop) + '</div>';
     h += '<div class="chips">' + [['HOAT_DONG', 'Đang hoạt động'], ['NGUNG', 'Đã khóa'], ['', 'Tất cả']].map(function (x) { return '<button class="chip ' + (f.st === x[0] ? 'on' : '') + '" data-tkst="' + x[0] + '">' + x[1] + '<em>' + (cnt[x[0]] || 0) + '</em></button>' }).join('') + '</div>';
-    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Họ tên</th><th>Vai trò</th><th>Shop</th><th>Đang giữ</th><th>Trạng thái</th><th style="min-width:230px"></th></tr></thead><tbody>' + L.map(function (a) {
+    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Họ tên</th><th>Vai trò</th><th>Shop</th><th>Đang giữ</th><th>Trạng thái</th><th>Mật khẩu</th><th>Đăng nhập gần nhất</th><th style="min-width:270px"></th></tr></thead><tbody>' + L.map(function (a) {
       var n = openN(a.ma_tk);
-      return '<tr><td><b>' + esc(a.ho_ten) + '</b><small>' + esc(a.email) + '</small></td><td>' + (a.vai_tro === 'QUAN_LY' ? tag('t-today', 'Quản lý') : 'Nhân viên') + '</td><td>' + esc(shopName(a.id_shop)) + '</td><td>' + (n ? n + ' lượt mở' : '–') + '</td><td>' + (a.trang_thai === 'HOAT_DONG' ? tag('t-ok', 'Hoạt động') : tag('t-bad', 'Đã khóa')) + '</td><td><div class="row" style="flex-wrap:wrap"><button class="btn b3" data-tkedit="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">Sửa</button><button class="btn b3" data-tkpw="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">Mật khẩu</button><button class="btn b3" data-tklock="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">' + (a.trang_thai === 'HOAT_DONG' ? 'Khóa' : 'Mở khóa') + '</button></div></td></tr>'
-    }).join('') + (L.length ? '' : '<tr><td colspan="6" class="empty">Không có tài khoản phù hợp.</td></tr>') + '</tbody></table></div></div>';
+      return '<tr><td><b>' + esc(a.ho_ten) + '</b><small>' + esc(a.email) + '</small></td><td>' + (a.vai_tro === 'QUAN_LY' ? tag('t-today', 'Quản lý') : 'Nhân viên') + '</td><td>' + esc(shopName(a.id_shop)) + '</td><td>' + (n ? n + ' lượt mở' : '–') + '</td><td>' + (a.trang_thai === 'HOAT_DONG' ? tag('t-ok', 'Hoạt động') : tag('t-bad', 'Đã khóa')) + '</td><td>' + (a.mk_doi_luc ? tag('t-ok', 'Đã đổi') + '<small>' + esc(fdt(a.mk_doi_luc)) + '</small>' : '<span class="tag t-late">Chưa đổi</span>') + '</td><td>' + (a.dang_nhap_luc ? esc(fdt(a.dang_nhap_luc)) : '<span class="meta">Chưa đăng nhập</span>') + '</td><td><div class="row" style="flex-wrap:wrap"><button class="btn b3" data-tkedit="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">Sửa</button><button class="btn b3" data-tkpw="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">Mật khẩu</button><button class="btn b3" data-tklock="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">' + (a.trang_thai === 'HOAT_DONG' ? 'Khóa' : 'Mở khóa') + '</button><button class="btn b3" data-tkdel="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px;color:var(--bad)">Xóa</button></div></td></tr>'
+    }).join('') + (L.length ? '' : '<tr><td colspan="8" class="empty">Không có tài khoản phù hợp.</td></tr>') + '</tbody></table></div></div>';
     return h
   }
   function creds(title, email, pw) {
@@ -1080,17 +1074,14 @@ var ASMIMG = (function () {
   function accModal(a) {
     var isNew = !a, SH = U.shops(), m = { ho_ten: a ? a.ho_ten : '', email: a ? a.email : '', vai_tro: a ? a.vai_tro : 'NHAN_VIEN', id_shop: a ? a.id_shop : (ST.shop || (SH[0] || {}).id_shop || ''), trang_thai: a ? a.trang_thai : 'HOAT_DONG', mk: isNew ? genPw() : '', thay: false }, d = modal();
     function draw() {
-      var cf = m.vai_tro === 'QUAN_LY' && m.trang_thai === 'HOAT_DONG' ? qlRow(m.id_shop, a && a.ma_tk) : null;
       sheet(d, '<h2 style="font-size:18px;margin:0 0 10px">' + (isNew ? 'Thêm tài khoản' : 'Sửa tài khoản') + '</h2><div class="form2" style="margin-top:0"><div><label class="meta">Họ tên</label><input id="f-ten" value="' + esc(m.ho_ten) + '"></div><div><label class="meta">Email đăng nhập</label><input id="f-em" type="email" value="' + esc(m.email) + '"' + (isNew ? '' : ' disabled') + '></div><div><label class="meta">Vai trò</label>' + sel('f-vt', [['NHAN_VIEN', 'Nhân viên'], ['QUAN_LY', 'Quản lý']], m.vai_tro) + '</div><div><label class="meta">Shop</label>' + sel('f-sh', SH.map(function (s) { return [s.id_shop, s.ten_shop] }), m.id_shop) + '</div>' +
         (isNew ? '<div style="grid-column:1/-1"><label class="meta">Mật khẩu ban đầu (tối thiểu 8 ký tự)</label><div class="row"><input id="f-mk" value="' + esc(m.mk) + '" autocomplete="off"><button class="btn b3" id="f-gen" style="min-height:44px">Tạo ngẫu nhiên</button></div></div>' : '<div><label class="meta">Trạng thái</label>' + sel('f-tt', [['HOAT_DONG', 'Đang hoạt động'], ['NGUNG', 'Đã khóa']], m.trang_thai) + '</div>') + '</div>' +
-        (cf ? '<label class="sw" style="margin-top:10px"><input type="checkbox" id="f-thay" ' + (m.thay ? 'checked' : '') + '><div><b>Thay Quản lý hiện tại</b><small>Shop này đang có Quản lý ' + esc(cf.ho_ten) + '. Chọn để chuyển người đó về Nhân viên và đặt người này làm Quản lý. Mỗi Shop chỉ có một Quản lý.</small></div></label>' : '') +
         (!isNew && a.vai_tro !== m.vai_tro || !isNew && a.id_shop !== m.id_shop ? '<div class="ro" style="margin-top:10px">Lượt đang giữ vẫn giữ tên người này và vẫn ghi Shop lúc giao. Quản lý cũ của Shop sẽ không còn xem được nếu người này chuyển Shop.</div>' : '') +
-        '<div class="acts" style="margin-top:12px"><button class="btn b3" id="f-x" style="flex:1">Hủy</button><button class="btn b1" id="f-ok" style="flex:1.4"' + (cf && !m.thay ? ' disabled' : '') + '>' + (isNew ? 'Tạo tài khoản' : 'Lưu') + '</button></div>');
+        '<div class="acts" style="margin-top:12px"><button class="btn b3" id="f-x" style="flex:1">Hủy</button><button class="btn b1" id="f-ok" style="flex:1.4">' + (isNew ? 'Tạo tài khoản' : 'Lưu') + '</button></div>');
       q(d, '#f-ten').oninput = function (e) { m.ho_ten = e.target.value }; var em = q(d, '#f-em'); em.oninput = function (e) { m.email = e.target.value };
       q(d, '#f-vt').onchange = function (e) { m.vai_tro = e.target.value; m.thay = false; m.ho_ten = q(d, '#f-ten').value; m.email = em.value; draw() }; q(d, '#f-sh').onchange = function (e) { m.id_shop = e.target.value; m.thay = false; m.ho_ten = q(d, '#f-ten').value; m.email = em.value; draw() };
       var tt = q(d, '#f-tt'); if (tt) tt.onchange = function (e) { m.trang_thai = e.target.value; m.ho_ten = q(d, '#f-ten').value; draw() };
       var mk = q(d, '#f-mk'); if (mk) { mk.oninput = function (e) { m.mk = e.target.value }; q(d, '#f-gen').onclick = function () { m.mk = genPw(); mk.value = m.mk } }
-      var th = q(d, '#f-thay'); if (th) th.onchange = function (e) { m.thay = e.target.checked; m.ho_ten = q(d, '#f-ten').value; if (mk) m.mk = mk.value; draw() };
       q(d, '#f-x').onclick = function () { d.remove() };
       q(d, '#f-ok').onclick = function () {
         m.ho_ten = q(d, '#f-ten').value; m.email = em.value; if (mk) m.mk = mk.value; var b = q(d, '#f-ok'); b.disabled = true;
@@ -1113,10 +1104,21 @@ var ASMIMG = (function () {
     q(d, '#l-ok').onclick = function () { var b = q(d, '#l-ok'); b.disabled = true; rpc('u_asm_account_update', { p_ma_tk: a.ma_tk, p_ho_ten: a.ho_ten, p_vai_tro: a.vai_tro, p_id_shop: a.id_shop, p_trang_thai: on ? 'NGUNG' : 'HOAT_DONG', p_thay_ql: false, p_req: rid() }).then(function () { d.remove(); done(on ? 'Đã khóa ' + a.ho_ten : 'Đã mở khóa ' + a.ho_ten) }, function (e) { b.disabled = false; fail(e) }) }
   }
   function setQl(shopId) {
-    var cur = qlRow(shopId), cands = accs().filter(function (a) { return a.id_shop === shopId && a.trang_thai === 'HOAT_DONG' && (!cur || a.ma_tk !== cur.ma_tk) }), d = modal();
-    sheet(d, '<h2 style="font-size:18px;margin:0 0 6px">' + (cur ? 'Đổi Quản lý' : 'Chọn Quản lý') + ' · ' + esc(shopName(shopId)) + '</h2>' + (cur ? '<div class="meta" style="margin-bottom:10px">Quản lý hiện tại: <b>' + esc(cur.ho_ten) + '</b> sẽ chuyển về Nhân viên.</div>' : '') + (cands.length ? '<label class="field">Người làm Quản lý mới' + sel('q-who', cands.map(function (a) { return [a.ma_tk, a.ho_ten + ' (' + VAI[a.vai_tro] + ')'] }), cands[0].ma_tk) + '</label>' : '<div class="ro">Shop này chưa có nhân viên nào khác. Hãy thêm tài khoản trước (vai trò Quản lý).</div>') + '<div class="acts"><button class="btn b3" id="q-x" style="flex:1">Hủy</button>' + (cands.length ? '<button class="btn b1" id="q-ok" style="flex:1.4">Xác nhận</button>' : '') + '</div>', 480);
+    var people = accs().filter(function (a) { return a.id_shop === shopId && a.trang_thai === 'HOAT_DONG' }).sort(function (a, b) { return a.vai_tro === b.vai_tro ? a.ho_ten.localeCompare(b.ho_ten) : a.vai_tro === 'QUAN_LY' ? -1 : 1 }), d = modal();
+    sheet(d, '<h2 style="font-size:18px;margin:0 0 6px">Chọn Quản lý · ' + esc(shopName(shopId)) + '</h2><div class="meta" style="margin-bottom:10px">Tick những người làm Quản lý của Shop này. Một Shop có thể có nhiều Quản lý. Bỏ tick = chuyển người đó về Nhân viên.</div>' + (people.length ? '<div style="display:grid;gap:6px;margin-bottom:10px">' + people.map(function (a) { return '<label class="row" style="cursor:pointer"><input type="checkbox" data-qw="' + esc(a.ma_tk) + '"' + (a.vai_tro === 'QUAN_LY' ? ' checked' : '') + '><span><b>' + esc(a.ho_ten) + '</b><small style="display:block">' + esc(a.email) + '</small></span></label>' }).join('') + '</div>' : '<div class="ro">Shop này chưa có ai. Hãy thêm tài khoản trước.</div>') + '<div class="acts"><button class="btn b3" id="q-x" style="flex:1">Hủy</button>' + (people.length ? '<button class="btn b1" id="q-ok" style="flex:1.4">Lưu</button>' : '') + '</div>', 480);
     q(d, '#q-x').onclick = function () { d.remove() };
-    var ok = q(d, '#q-ok'); if (ok) ok.onclick = function () { var a = D.acc[q(d, '#q-who').value]; ok.disabled = true; rpc('u_asm_account_update', { p_ma_tk: a.ma_tk, p_ho_ten: a.ho_ten, p_vai_tro: 'QUAN_LY', p_id_shop: a.id_shop, p_trang_thai: 'HOAT_DONG', p_thay_ql: true, p_req: rid() }).then(function () { d.remove(); done(a.ho_ten + ' là Quản lý ' + shopName(shopId)) }, function (e) { ok.disabled = false; fail(e) }) }
+    var ok = q(d, '#q-ok'); if (ok) ok.onclick = function () {
+      var chg = people.map(function (a) { return { a: a, on: q(d, '[data-qw="' + a.ma_tk + '"]').checked } }).filter(function (x) { return x.on !== (x.a.vai_tro === 'QUAN_LY') });
+      if (!chg.length) { d.remove(); return } ok.disabled = true;
+      chg.reduce(function (p, x) { return p.then(function () { return rpc('u_asm_account_update', { p_ma_tk: x.a.ma_tk, p_ho_ten: x.a.ho_ten, p_vai_tro: x.on ? 'QUAN_LY' : 'NHAN_VIEN', p_id_shop: x.a.id_shop, p_trang_thai: 'HOAT_DONG', p_thay_ql: false, p_req: rid() }) }) }, Promise.resolve())
+        .then(function () { d.remove(); done('Đã cập nhật Quản lý của ' + shopName(shopId)) }, function (e) { ok.disabled = false; fail(e) })
+    }
+  }
+  function delAsm(a) {
+    var n = openN(a.ma_tk), d = modal();
+    sheet(d, '<h2 style="font-size:18px;margin:0 0 6px">Xóa tài khoản</h2><div class="meta" style="margin-bottom:10px">' + esc(a.ho_ten) + ' · ' + esc(a.email) + '</div><div class="ro">Xóa hẳn tài khoản này, <b>không hoàn tác được</b>. Chỉ xóa được khi người này chưa có lịch sử làm việc (chưa được giao lượt, chưa liên hệ khách) — ví dụ nhập sai hoặc nghỉ trước khi làm gì. Nếu đã có lịch sử, hệ thống từ chối xóa và anh dùng <b>Khóa</b> để giữ lịch sử chăm sóc khách.' + (n ? ' <b>Người này đang giữ ' + n + ' lượt mở.</b>' : '') + '</div><div class="acts" style="margin-top:10px"><button class="btn b3" id="x-x" style="flex:1">Hủy</button><button class="btn b1" id="x-ok" style="flex:1.4;background:var(--bad)">Xóa hẳn</button></div>', 480);
+    q(d, '#x-x').onclick = function () { d.remove() };
+    q(d, '#x-ok').onclick = function () { var b = q(d, '#x-ok'); b.disabled = true; rpc('u_asm_account_delete', { p_ma_tk: a.ma_tk, p_req: rid() }).then(function () { d.remove(); done('Đã xóa ' + a.ho_ten) }, function (e) { b.disabled = false; fail(e) }) }
   }
 
   /* ================= THƯ VIỆN ================= */
@@ -1213,6 +1215,7 @@ var ASMIMG = (function () {
     all('[data-tkedit]', function (b) { b.onclick = function () { accModal(byAcc(b.dataset.tkedit)) } });
     all('[data-tkpw]', function (b) { b.onclick = function () { pwAsm(byAcc(b.dataset.tkpw)) } });
     all('[data-tklock]', function (b) { b.onclick = function () { lockAsm(byAcc(b.dataset.tklock)) } });
+    all('[data-tkdel]', function (b) { b.onclick = function () { delAsm(byAcc(b.dataset.tkdel)) } });
     all('[data-setql]', function (b) { b.onclick = function () { setQl(b.dataset.setql) } });
     all('[data-tltab]', function (b) { b.onclick = function () { AS.tl.tab = b.dataset.tltab; render() } });
     all('[data-tlg]', function (b) { b.onclick = function () { AS.tl.nhom = b.dataset.tlg; render() } });
