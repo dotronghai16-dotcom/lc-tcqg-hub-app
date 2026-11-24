@@ -252,7 +252,7 @@ function kpiPage(){var M=D.turns.filter(mine_),xong=M.filter(function(t){return 
  return mtop()+'<div class="greet"><h1>KPI</h1><p>Chỉ số tạm để xem. Công thức KPI chính thức chưa chốt nên chưa dùng để đánh giá.</p></div><div class="stats"><div class="card st"><div class="l">Được giao</div><div class="v">'+M.length+'</div></div><div class="card st"><div class="l">Hoàn thành</div><div class="v">'+xong.length+'</div></div><div class="card st"><div class="l">Đồng ý tiêm</div><div class="v">'+dy+'</div></div><div class="card st"><div class="l">Tỷ lệ đồng ý / hoàn thành</div><div class="v">'+(xong.length?Math.round(dy/xong.length*100)+'%':'–')+'</div></div></div>'}
 function accPage(){return mtop()+'<div class="greet"><h1>Tài khoản</h1></div><div class="card"><div class="alert"><div class="ava">'+esc(ini(ME.ho_ten))+'</div><div><b>'+esc(ME.ho_ten)+'</b><small>'+esc(ME.email)+' · '+(ME.vai_tro==='QUAN_LY'?'Quản lý':'Nhân viên')+' · '+esc(shopName(ME.id_shop))+'</small></div></div><button class="btn b3" id="cpw" style="width:100%;margin-bottom:8px">Đổi mật khẩu</button><button class="btn b3" id="out" style="width:100%">Đăng xuất</button></div>'}
 /* ===== Vẽ và gắn sự kiện ===== */
-function render(){if(!ME||!D)return;if(ME.vai_tro==='ASM'&&window.ASM){ASM.render();return}shell();var m=$('#main'),p=S.page;m.innerHTML=({today:today,data:dataPage,hist:histPage,team:teamPage,kpi:kpiPage,acc:accPage}[p]||today)();bind();if(S.sel)showDetail()}
+function render(){if(!ME||!D)return;if(ME.vai_tro==='ASM'&&window.ASM){ASM.render();if(window.PGR)PGR.run();return}shell();var m=$('#main'),p=S.page;m.innerHTML=({today:today,data:dataPage,hist:histPage,team:teamPage,kpi:kpiPage,acc:accPage}[p]||today)();bind();if(S.sel)showDetail();if(window.PGR)PGR.run()}
 function bind(){var gq=$('#gq');if(gq)gq.oninput=function(){S.q=gq.value;var pos=gq.selectionStart;render();var n=$('#gq');if(n){n.focus();n.setSelectionRange(pos,pos)}};
  document.querySelectorAll('.chip[data-t]').forEach(function(b){b.onclick=function(){S.tab=b.dataset.t;S.sel=null;render()}});document.querySelectorAll('.chip[data-s]').forEach(function(b){b.onclick=function(){S.scope=b.dataset.s;render()}});document.querySelectorAll('.chip[data-f]').forEach(function(b){b.onclick=function(){S.filter=b.dataset.f;render()}});
  document.querySelectorAll('.q,tr.click').forEach(function(el){el.onclick=function(e){if(e.target.closest('[data-stop]'))return;S.sel=el.dataset.id;S.open=innerWidth<960;render()}});
@@ -271,10 +271,6 @@ addEventListener('resize',function(){if(ME&&D)render()});
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&ME&&D&&Date.now()-loadedAt>30000)load(true).then(render,function(){})});
 start();
 </script>
-<script src="lib-parse.js"></script>
-<script src="asm.js"></script>
-<script src="asm-lib.js"></script>
-<script src="asm-admin.js"></script>
-<script src="msg.js"></script>
+<script src="app.js?v=20261124a"></script>
 </body>
 </html>
