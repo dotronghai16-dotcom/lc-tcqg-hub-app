@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124f) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124g) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -1390,7 +1390,7 @@ var MSG = (function () {
   function fk(x) { return window.LIBSCAN ? LIBSCAN.fold(x || '') : String(x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd') }
   /* Biến tự điền: tên NV, SĐT NV (từ tài khoản), Shop; extra = vaccine đã chọn + chỗ nhân viên đã điền tay. Biến thiếu giá trị thì GIỮ NGUYÊN {{…}} để app nhắc điền. */
   function ctx(c, link, xhOverride, extra) {
-    var xh = xhOverride || xungOf(link), sh = shopOf(), o = { XUNG_HO: xh, XUNG_HO_HOA: cap(xh), TEN_NGUOI_LH: given(link && link.ho_ten), TEN_BE: given(c && c.ho_ten) || 'bé', TUOI: tuoiTxt(c), TEN_NV: given(ME.ho_ten), SDT_NV: fph(ME.sdt), TEN_CO_SO: strip(sh.ten_shop) || 'Trung tâm tiêm chủng Long Châu', DIA_CHI: strip(sh.dia_chi), GIO_MO_CUA: sh.gio_mo_cua || '', HOTLINE: sh.hotline || '', LINK_GOOGLE_MAPS: '' };
+    var xh = xhOverride || xungOf(link), sh = shopOf(), o = { XUNG_HO: xh, XUNG_HO_HOA: cap(xh), TEN_NGUOI_LH: given(link && link.ho_ten), TEN_BE: given(c && c.ho_ten) || 'bé', TUOI: tuoiTxt(c), TEN_NV: given(ME.ho_ten), SDT_NV: fph(ME.sdt), TEN_CO_SO: strip(sh.ten_shop) || 'Trung tâm tiêm chủng Long Châu', DIA_CHI: oneLine(sh.dia_chi) || oneLine(sh.ten_shop), GIO_MO_CUA: sh.gio_mo_cua || '', HOTLINE: sh.hotline || '', LINK_GOOGLE_MAPS: '' };
     if (extra) for (var k in extra) if (extra[k] != null && extra[k] !== '') o[k] = extra[k];
     return o
   }
@@ -1557,7 +1557,6 @@ var MSG = (function () {
   function cxS() { var e = {}; for (var k in S.fv) e[k] = S.fv[k]; if (S.vac) e.TEN_VACCINE = S.vac.name; return ctx(cust(), link(), S.xh, e) }
   function sigText(cx) { return 'Người chăm sóc: ' + strip(ME.ho_ten) + ' · ' + cx.TEN_CO_SO + (cx.SDT_NV ? '\nSĐT/Zalo: ' + cx.SDT_NV : '') }
   function sigNeeded(txt) { var d = String(ME.sdt || ''); return !(d && txt.replace(/\D/g, '').indexOf(d) >= 0) }
-  function shopInfo() { var sh = shopOf(); return !!(sh.dia_chi || sh.gio_mo_cua || sh.hotline) }
   function compose() {
     var cx = cxS(), parts = [], f = function (t) { return fill(nl(t), cx) };
     if (S.mode === 'QT' && S.pq) parts.push(f(S.pq.text));
@@ -1570,7 +1569,7 @@ var MSG = (function () {
       if (!S.km[g.nhom]) return; var tn = fk(g.title), host = -1; if (tn.length >= 8) for (var i = 0; i < nBase; i++) if (fk(parts[i]).indexOf(tn) >= 0) { host = i; break }
       if (host >= 0) parts[host] = parts[host] + '\n' + ctkmLines(g); else parts.push(ctkmText(g))
     });
-    if (S.dc) parts.push('Địa chỉ: ' + cx.DIA_CHI + '. Giờ mở cửa: ' + cx.GIO_MO_CUA + '. Hotline: ' + cx.HOTLINE + '.');
+    if (S.dc) parts.push('Địa chỉ: ' + cx.DIA_CHI + (cx.GIO_MO_CUA ? '. Giờ mở cửa: ' + cx.GIO_MO_CUA : '') + (cx.HOTLINE ? '. Hotline: ' + cx.HOTLINE : '') + '.');
     var txt = parts.join('\n\n'); if (S.sig && sigNeeded(txt)) txt = (txt ? txt + '\n\n' : '') + sigText(cx); return txt
   }
   function regen() { S.base = compose(); S.text = S.base; draw() }
@@ -1650,7 +1649,7 @@ var MSG = (function () {
     var noPhone = !ME.sdt;
     rows += kitRow('user', 'sig', 'Chữ ký người chăm sóc', S.sig ? (noPhone ? 'Chưa có SĐT của anh/chị: tin sẽ thiếu số liên hệ' : esc(strip(ME.ho_ten)) + ' · ' + esc(cx.TEN_CO_SO) + ' · ' + esc(cx.SDT_NV)) : 'Đang tắt: tin không có tên nhân viên, Shop, SĐT', S.sig, true, S.sig && noPhone);
     if (noPhone) rows += '<div class="sdtbox"><input id="mysdt" type="tel" inputmode="tel" placeholder="Nhập SĐT của anh/chị, ví dụ 0912345678" autocomplete="tel" aria-label="SĐT của anh/chị"><button class="abt p" id="sdtsave" style="min-height:44px;flex:none;padding:0 16px"><b>Lưu SĐT</b></button></div>';
-    if (shopInfo()) rows += '<label class="li"><span class="ico">' + ic('pin') + '</span><span class="lt"><b>Địa chỉ, giờ mở cửa, hotline</b><small>' + esc(cx.TEN_CO_SO) + '</small></span><span class="tg"><input type="checkbox" id="swd" ' + (S.dc ? 'checked' : '') + '><i></i></span></label>';
+    rows += '<label class="li"><span class="ico">' + ic('pin') + '</span><span class="lt"><b>Địa chỉ Shop</b><small>' + esc(cx.DIA_CHI) + '</small></span><span class="tg"><input type="checkbox" id="swd" ' + (S.dc ? 'checked' : '') + '><i></i></span></label>';
     rows += '<div class="li"><span class="ico">' + ic('user') + '</span><span class="lt"><b>Xưng hô</b></span><select id="xh" aria-label="Xưng hô">' + XH.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === S.xh ? ' selected' : '') + '>' + esc(o[1]) + '</option>' }).join('') + '</select></div>';
     return '<section><div class="mh">' + (V ? 'Tự điền theo ' + nm : 'Thêm vào tin') + '</div><div class="ls">' + rows + '</div></section>'
   }
