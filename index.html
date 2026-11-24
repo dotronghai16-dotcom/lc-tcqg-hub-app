@@ -245,7 +245,9 @@ addEventListener('resize',function(){if(ME&&D)render()});
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&ME&&D&&Date.now()-loadedAt>30000)load(true).then(render,function(){})});
 start();
 </script>
+<script src="lib-parse.js"></script>
 <script src="asm.js"></script>
+<script src="asm-lib.js"></script>
 <script src="asm-admin.js"></script>
 <script src="msg.js"></script>
 </body>
