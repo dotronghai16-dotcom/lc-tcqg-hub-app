@@ -29,8 +29,8 @@
     MAU_CHU_DE: { ten: 'Mẫu theo vaccine và độ tuổi', moTa: 'Mẫu tin theo từng vaccine/chủ đề, chia theo nhóm tuổi/đối tượng.', cheDo: 'BO_SUNG', cot: [
       { k: 'chu_de', nhan: 'Chủ đề', bb: 1 }, { k: 'nhom_ap_dung', nhan: 'Nhóm áp dụng' }, { k: 'ten_mau', nhan: 'Tên mẫu', bb: 1 }, { k: 'noi_dung', nhan: 'Nội dung', bb: 1, bien: 1 }, { k: 'thu_tu', nhan: 'Thứ tự', kieu: 'so' }, { k: 'ghi_chu', nhan: 'Ghi chú' }] },
     MAU_SAU_TIEM: { ten: 'Mẫu CSKH sau tiêm', moTa: 'Mẫu tin chăm sóc sau tiêm (hỏi thăm, dặn dò theo vaccine).', cheDo: 'BO_SUNG', cot: [
-      { k: 'ma_mau', nhan: 'Mã mẫu', bb: 1 }, { k: 'nhom_mau', nhan: 'Nhóm mẫu' }, { k: 'vaccine', nhan: 'Vaccine' }, { k: 'thoi_diem', nhan: 'Thời điểm' }, { k: 'doi_tuong', nhan: 'Đối tượng' }, { k: 'kenh', nhan: 'Kênh' }, { k: 'dieu_kien', nhan: 'Điều kiện sử dụng', alias: ['dieu kien'] },
-      { k: 'noi_dung', nhan: 'Nội dung tin nhắn', alias: ['noi dung', 'noi dung tin'], bb: 1, bien: 1 }, { k: 'ten_mau', nhan: 'Tên mẫu' }] },
+      { k: 'ma_mau', nhan: 'Mã mẫu' }, { k: 'nhom_mau', nhan: 'Nhóm mẫu' }, { k: 'vaccine', nhan: 'Vaccine' }, { k: 'thoi_diem', nhan: 'Thời điểm' }, { k: 'doi_tuong', nhan: 'Đối tượng' }, { k: 'kenh', nhan: 'Kênh' }, { k: 'dieu_kien', nhan: 'Điều kiện sử dụng', alias: ['dieu kien'] },
+      { k: 'noi_dung', nhan: 'Nội dung tin nhắn', alias: ['noi dung', 'noi dung tin'], bb: 1, bien: 1 }, { k: 'ten_mau', nhan: 'Tên mẫu', bb: 1 }, { k: 'ghi_chu', nhan: 'Ghi chú' }] },
     MAU_CHUNG: { ten: 'Mẫu tin chung', moTa: 'Kho tin nhắn mẫu chung (kết bạn, chăm sóc sau tiêm, vaccine…) dùng tự do.', cheDo: 'THAY_THE', cot: [
       { k: 'ma_tin', nhan: 'Mã tin', alias: ['ma'], bb: 1 }, { k: 'ten_ngan', nhan: 'Tên ngắn' }, { k: 'chu_de', nhan: 'Chủ đề' }, { k: 'ap_dung', nhan: 'Áp dụng cho', alias: ['ap dung'] }, { k: 'noi_dung', nhan: 'Nội dung', alias: ['tin nhan'], bb: 1, bien: 1 },
       { k: 'ma_anh', nhan: 'Mã ảnh' }, { k: 'anh_salechat', nhan: 'Ảnh Salechat', alias: ['duong dan anh'] }, { k: 'thu_tu', nhan: 'Thứ tự', kieu: 'so' }, { k: 'ghi_chu', nhan: 'Ghi chú' }] },
@@ -112,7 +112,7 @@
   function parse(loai, aoa) {
     var cfg = CONFIG[loai], cols = cfg.cot, hd = findHeader(aoa, cols);
     var thieu = cols.filter(function (c) { return c.bb && hd.map[c.k] === undefined && !c.tuKy });
-    if (!hd.n || thieu.length) return { loi: 'Không tìm thấy cột bắt buộc: ' + thieu.map(function (c) { return c.nhan }).join(', ') + ' (khớp ' + hd.n + ' cột ở dòng ' + (hd.r + 1) + ')' };
+    if (!hd.n || thieu.length) return { loi: 'Không tìm thấy cột bắt buộc: ' + thieu.map(function (c) { return c.nhan }).join(', ') + ' (khớp ' + hd.n + ' cột ở dòng ' + (hd.r + 1) + '). Các cột đọc được ở dòng đó: ' + (aoa[hd.r] || []).filter(function (v) { return v != null && String(v).trim() !== '' }).slice(0, 12).map(cs).join(' | ') };
     var ky = kyOf(aoa, hd.r), rows = [], boQua = [], cur = {}, prog = 0, curProg = null, sec = null, secCond = '';
     for (var r = hd.r + 1; r < aoa.length; r++) {
       var src = aoa[r] || []; if (emptyRow(src)) continue;
