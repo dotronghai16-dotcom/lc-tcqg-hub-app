@@ -131,7 +131,7 @@ function rest(p){return tok().then(function(t){return http('GET','/rest/v1/'+p,u
 function rpc(n,b){return tok().then(function(t){return http('POST','/rest/v1/rpc/'+n,b,t)}).then(function(r){if(r.status===401)throw {code:'AUTH'};if(r.status>=400){var m=String((r.json&&r.json.message)||'Lỗi hệ thống.'),i=m.indexOf(': ');var c=i>0&&/^[A-Z_]+$/.test(m.slice(0,i))?m.slice(0,i):'INTERNAL';throw {code:c,message:i>0&&c!=='INTERNAL'?m.slice(i+2):m}}return r.json})}
 var ME=null,D=null,loadedAt=0,loading=null;
 function load(force){if(!force&&D&&Date.now()-loadedAt<4000)return Promise.resolve();if(loading)return loading;
- loading=Promise.all([rest('turns?select=*&order=thoi_gian_giao_ban_dau.asc,ma_luot.asc&limit=5000'),rest('customers?select=*&limit=5000'),rest('customer_contacts?select=ma_khach,ma_nlh,quan_he,contact_people(ma_nlh,ho_ten,sdt)&limit=10000'),rest('turn_events?select=*&order=thoi_gian.asc&limit=20000'),rest('interactions?select=*&order=thoi_gian.asc&limit=20000'),rest('catalog?select=*&order=thu_tu.asc'),rest('accounts?select=ma_tk,ho_ten,vai_tro,id_shop,email,trang_thai'),rest('shops?select=*'),rest('runs?select=*'),rest('msg_templates?select=*&order=ma.asc'),rest('promos?select=*&order=ma.asc'),rest('vaccine_rules?select=*&order=tu_ngay.asc,ma.asc'),rest('message_log?select=ma_tt,ma_luot,ma_mau,kenh,da_sua&limit=20000')]).then(function(a){
+ loading=Promise.all([rest('turns?select=*&order=thoi_gian_giao_ban_dau.asc,ma_luot.asc&limit=5000'),rest('customers?select=*&limit=5000'),rest('customer_contacts?select=ma_khach,ma_nlh,quan_he,contact_people(ma_nlh,ho_ten,sdt)&limit=10000'),rest('turn_events?select=*&order=thoi_gian.asc&limit=20000'),rest('interactions?select=*&order=thoi_gian.asc&limit=20000'),rest('catalog?select=*&order=thu_tu.asc'),rest('accounts?select=ma_tk,ho_ten,vai_tro,id_shop,email,trang_thai,mk_doi_luc,dang_nhap_luc'),rest('shops?select=*'),rest('runs?select=*'),rest('msg_templates?select=*&order=ma.asc'),rest('promos?select=*&order=ma.asc'),rest('vaccine_rules?select=*&order=tu_ngay.asc,ma.asc'),rest('message_log?select=ma_tt,ma_luot,ma_mau,kenh,da_sua&limit=20000')]).then(function(a){
   var d={turns:a[0],cus:{},links:{},events:a[3],tt:a[4],dm:{},acc:{},shops:{},runs:{},tpl:a[9],promos:a[10],rules:a[11],mlog:a[12]};
   a[1].forEach(function(c){d.cus[c.ma_khach]=c});a[2].forEach(function(x){var p=x.contact_people||{};(d.links[x.ma_khach]=d.links[x.ma_khach]||[]).push({ma_nlh:x.ma_nlh,ho_ten:p.ho_ten||'',sdt:p.sdt||'',quan_he:x.quan_he||''})});
   a[5].forEach(function(c){d.dm[c.ma_dm]=c});a[6].forEach(function(x){d.acc[x.ma_tk]=x});a[7].forEach(function(x){d.shops[x.id_shop]=x});a[8].forEach(function(x){d.runs[x.ma_lan_pc]=x});
@@ -271,6 +271,6 @@ addEventListener('resize',function(){if(ME&&D)render()});
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&ME&&D&&Date.now()-loadedAt>30000)load(true).then(render,function(){})});
 start();
 </script>
-<script src="app.js?v=20261124c"></script>
+<script src="app.js?v=20261124d"></script>
 </body>
 </html>
