@@ -5,7 +5,7 @@
   var X = ASM.X, U = X.u, head = U.head, sel = U.sel, ST = U.ST;
   IC.shield = '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>';
   var VAI = { QUAN_LY: 'Quản lý', NHAN_VIEN: 'Nhân viên' }, TT = { HOAT_DONG: 'Đang hoạt động', NGUNG: 'Đã khóa' };
-  var AS = { tk: { shop: '', st: 'HOAT_DONG', q: '' }, tl: { tab: 'mau', nhom: '', st: 'ACTIVE', q: '' }, pd: { tv: '3', tu: '30', tg: '' } };
+  var AS = { tk: { shop: '', st: 'HOAT_DONG', q: '' }, tl: { tab: 'kho', nhom: '', st: 'ACTIVE', q: '' }, pd: { tv: '3', tu: '30', tg: '' } };
   var NHOM = { KH_MOI: 'KH mới', CSKH_SAU_TIEM: 'CSKH sau tiêm', BAU_NHI: 'Bầu – Nhi', CHUNG: 'Chung', NGUY_CO: 'Nguy cơ', GOI: 'Lời nói khi gọi' };
   var BUOC = { D: 'D', D1: 'D+1', D3: 'D+3', D7: 'D+7', TRE: 'Trễ lịch' };
   var TPLST = { DANG_DUNG: ['t-ok', 'Đang dùng'], CHO_DUYET: ['t-late', 'Chờ duyệt'], DA_THAY: ['t-new', 'Đã thay'], NGUNG_DUNG: ['t-bad', 'Ngừng dùng'] };
@@ -90,9 +90,9 @@
   /* ================= THƯ VIỆN ================= */
   function used(ma) { return (D.mlog || []).filter(function (x) { return x.ma_mau === ma }).length }
   function pgTl() {
-    var f = AS.tl, h = head('Thư viện', 'Câu chữ nhân viên dùng khi nhắn và gọi: mẫu tin, khuyến mãi. Mẫu phải được duyệt mới hiện cho nhân viên. Phác đồ (khi nào tiêm gì) ở mục riêng.', f.tab === 'mau' ? '<button class="btn b1" id="tl-new">+ Thêm mẫu</button>' : '<button class="btn b1" id="km-new">+ Thêm khuyến mãi</button>');
-    h += '<div class="chips"><button class="chip ' + (f.tab === 'mau' ? 'on' : '') + '" data-tltab="mau">Mẫu tin nhắn &amp; lời gọi<em>' + D.tpl.length + '</em></button><button class="chip ' + (f.tab === 'km' ? 'on' : '') + '" data-tltab="km">Khuyến mãi<em>' + D.promos.length + '</em></button></div>';
-    return h + (f.tab === 'mau' ? tplList() : promoList())
+    var f = AS.tl, h = head('Thư viện', f.tab === 'kho' ? 'Nội dung nhân viên dùng khi nhắn và gọi. Nạp từ file Excel của công ty: xem trước, lưu chờ duyệt, duyệt thì nhân viên mới thấy. Phác đồ (khi nào tiêm gì) ở mục riêng, sẽ bổ sung sau.' : 'Mẫu soạn tay: bản tạm, đang dùng cho màn Gợi ý tin nhắn cho tới khi nối kho Excel ở Đợt 3.', f.tab === 'mau' ? '<button class="btn b1" id="tl-new">+ Thêm mẫu</button>' : f.tab === 'km' ? '<button class="btn b1" id="km-new">+ Thêm khuyến mãi</button>' : '');
+    h += '<div class="chips"><button class="chip ' + (f.tab === 'kho' ? 'on' : '') + '" data-tltab="kho">Kho từ Excel</button><button class="chip ' + (f.tab === 'mau' ? 'on' : '') + '" data-tltab="mau">Mẫu soạn tay (tạm)<em>' + D.tpl.length + '</em></button><button class="chip ' + (f.tab === 'km' ? 'on' : '') + '" data-tltab="km">Khuyến mãi soạn tay (tạm)<em>' + D.promos.length + '</em></button></div>';
+    return h + (f.tab === 'kho' ? ASMLIB.page() : f.tab === 'mau' ? tplList() : promoList())
   }
   function tplList() {
     var f = AS.tl, ql = f.q.trim().toLowerCase(), all = D.tpl;
@@ -144,7 +144,7 @@
   function pgPd() {
     var t = AS.pd, days = Math.round(Number(t.tv || 0) * Number(t.tu)), due = MSG.dueRules(days, t.tg);
     var h = head('Phác đồ vaccine', 'Quy tắc "khi nào": vaccine nào đến tuổi nào, tính từ ngày sinh. App dùng để gợi ý "vaccine đã đến tuổi" trong tin nhắn của nhân viên. Dòng chỉ hiện cho nhân viên khi đang dùng.', '<button class="btn b1" id="pd-new">+ Thêm dòng phác đồ</button>');
-    h += '<div class="ro" style="background:var(--warn-bg);color:var(--warn)"><b>Dữ liệu mẫu minh họa.</b> Các độ tuổi bên dưới chưa phải phác đồ chuẩn đã duyệt. Bác sĩ cần nhập và duyệt phác đồ thật trước khi dùng cho khách thật; dòng "Chờ duyệt" không hiện cho nhân viên.</div>';
+    h += '<div class="ro"><b>Menu giữ chỗ.</b> Anh sẽ gửi dữ liệu phác đồ chuẩn, khi đó tôi làm nút nạp Excel cho khu này giống các khu trong Thư viện (có xem trước, chờ duyệt, bác sĩ duyệt).</div><div class="ro" style="background:var(--warn-bg);color:var(--warn)"><b>Dữ liệu mẫu minh họa.</b> Các độ tuổi bên dưới chưa phải phác đồ chuẩn đã duyệt. Bác sĩ cần nhập và duyệt phác đồ thật trước khi dùng cho khách thật; dòng "Chờ duyệt" không hiện cho nhân viên.</div>';
     h += '<div class="card"><h2>Thử nhanh: bé ở tuổi này thì gợi ý những vaccine nào?</h2><div class="row" style="flex-wrap:wrap"><input id="pd-tv" type="number" min="0" value="' + esc(t.tv) + '" style="width:90px;border:1px solid var(--line);border-radius:12px;padding:10px;min-height:44px;background:var(--card)">' + sel('pd-tu', [['1', 'ngày'], ['7', 'tuần'], ['30', 'tháng'], ['365', 'năm']], t.tu) + sel('pd-tg', [['', 'Cả nam và nữ'], ['M', 'Nam'], ['F', 'Nữ']], t.tg) + '<span class="meta">= ' + days + ' ngày tuổi</span></div><div style="margin-top:10px">' + (due.length ? due.map(function (r) { return tag('t-today', r.ten) }).join('') : '<span class="meta">Chưa có vaccine nào đang dùng ở tuổi này.</span>') + '</div></div>';
     h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Vaccine</th><th>Từ tuổi</th><th>Đến tuổi</th><th>Giới tính</th><th>Phác đồ (số mũi, khoảng cách)</th><th>Ghi chú cho nhân viên</th><th>Trạng thái</th><th style="min-width:170px"></th></tr></thead><tbody>' + D.rules.map(function (r) {
       var b = function (k, tx) { return '<button class="btn b3" data-pd' + k + '="' + esc(r.ma) + '" style="min-height:36px;font-size:13px">' + tx + '</button>' };
@@ -170,6 +170,7 @@
   X.pages.a_tk = pgTk; X.pages.a_tl = pgTl; X.pages.a_pd = pgPd;
   X.binders.push(function (on) {
     var all = function (s, fn) { [].slice.call(document.querySelectorAll(s)).forEach(fn) }, byAcc = function (ma) { return D.acc[ma] };
+    if (AS.tl.tab === 'kho' && S.page === 'a_tl' && window.ASMLIB) ASMLIB.bind(on);
     on('#tk-new', 'onclick', function () { accModal(null) });
     on('#tk-q', 'oninput', function (x) { AS.tk.q = x.value; var p = x.selectionStart; render(); var n = $('#tk-q'); n.focus(); n.setSelectionRange(p, p) });
     on('#tk-shop', 'onchange', function (x) { AS.tk.shop = x.value; render() });
