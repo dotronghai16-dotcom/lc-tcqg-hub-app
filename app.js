@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125s) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125t) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -271,7 +271,7 @@ var PGR = (function () {
 var ASM = (function () {
   IC.upload = '<path d="M12 16V4m0 0-4 4m4-4 4 4M5 20h14"/>'; IC.download = '<path d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/>'; IC.swap = '<path d="M7 7h12l-3-3M17 17H5l3 3"/>'; IC.book = '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/>'; IC.shop = '<path d="M4 9 5.5 4h13L20 9M4 9h16v11H4zM9 20v-6h6v6"/>';
   IC.more = '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'; IC.shield = '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>';
-  var NAV = [['a_tq', 'Tổng quan', 'home'], ['a_kho', 'Kho Data', 'list'], ['a_pc', 'Phân công', 'swap'], ['a_nap', 'Nạp Data', 'upload'], ['a_bc', 'Kết quả & xuất', 'chart'], ['a_tk', 'Nhân sự & tài khoản', 'team'], ['a_tl', 'Thư viện', 'book'], ['a_pd', 'Phác đồ', 'shield'], ['a_nv', 'Kiểm tra gọi & nhắn', 'shield'], ['acc', 'Của tôi', 'user']];
+  var NAV = [['a_tq', 'Tổng quan', 'home'], ['a_kho', 'Kho Data', 'list'], ['a_pc', 'Phân công', 'swap'], ['a_nap', 'Nạp Data', 'upload'], ['a_bc', 'Kết quả & xuất', 'chart'], ['a_tk', 'Nhân sự & tài khoản', 'team'], ['a_tl', 'Thư viện', 'book'], ['a_pd', 'Phác đồ', 'shield'], ['a_nv', 'Kiểm tra gọi & nhắn', 'shield'], ['a_cf', 'Cấu hình ghi nhận', 'shield'], ['acc', 'Của tôi', 'user']];
   var MOBILE = ['a_tq', 'a_kho', 'a_pc', 'a_tk'];
   var X = { pages: {}, binders: [], u: {} };
   var ST = { shop: '', band: '', f: '', q: '', pg: 1, sel: {}, selAll: false, imp: null, bcShop: '', bcSt: '' };
@@ -1272,6 +1272,53 @@ var ASMIMG = (function () {
   X.pages.a_nv = pgNv;
   X.binders.push(function (on) {
     on('#nv-go', 'onclick', function () { var t = AS.nv; t.tu = $('#nv-tu').value; t.den = $('#nv-den').value; if (!t.tu || !t.den || t.tu > t.den) { toast('Chọn khoảng ngày hợp lệ.', 0, 1); return } t.rows = null; t.err = ''; t.loading = false; render() })
+  });
+
+
+  /* ================= CẤU HÌNH GHI NHẬN KẾT QUẢ (ASM tự chỉnh; máy chủ kiểm khoảng giá trị) ================= */
+  var CF_KEYS = [
+    ['max_vong', 'Số lần xử lý tối đa cho một khách', 'lần, từ 1 đến 10', 1, 10],
+    ['max_vong_ngay', 'Số lần xử lý tối đa trong một ngày', 'lần, 0 = không giới hạn', 0, 10],
+    ['min_giay_goi', 'Thời gian tối thiểu từ lúc bấm Gọi đến lúc lưu', 'giây, từ 0 đến 600', 0, 600],
+    ['bat_buoc_bam_goi', 'Bắt buộc bấm Gọi trong app trước khi lưu', '1 = bắt buộc, 0 = không', 0, 1],
+    ['huy_giay', 'Thời gian được hủy lần ghi vừa lưu', 'giây, từ 0 đến 3600', 0, 3600]
+  ];
+  var CF_FLAGS = [['mien_nhan', 'Miễn nhắn'], ['ghi_chu_bb', 'Bắt buộc ghi chú'], ['can_hen', 'Cần ngày hẹn'], ['can_vaccine', 'Cần vaccine'], ['can_ngay_tiem', 'Cần ngày tiêm'], ['can_noi_tiem', 'Cần nơi tiêm'], ['can_ly_do', 'Cần lý do']];
+  var CF_GRP = { chua: 'Chưa liên lạc được', duoc: 'Đã liên lạc được', cuoi: 'Kết thúc lượt' };
+  function pgCf() {
+    var h = head('Cấu hình ghi nhận', 'Quy tắc khi nhân viên ghi kết quả gọi và nhắn. Thay đổi có hiệu lực ngay cho mọi nhân viên (nhân viên cần tải lại trang).', '');
+    h += '<div class="card"><h2>Quy tắc chung</h2>' + CF_KEYS.map(function (k) {
+      return '<div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:220px"><b>' + k[1] + '</b><div class="meta">' + k[2] + '</div></div><input type="number" class="cf-n" data-k="' + k[0] + '" min="' + k[3] + '" max="' + k[4] + '" value="' + cfgN(k[0], 0) + '" style="width:90px"><button class="btn b2 cf-ns" data-k="' + k[0] + '">Lưu</button></div>'
+    }).join('') + '</div>';
+    ['chua', 'duoc', 'cuoi'].forEach(function (g) {
+      var L = D.rr.filter(function (r) { return r.nhom === g }).sort(function (a, b) { return a.thu_tu - b.thu_tu });
+      if (!L.length) return;
+      h += '<div class="card"><h2>' + CF_GRP[g] + '</h2><div class="meta" style="margin-bottom:6px">Mã, nhóm và việc có kết thúc lượt hay không là cố định, không sửa ở đây.</div>' + L.map(function (r) {
+        return '<div class="cf-r" data-ma="' + esc(r.ma) + '" style="padding:10px 0;border-top:1px solid var(--line)"><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><input class="cf-ten" value="' + esc(r.ten) + '" maxlength="60" style="flex:1;min-width:180px">' + (r.la_cuoi ? tag('t-today', 'Kết thúc lượt') : '') + '<label class="meta"><input type="checkbox" class="cf-dd"' + (r.dang_dung ? ' checked' : '') + '> Đang dùng</label></div>' +
+          '<div class="row" style="gap:6px 14px;flex-wrap:wrap;margin:8px 0">' + CF_FLAGS.map(function (f) { return '<label class="meta"><input type="checkbox" class="cf-f" data-f="' + f[0] + '"' + (r[f[0]] ? ' checked' : '') + '> ' + f[1] + '</label>' }).join('') + '</div>' +
+          '<div class="row" style="gap:8px;align-items:center"><input class="cf-gy" placeholder="Gợi ý ghi chú cho nhân viên" maxlength="200" value="' + esc(r.goi_y_ghi_chu || '') + '" style="flex:1"><button class="btn b1 cf-rs">Lưu</button></div></div>'
+      }).join('') + '</div>'
+    });
+    return h
+  }
+  X.pages.a_cf = pgCf;
+  X.binders.push(function () {
+    [].forEach.call(document.querySelectorAll('.cf-ns'), function (b) {
+      b.onclick = function () {
+        var k = b.getAttribute('data-k'), v = document.querySelector('.cf-n[data-k="' + k + '"]').value;
+        if (v === '' || isNaN(Number(v))) { toast('Nhập một số.', 0, 1); return }
+        b.disabled = true;
+        rpc('u_asm_cfg_save', { p_khoa: k, p_gia_tri: parseInt(v, 10) }).then(function () { done('Đã lưu') }, function (e) { b.disabled = false; toast((e && e.message) || 'Không lưu được.', 0, 1) })
+      }
+    });
+    [].forEach.call(document.querySelectorAll('.cf-rs'), function (b) {
+      b.onclick = function () {
+        var box = b.closest('.cf-r'), f = function (n) { var e = box.querySelector('.cf-f[data-f="' + n + '"]'); return !!(e && e.checked) };
+        b.disabled = true;
+        rpc('u_asm_rr_save', { p_ma: box.getAttribute('data-ma'), p_ten: box.querySelector('.cf-ten').value, p_mien_nhan: f('mien_nhan'), p_ghi_chu_bb: f('ghi_chu_bb'), p_can_hen: f('can_hen'), p_can_vaccine: f('can_vaccine'), p_can_ngay_tiem: f('can_ngay_tiem'), p_can_noi_tiem: f('can_noi_tiem'), p_can_ly_do: f('can_ly_do'), p_goi_y: box.querySelector('.cf-gy').value, p_dang_dung: box.querySelector('.cf-dd').checked })
+          .then(function () { done('Đã lưu') }, function (e) { b.disabled = false; toast((e && e.message) || 'Không lưu được.', 0, 1) })
+      }
+    })
   });
 
   /* ================= đăng ký trang và sự kiện ================= */
