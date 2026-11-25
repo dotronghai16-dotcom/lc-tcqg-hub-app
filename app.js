@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125v) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125x) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -1464,7 +1464,7 @@ var MSG = (function () {
 .lbtn{background:none;border:0;text-align:left;color:inherit;padding:0;cursor:pointer;font:inherit}
 .sdtbox{display:flex;gap:8px;padding:2px 14px 12px 64px}.sdtbox input,.fvi{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);min-height:44px;font:inherit;color:var(--ink)}.sdtbox input{flex:1;min-width:0}.fvi{display:block;width:100%;margin-top:6px}
 .mp.zero{background:var(--warn-bg);color:var(--warn)}.mp.lkw{white-space:normal;line-height:1.35;border-radius:12px;text-align:left;max-width:100%}
-.lkt{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}.lkt summary{list-style:none;cursor:pointer;padding:11px 13px;display:grid;gap:3px}.lkt summary::-webkit-details-marker{display:none}.lkt summary b{font-size:14.5px;line-height:1.35}.lkt summary small{color:var(--muted);font-size:12.5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.lkt[open] summary small{display:none}.lkx{padding:0 13px 6px;font-size:14px;line-height:1.55}.lkt .mlink{margin:2px 13px 11px}
+.lkdp{margin:2px 0 10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.lkdi{font-size:13px;line-height:1.45;margin-bottom:8px}.lkch{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}.lkchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:8px 12px;font-weight:600;font-size:14px;background:var(--card)}.lkchip:has(input:checked){background:var(--teal);border-color:var(--teal);color:#fff}.lkdt{display:grid;gap:4px;margin-bottom:8px}.lkdt input{width:100%}.lkres2{font-size:13.5px;line-height:1.5;color:var(--ink)}.lkt{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}.lkt summary{list-style:none;cursor:pointer;padding:11px 13px;display:grid;gap:3px}.lkt summary::-webkit-details-marker{display:none}.lkt summary b{font-size:14.5px;line-height:1.35}.lkt summary small{color:var(--muted);font-size:12.5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.lkt[open] summary small{display:none}.lkx{padding:0 13px 6px;font-size:14px;line-height:1.55}.lkt .mlink{margin:2px 13px 11px}
 .lkn{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.lkn::-webkit-scrollbar{display:none}.lkn button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:7px 12px;font-size:13px;font-weight:600;min-height:36px}
 .lkage{display:grid;grid-template-columns:1fr 1.3fr;gap:8px;margin-bottom:6px}.lkage select,.lkage input{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:44px;color:var(--ink);min-width:0;font-size:15px}.mcard.vac .mtags{margin-top:0}.mcard.vac .mc1{align-items:center}
 .psw{display:flex;gap:6px;margin-top:10px}.psw button{flex:1;border:1.5px solid var(--line);background:var(--card);border-radius:13px;min-height:42px;font-weight:600;font-size:13.5px;color:var(--ink);transition:border-color .15s,background .15s}.psw button.on{border-color:var(--teal);background:var(--tint);color:var(--teal-d)}
@@ -2100,22 +2100,93 @@ var MSG = (function () {
   /* Tab "Theo tuổi": bé/khách ở tuổi này tiêm được những vaccine nào hiện tại */
   function lkAgeView() {
     var rows = lkRows(), pdOn_ = rows.length && rows[0].src === 'PD', pa = lkParseAge(LK.am, LK.av), mode = LK_MODES.filter(function (m) { return m[0] === LK.am })[0];
-    var h = '<div class="msheet">' + lkHead(lkSubline(rows)) + '<div class="mbody"><div class="lkage"><select id="lam" aria-label="Cách nhập tuổi">' + LK_MODES.map(function (m) { return '<option value="' + m[0] + '"' + (m[0] === LK.am ? ' selected' : '') + '>' + esc(m[1]) + '</option>' }).join('') + '</select>' + (LK.am === 'ngay' ? '<input id="lav" type="date" min="1900-01-01" max="' + lkIso(new Date()) + '" value="' + esc(LK.av) + '" aria-label="Ngày sinh">' : '<input id="lav" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" placeholder="' + esc(mode[2]) + '" value="' + esc(LK.av) + '" aria-label="' + esc(mode[1]) + '" autocomplete="off">') + '</div>' + lkDoneBox(rows, pdOn_);
+    var h = '<div class="msheet">' + lkHead(lkSubline(rows)) + '<div class="mbody"><div class="lkage"><select id="lam" aria-label="Cách nhập tuổi">' + LK_MODES.map(function (m) { return '<option value="' + m[0] + '"' + (m[0] === LK.am ? ' selected' : '') + '>' + esc(m[1]) + '</option>' }).join('') + '</select>' + (LK.am === 'ngay' ? '<input id="lav" type="date" min="1900-01-01" max="' + lkIso(new Date()) + '" value="' + esc(LK.av) + '" aria-label="Ngày sinh">' : '<input id="lav" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" placeholder="' + esc(mode[2]) + '" value="' + esc(LK.av) + '" aria-label="' + esc(mode[1]) + '" autocomplete="off">') + '</div>' + lkDoneBox(rows, pdOn_, pa);
     h += '<div id="lkres">' + lkAgeBody(rows, pdOn_, pa) + '</div></div></div>'; lkHost.innerHTML = h; lkBindHead();
     var am = lkHost.querySelector('#lam'); am.onchange = function () { LK.am = am.value; LK.av = ''; lkDraw(); var n = lkHost.querySelector('#lav'); if (n) n.focus() };
-    var av = lkHost.querySelector('#lav'), tm = null, upd = function () { LK.av = av.value; var r = lkHost.querySelector('#lkres'); if (r) r.innerHTML = lkAgeBody(lkRows(), true, lkParseAge(LK.am, LK.av)) };
+    var av = lkHost.querySelector('#lav'), tm = null, upd = function () { LK.av = av.value; var pa2 = lkParseAge(LK.am, LK.av), r = lkHost.querySelector('#lkres'); if (r) r.innerHTML = lkAgeBody(lkRows(), true, pa2); lkDoneRefresh(pa2) };
     av.oninput = function () { clearTimeout(tm); tm = setTimeout(upd, 250) }; av.onchange = function () { clearTimeout(tm); upd() };
-    var dn = lkHost.querySelector('#lkdone'); if (dn) { dn.ontoggle = function () { LK.doneOpen = dn.open }; [].forEach.call(dn.querySelectorAll('input[data-d]'), function (c) { c.onchange = function () { var k = c.getAttribute('data-d'); if (c.checked) LK.done[k] = 1; else delete LK.done[k]; var n = Object.keys(LK.done).length, sm = dn.querySelector('summary b'); if (sm) sm.textContent = 'Khách đã tiêm vaccine nào?' + (n ? ' (' + n + ')' : ''); upd() } }) }
+    var dn = lkHost.querySelector('#lkdone'); if (dn) { dn.ontoggle = function () { LK.doneOpen = dn.open }; dn.onchange = function (e) { lkDoneChange(e.target, upd) } }
     if (!LK.av && !LK.sel && LK.tab === 'tuoi' && LK.am !== 'ngay') av.focus()
   }
   function lkIso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) }
   function lkTok(benh) { return String(benh || '').split(/[;,\/+\n]|\s-\s/).map(function (x) { return { k: nv(x).trim(), t: x.trim() } }).filter(function (x) { return x.k.length > 2 }) }
   function lkDoneSet(rows) { var o = {}; rows.forEach(function (r) { if (LK.done[r.id]) lkTok(r.benh).forEach(function (x) { o[x.k] = 1 }) }); return o }
   function lkOverlap(r, dset) { var tk = lkTok(r.benh), hit = tk.filter(function (x) { return dset[x.k] }); return hit.length ? { full: hit.length === tk.length, names: hit.map(function (x) { return x.t }) } : null }
-  function lkDoneBox(rows, on) {
-    if (!on) return ''; var n = Object.keys(LK.done).length, by = {}, ord = [];
-    rows.forEach(function (r) { var g = oneLine(r.d.nhom_vaccine) || 'Khác'; if (!by[g]) { by[g] = []; ord.push(g) } by[g].push(r) });
-    return '<details class="lkt" id="lkdone"' + (LK.doneOpen ? ' open' : '') + '><summary><b>Khách đã tiêm vaccine nào?' + (n ? ' (' + n + ')' : '') + '</b><small>Tích vaccine khách đã tiêm để loại trừ và gợi ý vaccine còn phù hợp</small></summary><div style="padding:0 10px 10px;max-height:240px;overflow:auto">' + ord.map(function (g) { return '<div class="mh" style="margin-top:8px">' + esc(g) + '</div>' + by[g].map(function (r) { return '<label style="display:flex;gap:8px;align-items:center;padding:6px 0"><input type="checkbox" data-d="' + esc(r.id) + '"' + (LK.done[r.id] ? ' checked' : '') + '> ' + esc(r.name) + '</label>' }).join('') }).join('') + '</div></details>'
+  /* ---- số mũi & lịch mũi tiếp theo (đọc từ cột so_mui, khoang_cach_ngay của Phác đồ; chỉ tính ngày khi cách viết rõ ràng) ---- */
+  function lkSoMui(v) {
+    v = String(v == null ? '' : v).trim(); var m = /^(\d+)(?:\s*-\s*(\d+))?$/.exec(v);
+    if (m) return { n: Math.min(6, +(m[2] || m[1])), amb: !!m[2] && m[2] !== m[1] };
+    var all = [], re = /(\d+)\s*(?:mũi|liều|\()/g, x; while ((x = re.exec(v))) all.push(+x[1]);
+    if (!all.length) { var f = /(\d+)/.exec(v); return { n: Math.min(6, f ? +f[1] : 1), amb: true } }
+    return { n: Math.min(6, Math.max.apply(null, all)), amb: all.some(function (a) { return a !== all[0] }) }
+  }
+  function lkGaps(row, n) {
+    var t = oneLine(row.d.khoang_cach_ngay || ''); if (n < 2 || !t) return null;
+    var lab = /^(Lịch cơ bản|PĐ tiêu chuẩn|Lịch thường quy)\s*:\s*/i.exec(t); if (lab) t = t.slice(lab[0].length).split(';')[0].trim();
+    else if (/[;]|hoặc|\(\s*[<>=]|\d\s*[mt]\b/.test(t)) return null;
+    var m = /^(\d+(?:\s*-\s*\d+)+)\s*(tháng|ngày)/.exec(t), nums, i, g = [];
+    if (m) {
+      nums = m[1].split(/\s*-\s*/).map(Number);
+      if (nums[0] === 0) { if (nums.length !== n) return null; for (i = 1; i < nums.length; i++) g.push([nums[i] - nums[i - 1], m[2]]); return g }
+      if (nums.length !== n - 1) return null; return nums.map(function (x) { return [x, m[2]] })
+    }
+    m = /^(?:cách\s*)?(\d+)\s*(ngày|tháng)/.exec(t); if (!m) return null;
+    for (i = 1; i < n; i++) g.push([+m[1], m[2]]); return g
+  }
+  function lkAddGap(d, gp) { var x = new Date(d.getTime()); if (gp[1] === 'tháng') x.setMonth(x.getMonth() + gp[0]); else x.setDate(x.getDate() + gp[0]); return x }
+  function lkFmtD(d) { return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear() }
+  function lkDoseInfo(row, st) {
+    var sm = lkSoMui(row.d.so_mui), n = sm.n, got = Object.keys(st.m).map(Number).filter(function (k) { return k >= 1 && k <= n }), c = got.length;
+    var gaps = sm.amb ? null : lkGaps(row, n), txt = '', short = '';
+    if (c >= n) { txt = '<b>Đã đủ ' + n + ' mũi</b> theo phác đồ.' + (/nhắc/i.test(row.d.khoang_cach_ngay || '') ? ' ' + esc(oneLine(row.d.khoang_cach_ngay)) : ''); short = 'đã tiêm đủ ' + n + ' mũi' }
+    else {
+      var nx = 1; while (st.m[nx]) nx++; short = 'đã tiêm ' + c + '/' + n + ' · còn mũi ' + nx;
+      txt = '<b>Đã tiêm ' + c + '/' + n + ' mũi. Mũi tiếp theo: mũi ' + nx + '.</b>';
+      if (nx === 1) txt += ' Chưa tiêm mũi nào.';
+      else if (gaps && gaps[nx - 2]) {
+        var gp = gaps[nx - 2], gtxt = gp[0] + ' ' + gp[1];
+        if (st.d) { var ld = new Date(st.d + 'T00:00:00'), due = lkAddGap(ld, gp), late = due.getTime() < Date.now(); txt += ' Cách mũi trước ' + esc(gtxt) + ': <b>' + (late ? 'đã đến hạn từ ' : 'từ ') + esc(lkFmtD(due)) + '</b> (dự kiến, bác sĩ xác nhận).'; short += late ? ' · đã đến hạn' : ' · từ ' + lkFmtD(due) }
+        else txt += ' Cách mũi trước ' + esc(gtxt) + '. Chọn ngày tiêm mũi gần nhất để tính ngày.'
+      } else if (c) txt += ' Khoảng cách tùy phác đồ, xem mô tả phía trên.'
+    }
+    if (sm.amb) txt += ' <span class="meta">Số mũi tùy độ tuổi hoặc lịch, hãy đối chiếu phác đồ phía trên.</span>';
+    return { html: txt, short: short, n: n }
+  }
+  function lkDosePanel(row) {
+    var st = LK.done[row.id], inf = lkDoseInfo(row, st), d = row.d, n = inf.n, chips = '';
+    for (var k = 1; k <= n; k++) chips += '<label class="lkchip"><input type="checkbox" data-m="' + k + '"' + (st.m[k] ? ' checked' : '') + '>Mũi ' + k + '</label>';
+    return '<div class="lkdp" data-p="' + esc(row.id) + '"><div class="lkdi">' + (d.noi_dung_tu_van ? '<div>' + esc(oneLine(d.noi_dung_tu_van)) + '</div>' : '') + (d.khoang_cach_ngay ? '<div class="meta">Khoảng cách: ' + esc(oneLine(d.khoang_cach_ngay)) + '</div>' : '') + '</div>' +
+      '<div class="lkch"><span class="meta">Mũi đã tiêm:</span>' + chips + '</div>' +
+      '<label class="lkdt"><span class="meta">Ngày tiêm mũi gần nhất (nếu biết)</span><input type="date" data-dd max="' + lkIso(new Date()) + '" value="' + esc(st.d || '') + '"></label>' +
+      '<div class="lkres2">' + inf.html + '</div></div>'
+  }
+  function lkDoneChange(el, upd) {
+    if (!el || !el.getAttribute) return; var dn = lkHost.querySelector('#lkdone'), pn = el.closest ? el.closest('.lkdp') : null;
+    if (el.hasAttribute('data-d')) {
+      var id = el.getAttribute('data-d'), lab = el.closest('label'), row = lkRows().filter(function (r) { return r.id === id })[0];
+      if (el.checked && row) { LK.done[id] = { m: {}, d: '' }; lab.insertAdjacentHTML('afterend', lkDosePanel(row)) }
+      else { delete LK.done[id]; var old = dn.querySelector('.lkdp[data-p="' + id + '"]'); if (old) old.remove() }
+      var n = Object.keys(LK.done).length, sm = dn.querySelector('summary b'); if (sm) sm.textContent = 'Khách đã tiêm vaccine nào?' + (n ? ' (' + n + ')' : ''); upd(); return
+    }
+    if (pn && (el.hasAttribute('data-m') || el.hasAttribute('data-dd'))) {
+      var pid = pn.getAttribute('data-p'), st = LK.done[pid], rw = lkRows().filter(function (r) { return r.id === pid })[0]; if (!st || !rw) return;
+      if (el.hasAttribute('data-m')) { var k = +el.getAttribute('data-m'); if (el.checked) st.m[k] = 1; else delete st.m[k] } else st.d = el.value || '';
+      pn.querySelector('.lkres2').innerHTML = lkDoseInfo(rw, st).html; upd()
+    }
+  }
+  function lkDoneList(rows, pa) {
+    var ok = pa && !pa.err ? function (r) { return lkElig(r, pa.a) > 0 || LK.done[r.id] } : function () { return true };
+    function group(list) { var by = {}, ord = []; list.forEach(function (r) { var g = oneLine(r.d.nhom_vaccine) || 'Khác'; if (!by[g]) { by[g] = []; ord.push(g) } by[g].push(r) }); return ord.map(function (g) { return '<div class="mh" style="margin-top:8px">' + esc(g) + '</div>' + by[g].map(item).join('') }).join('') }
+    function item(r) { return '<label style="display:flex;gap:8px;align-items:center;padding:6px 0"><input type="checkbox" data-d="' + esc(r.id) + '"' + (LK.done[r.id] ? ' checked' : '') + '> ' + esc(r.name) + '</label>' + (LK.done[r.id] ? lkDosePanel(r) : '') }
+    var a = rows.filter(ok), b = rows.filter(function (r) { return !ok(r) });
+    return group(a) + (b.length ? '<details class="lkt" style="margin-top:10px"><summary><b>Vaccine ngoài độ tuổi hiện tại (' + b.length + ')</b><small>Dùng khi khách đã tiêm hồi nhỏ</small></summary><div style="padding:0 10px 10px">' + group(b) + '</div></details>' : '')
+  }
+  function lkDoneRefresh(pa) {
+    var box = lkHost && lkHost.querySelector('#lkdl'); if (!box) return; var sig = pa && !pa.err ? pa.a.join(',') : ''; if (sig === LK.dsig) return; LK.dsig = sig; box.innerHTML = lkDoneList(lkRows(), pa)
+  }
+  function lkDoneBox(rows, on, pa) {
+    if (!on) return ''; var n = Object.keys(LK.done).length; LK.dsig = pa && !pa.err ? pa.a.join(',') : '';
+    return '<details class="lkt" id="lkdone"' + (LK.doneOpen ? ' open' : '') + '><summary><b>Khách đã tiêm vaccine nào?' + (n ? ' (' + n + ')' : '') + '</b><small>Tích vaccine đã tiêm, chọn các mũi đã tiêm để loại trừ và xem mũi tiếp theo</small></summary><div id="lkdl" style="padding:0 10px 10px;max-height:340px;overflow:auto">' + lkDoneList(rows, pa) + '</div></details>'
   }
   function lkAgeBody(rows, pdOn_, pa) {
     var h = '';
@@ -2141,7 +2212,7 @@ var MSG = (function () {
       h += '<div class="tcard"><div class="tctop"><div class="tt">Khách ' + esc(pa.label) + '</div></div><div class="mtags"><span class="mp gr">' + total + ' vaccine tiêm được hiện tại</span>' + (ord.length ? '<span class="mp">' + ord.length + ' nhóm</span>' : '') + '</div></div>';
       if (pa.approx && LK.am === 'nam') h += '<div class="mnote"><span>Chỉ biết năm sinh nên có vaccine ghi "tùy ngày sinh". Nhập ngày sinh để chính xác.</span></div>';
       h += ord.length ? ord.map(function (nm) { return '<section><div class="mh">' + esc(nm) + ' (' + by[nm].length + ')</div><div class="mlist">' + by[nm].map(card).join('') + '</div></section>' }).join('') : '<div class="mwarn">Chưa có vaccine nào trong phác đồ phù hợp tuổi này.</div>';
-      if (doneL.length) h += '<section><div class="mh">Khách đã tiêm (' + doneL.length + ')</div><div class="mlist">' + doneL.map(function (r) { return lkCard(r, '<span class="mp zero">đã tiêm</span>') }).join('') + '</div></section>';
+      if (doneL.length) h += '<section><div class="mh">Khách đã tiêm (' + doneL.length + ')</div><div class="mlist">' + doneL.map(function (r) { return lkCard(r, '<span class="mp zero">' + esc(lkDoseInfo(r, LK.done[r.id]).short) + '</span>') }).join('') + '</div></section>';
       if (ovL.length) h += '<section><div class="mh">Trùng bệnh với vaccine đã tiêm (' + ovL.length + ')</div><div class="mnote"><span>Cùng phòng bệnh với vaccine khách đã tiêm. App chưa biết khách đã tiêm mấy mũi, nên bác sĩ quyết định tiêm tiếp, tiêm nhắc hay đổi loại.</span></div><div class="mlist">' + ovL.map(function (x) { return lkCard(x.r, '<span class="mp or">' + (x.ov.full ? 'Trùng toàn bộ: ' : 'Trùng một phần: ') + esc(x.ov.names.slice(0, 3).join(', ')) + '</span>') }).join('') + '</div></section>';
       if (soon.length) h += '<section><div class="mh">Sắp đến tuổi (trong 45 ngày)</div><div class="mlist">' + soon.map(function (r) { return lkCard(r) }).join('') + '</div></section>';
       if (offN) h += '<details class="lkt"><summary><b>Tiêm theo chỉ định riêng (' + offN + ')</b><small>Dại, uốn ván, thương hàn, tả, zona, RSV người lớn… không tự gợi ý theo tuổi, nhưng vẫn tra được</small></summary><div style="padding:0 10px 10px"><div class="mlist">' + offOrd.map(function (nm) { return offBy[nm].map(card).join('') }).join('') + '</div></div></details>';
