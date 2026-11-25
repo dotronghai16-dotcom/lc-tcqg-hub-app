@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125l) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125o) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -269,7 +269,7 @@ var PGR = (function () {
 var ASM = (function () {
   IC.upload = '<path d="M12 16V4m0 0-4 4m4-4 4 4M5 20h14"/>'; IC.download = '<path d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/>'; IC.swap = '<path d="M7 7h12l-3-3M17 17H5l3 3"/>'; IC.book = '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/>'; IC.shop = '<path d="M4 9 5.5 4h13L20 9M4 9h16v11H4zM9 20v-6h6v6"/>';
   IC.more = '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'; IC.shield = '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>';
-  var NAV = [['a_tq', 'Tổng quan', 'home'], ['a_kho', 'Kho Data', 'list'], ['a_pc', 'Phân công', 'swap'], ['a_nap', 'Nạp Data', 'upload'], ['a_bc', 'Kết quả & xuất', 'chart'], ['a_tk', 'Nhân sự & tài khoản', 'team'], ['a_tl', 'Thư viện', 'book'], ['a_pd', 'Phác đồ', 'shield'], ['acc', 'Của tôi', 'user']];
+  var NAV = [['a_tq', 'Tổng quan', 'home'], ['a_kho', 'Kho Data', 'list'], ['a_pc', 'Phân công', 'swap'], ['a_nap', 'Nạp Data', 'upload'], ['a_bc', 'Kết quả & xuất', 'chart'], ['a_tk', 'Nhân sự & tài khoản', 'team'], ['a_tl', 'Thư viện', 'book'], ['a_pd', 'Phác đồ', 'shield'], ['a_nv', 'Kiểm tra gọi & nhắn', 'shield'], ['acc', 'Của tôi', 'user']];
   var MOBILE = ['a_tq', 'a_kho', 'a_pc', 'a_tk'];
   var X = { pages: {}, binders: [], u: {} };
   var ST = { shop: '', band: '', f: '', q: '', pg: 1, sel: {}, selAll: false, imp: null, bcShop: '', bcSt: '' };
@@ -1250,6 +1250,28 @@ var ASMIMG = (function () {
     }
   }
 
+
+  /* ================= KIỂM TRA GỌI & NHẮN (mức 1: dấu hiệu để quản lý kiểm tra, KHÔNG phải bằng chứng) ================= */
+  AS.nv = { tu: '', den: '', rows: null, loading: false, err: '' };
+  function isoD(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) }
+  function pgNv() {
+    var t = AS.nv; if (!t.tu) { t.den = isoD(new Date()); t.tu = isoD(new Date(Date.now() - 6 * 864e5)) }
+    if (!t.rows && !t.loading && !t.err) { t.loading = true; rpc('u_asm_nghi_van', { p_tu: t.tu, p_den: t.den }).then(function (r) { t.rows = r || []; t.loading = false; render() }, function (e) { t.loading = false; t.err = (e && e.message) || 'Không tải được báo cáo.'; render() }) }
+    var h = head('Kiểm tra gọi & nhắn', 'Dấu hiệu bất thường trong cách nhân viên ghi nhận kết quả. Đây là công cụ để quản lý kiểm tra, không phải bằng chứng một nhân viên gian lận: có thể nhân viên gọi bằng máy khác hoặc nhắn Zalo trên máy tính.', '');
+    h += '<div class="card"><div class="row" style="flex-wrap:wrap;gap:10px;align-items:end"><label class="field" style="margin:0">Từ ngày<input type="date" id="nv-tu" value="' + esc(t.tu) + '"></label><label class="field" style="margin:0">Đến ngày<input type="date" id="nv-den" value="' + esc(t.den) + '"></label><button class="btn b1" id="nv-go">Xem báo cáo</button></div></div>';
+    if (t.err) return h + '<div class="ro" style="background:var(--bad-bg);color:var(--bad)">' + esc(t.err) + '</div>';
+    if (t.loading || !t.rows) return h + '<div class="card"><div class="meta">Đang tải…</div></div>';
+    var c = function (n, bad) { return Number(n) > 0 ? tag(bad ? 't-late' : 't-new', n) : '<span class="meta">0</span>' };
+    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Nhân viên</th><th>Số lần ghi</th><th>Lưu nhanh<small>dưới 30 giây sau bấm Gọi</small></th><th>Rời app ngắn<small>dưới 5 giây</small></th><th>Dồn dập<small>từ 6 kết quả trong 10 phút</small></th><th>Trùng ghi chú<small>nội dung lặp từ 3 lần</small></th><th>Không nghe, bận<small>% các lần ghi</small></th><th>Ghi cách cũ<small>không có dấu bấm Gọi</small></th></tr></thead><tbody>' +
+      (t.rows.length ? t.rows.map(function (r) { return '<tr><td><b>' + esc(r.ho_ten) + '</b><small>' + esc(r.ma_tk) + '</small></td><td>' + r.tong + '</td><td>' + c(r.nhanh, 1) + '</td><td>' + c(r.roi_ngan, 1) + '</td><td>' + c(r.dot_bien, 1) + '</td><td>' + c(r.trung_ghi_chu, 1) + '</td><td>' + (Number(r.ty_le_khong_nghe) >= 70 && r.tong >= 10 ? tag('t-late', r.ty_le_khong_nghe + '%') : r.ty_le_khong_nghe + '%') + '</td><td>' + c(r.cach_cu, 0) + '</td></tr>' }).join('') : '<tr><td colspan="8" class="meta">Chưa có kết quả nào trong khoảng ngày này.</td></tr>') + '</tbody></table></div></div>';
+    h += '<div class="ro"><b>Cách đọc:</b> một dòng có nhiều ô cam chưa nói lên điều gì chắc chắn, chỉ nên là lý do để quản lý gọi lại vài khách của nhân viên đó, hoặc đối chiếu với dữ liệu tiêm thực tế. App chỉ biết nhân viên đã bấm nút Gọi hoặc Nhắn, không biết cuộc gọi hay tin nhắn có thật sự xảy ra.</div>';
+    return h
+  }
+  X.pages.a_nv = pgNv;
+  X.binders.push(function (on) {
+    on('#nv-go', 'onclick', function () { var t = AS.nv; t.tu = $('#nv-tu').value; t.den = $('#nv-den').value; if (!t.tu || !t.den || t.tu > t.den) { toast('Chọn khoảng ngày hợp lệ.', 0, 1); return } t.rows = null; t.err = ''; t.loading = false; render() })
+  });
+
   /* ================= đăng ký trang và sự kiện ================= */
   X.pages.a_tk = pgTk; X.pages.a_tl = pgTl; X.pages.a_pd = pgPd;
   X.binders.push(function (on) {
@@ -1487,9 +1509,11 @@ var MSG = (function () {
 
   /* ---------- hiện trong chi tiết khách ---------- */
   function counters(t) {
-    var g = 0, m = 0; D.tt.forEach(function (x) { if (x.ma_luot !== t.ma_luot) return; var c = D.dm[x.loai_tuong_tac]; if (!c) return; if (c.ma === 'GOI') g++; else if (isMsg(x)) m++ });
-    return '<span class="tag t-new">Gọi ' + g + '/3</span><span class="tag t-new">Nhắn ' + m + '/2</span>'
+    var r = D.tt.filter(function (x) { return x.ma_luot === t.ma_luot && x.vong != null && !x.huy_luc }).length, m = 0, mx = (D.cfg && D.cfg.max_vong) || 3;
+    D.tt.forEach(function (x) { if (x.ma_luot === t.ma_luot && isMsg(x) && !x.huy_luc) m++ });
+    return '<span class="tag t-new">Lần xử lý ' + Math.min(r, mx) + '/' + mx + '</span><span class="tag t-new">Đã nhắn ' + m + '</span>'
   }
+
   function scriptBlock(t, link) {
     var c = D.cus[t.ma_khach] || {}, st = stepNow(t), g = activeTpl().filter(function (x) { return x.nhom === 'GOI' }), tp = g.filter(function (x) { return x.buoc === st })[0] || g[0], txt, src;
     if (tp) { txt = fill(tp.noi_dung, ctx(c, link)); src = 'Thư viện · ' + tp.ma + ' · ' + esc(tp.tieu_de) }
@@ -1644,7 +1668,7 @@ var MSG = (function () {
     if (!due.length) return; var V = reg(due[0]); S.vac = V; S.purpose = 'TV'; applyKit(); S.km = {}; var k = Object.keys(S.nc); S.nc = {}; if (k[0]) S.nc[k[0]] = 1;
     S.base = compose(); S.text = S.base
   }
-  function close() { document.removeEventListener('keydown', onKey); if (host) host.remove(); host = null; S = null }
+  function close() { document.removeEventListener('keydown', onKey); if (host) host.remove(); host = null; S = null; if (window.__afterMsg) { var f = window.__afterMsg; window.__afterMsg = null; setTimeout(f, 250) } }
   function link() { return (D.links[S.t.ma_khach] || [])[S.ci] || {} }
   function cust() { return D.cus[S && S.t ? S.t.ma_khach : ''] || {} }
   function cxS() { var e = {}; for (var k in S.fv) e[k] = S.fv[k]; if (S.vac) e.TEN_VACCINE = S.vac.name; return ctx(cust(), link(), S.xh, e) }
