@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261124o) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125c) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -89,7 +89,7 @@ var PGR = (function () {
     while ((m = re.exec(s))) last = m; if (!last) return null;
     var n = Number(last[1]), u = last[2]; return u === 'tuan' ? n * 7 : u === 'thang' ? Math.round(n * 30.4375) : Math.round(n * 365.25)
   }
-  CONFIG.PHAC_DO = { ten: 'Phác đồ & từ điển vaccine', moTa: 'Mỗi dòng một vaccine (tên thương mại): nhóm bệnh, tuổi, phác đồ, nước sản xuất, chống chỉ định, phản ứng sau tiêm. App dùng để gợi ý "vaccine đã đến tuổi", làm nút Tra cứu vaccine cho nhân viên và nối đúng tư vấn, nguy cơ, khuyến mãi theo vaccine.', cheDo: 'THAY_THE',
+  CONFIG.PHAC_DO = { ten: 'Phác đồ & từ điển vaccine', moTa: 'Mỗi dòng một vaccine (tên thương mại): nhóm bệnh, tuổi, phác đồ, nước sản xuất, chống chỉ định, phản ứng sau tiêm. App dùng để gợi ý "vaccine đã đến tuổi", làm nút Từ điển vaccine cho nhân viên và nối đúng tư vấn, nguy cơ, khuyến mãi theo vaccine.', cheDo: 'THAY_THE',
     hau: function (o) {
       /* File từ NotebookLM: tên đánh số "12. Bexsero" → bỏ số thứ tự; ký tự Hán lọt vào chữ ("Viêm脑") → "não" */
       Object.keys(o).forEach(function (k) { if (typeof o[k] === 'string') o[k] = o[k].replace(/\s*脑/g, " não") });
@@ -107,7 +107,13 @@ var PGR = (function () {
       { k: 'noi_dung_tu_van', nhan: 'Nội dung tư vấn / phác đồ', alias: ['noi dung tu van', 'phac do', 'phac do tham khao', 'tu van'], bien: 1 },
       { k: 'luu_y', nhan: 'Lưu ý', alias: ['luu y chuyen mon'] }, { k: 'nuoc_sx', nhan: 'Nước sản xuất', alias: ['xuat xu', 'nuoc san xuat', 'nsx'] }, { k: 'do_tuoi', nhan: 'Độ tuổi chỉ định', alias: ['do tuoi', 'chi dinh', 'do tuoi chi dinh', 'doi tuong'] },
       { k: 'chong_chi_dinh', nhan: 'Chống chỉ định / thận trọng', alias: ['chong chi dinh', 'than trong'] }, { k: 'phan_ung', nhan: 'Phản ứng sau tiêm thường gặp', alias: ['phan ung sau tiem', 'tac dung phu', 'phan ung'] }, { k: 'ghi_chu', nhan: 'Ghi chú', alias: ['ghi chu nguon nguon chua neu can y kien bs', 'ghi chu nguon', 'nguon'] }] };
-  var ORDER = ['BANG_GIA', 'CTKM', 'MAU_TUOI', 'MAU_CHU_DE', 'MAU_SAU_TIEM', 'MAU_CHUNG', 'NGUY_CO', 'PHAC_DO'];
+  /* HỎI ĐÁP & XỬ LÝ TỪ CHỐI (Hải 25/11): mỗi dòng một tình huống khách hỏi hoặc từ chối + cách trả lời. "Nhóm vaccine" ghi tên vaccine, nhóm (6 trong 1, Phế cầu…) hoặc "Chung" (áp dụng mọi vaccine). Hiện trong Từ điển vaccine của nhân viên. */
+  CONFIG.HOI_DAP = { ten: 'Hỏi đáp & xử lý từ chối', moTa: 'Mỗi dòng một tình huống: khách hỏi hoặc từ chối, kèm cách trả lời. Cột Nhóm vaccine ghi tên vaccine hoặc nhóm (6 trong 1, Phế cầu…), ghi "Chung" nếu áp dụng mọi vaccine. Nhân viên xem trong Từ điển vaccine.', cheDo: 'THAY_THE',
+    cot: [
+      { k: 'nhom_vaccine', nhan: 'Nhóm vaccine / Vaccine', alias: ['nhom vaccine', 'vaccine', 'ten vaccine', 'nhom vaccine chuan', 'nhom'] }, { k: 'loai', nhan: 'Loại (Hỏi đáp / Từ chối)', alias: ['loai', 'phan loai', 'loai tinh huong'] },
+      { k: 'tinh_huong', nhan: 'Khách hỏi / khách nói', alias: ['cau hoi', 'khach hoi', 'khach noi', 'tinh huong', 'ly do tu choi', 'van de'], bb: 1 }, { k: 'tra_loi', nhan: 'Cách trả lời', alias: ['cau tra loi', 'tra loi', 'cach xu ly', 'xu ly', 'goi y tra loi', 'kich ban'], bb: 1, bien: 1 },
+      { k: 'luu_y', nhan: 'Lưu ý', alias: ['luu y chuyen mon'] }, { k: 'nguon', nhan: 'Nguồn', alias: ['nguon tai lieu', 'tai lieu'] }, { k: 'ghi_chu', nhan: 'Ghi chú' }] };
+  var ORDER = ['BANG_GIA', 'CTKM', 'MAU_TUOI', 'MAU_CHU_DE', 'MAU_SAU_TIEM', 'MAU_CHUNG', 'NGUY_CO', 'PHAC_DO', 'HOI_DAP'];
 
   function p2(n) { return n < 10 ? '0' + n : '' + n }
   function isoDate(d) { var t = new Date(d.getTime() + 12 * 3600e3); return t.getFullYear() + '-' + p2(t.getMonth() + 1) + '-' + p2(t.getDate()) }
@@ -287,7 +293,7 @@ var ASM = (function () {
   function shell() {
     function b(x) { return '<button class="nav ' + (S.page === x[0] ? 'on' : '') + '" data-p="' + x[0] + '">' + ic(x[2]) + x[1] + '</button>' }
     $('#side').innerHTML = '<div class="brand">' + LOGO + '</div><div class="grp">Điều phối</div>' + NAV.slice(0, 3).map(b).join('') + '<div class="grp">Dữ liệu</div>' + NAV.slice(3, 5).map(b).join('') + '<div class="grp">Nhân sự &amp; nội dung</div>' + NAV.slice(5, 8).map(b).join('') + '<div class="grp">Hệ thống</div>' + NAV.slice(8).map(b).join('') +
-      '<div class="me"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>ASM · Giám đốc kinh doanh KV</small></div></div>';
+      '<div class="me"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>ASM · Giám đốc kinh doanh KV</small></div></div><div class="vx" style="padding:8px 4px 0;font-size:11px">' + BRAND.line() + '</div>';
     var mob = NAV.filter(function (x) { return MOBILE.indexOf(x[0]) >= 0 }), inMore = MOBILE.indexOf(S.page) < 0;
     $('#tabs').style.setProperty('--n', mob.length + 1);
     $('#tabs').innerHTML = mob.map(function (x) { return '<button class="tab ' + (S.page === x[0] ? 'on' : '') + '" data-p="' + x[0] + '">' + ic(x[2]) + x[1].replace('Nhân sự & tài khoản', 'Nhân sự') + '</button>' }).join('') + '<button class="tab ' + (inMore ? 'on' : '') + '" id="tmore">' + ic('more') + 'Thêm</button>';
@@ -340,7 +346,7 @@ var ASM = (function () {
     var all = khoRows(), base = Object.keys(D.cus).map(function (k) { return custState(turnsByCust()[k]) }), cnt = { '': base.length, kho: 0, dang: 0, xong: 0 }; base.forEach(function (s) { cnt[s]++ });
     var pages = Math.max(1, Math.ceil(all.length / PAGEN())); ST.pg = Math.min(ST.pg, pages); var rows = all.slice((ST.pg - 1) * PAGEN(), ST.pg * PAGEN()), n = Object.keys(ST.sel).length;
     var h = head('Kho Data', 'Toàn bộ khách. Chọn khách rồi bấm Phân công.', '');
-    h += '<div class="top"><div class="search">' + ic('search') + '<input id="kq" placeholder="Tìm tên, mã TCQG, số điện thoại…" value="' + esc(ST.q) + '"></div>' + sel('fband', BANDS, ST.band) + '</div>';
+    h += '<div class="top"><div class="search">' + ic('search') + '<input id="kq" placeholder="Tìm tên, mã hồ sơ, số điện thoại…" value="' + esc(ST.q) + '"></div>' + sel('fband', BANDS, ST.band) + '</div>';
     h += '<div class="chips">' + [['', 'Tất cả'], ['kho', 'Chưa giao'], ['dang', 'Đang giao'], ['xong', 'Đã xong']].map(function (x) { return '<button class="chip ' + (ST.f === x[0] ? 'on' : '') + '" data-f="' + x[0] + '">' + x[1] + '<em>' + cnt[x[0]] + '</em></button>' }).join('') + '</div>';
     h += '<div class="card" style="padding:6px 8px"><div class="tw"><table data-nopg><thead><tr><th style="width:36px"><input type="checkbox" id="selpg" ' + (rows.length && rows.every(function (r) { return ST.sel[r.c.ma_khach] }) ? 'checked' : '') + ' style="width:20px;height:20px"></th><th>Khách</th><th>Tuổi</th><th>Phụ huynh</th><th>Trạng thái</th><th>Đang giữ</th></tr></thead><tbody>' +
       rows.map(function (r) { var op = r.ts.filter(open_)[0], who = op ? (op.recipient_type === 'SHOP' ? shopName(op.id_shop) + ' (Shop)' : nm(op.ma_tk_nhan)) : '';
@@ -415,12 +421,12 @@ var ASM = (function () {
       if (!r.ho_ten) e = 'Thiếu họ tên'; else if (!r.iso) e = 'Ngày sinh không hợp lệ'; else if (r.ma_tcqg && have[r.ma_tcqg]) e = 'Đã có trong kho (bỏ qua)'; else if (r.ma_tcqg && seen[r.ma_tcqg]) e = 'Trùng Mã TCQG trong file'; if (r.ma_tcqg) seen[r.ma_tcqg] = 1; r.err = e; return r })
   }
   function pgNap() {
-    var h = head('Nạp Data', 'Dán nội dung file CSV (hoặc chọn file). App kiểm tra, xem trước, rồi mới nạp. Khách trùng Mã TCQG sẽ được bỏ qua.', '');
+    var h = head('Nạp Data', 'Dán nội dung file CSV (hoặc chọn file). App kiểm tra, xem trước, rồi mới nạp. Khách trùng Mã hồ sơ sẽ được bỏ qua.', '');
     h += '<div class="card"><div class="acts" style="margin-bottom:10px"><button class="btn b3" id="tpl">' + ic('download') + 'Tải file mẫu</button><label class="btn b2" style="cursor:pointer">' + ic('upload') + 'Chọn file CSV<input type="file" id="nfile" accept=".csv,.txt" hidden></label></div><textarea id="ntx" style="min-height:140px;font-family:ui-monospace,Menlo,monospace;font-size:13px" placeholder="ma_tcqg,ho_ten,ngay_sinh,gioi_tinh,ten_lien_he,quan_he,sdt">' + esc(ST.impText || '') + '</textarea><div class="acts" style="margin-top:10px"><button class="btn b1" id="nchk">Kiểm tra</button></div></div>';
     if (ST.imp) {
       var ok = ST.imp.filter(function (r) { return !r.err }), dup = ST.imp.filter(function (r) { return /bỏ qua/.test(r.err) }).length, bad = ST.imp.length - ok.length - dup;
       h += '<div class="stats stats4"><div class="card st"><div class="l">Dòng trong file</div><div class="v">' + ST.imp.length + '</div></div><div class="card st"><div class="l">Hợp lệ</div><div class="v" style="color:var(--ok)">' + ok.length + '</div></div><div class="card st"><div class="l">Đã có (bỏ qua)</div><div class="v">' + dup + '</div></div><div class="card st"><div class="l">Lỗi</div><div class="v" style="color:var(--bad)">' + bad + '</div></div></div>' +
-        '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Dòng</th><th>Mã TCQG</th><th>Họ tên</th><th>Ngày sinh</th><th>Liên hệ</th><th>Kết quả kiểm tra</th></tr></thead><tbody>' + ST.imp.slice(0, 30).map(function (r) { return '<tr><td>' + r._dong + '</td><td>' + esc(r.ma_tcqg) + '</td><td>' + esc(r.ho_ten) + '</td><td>' + esc(r.ngay_sinh) + '</td><td>' + esc(r.ten_lien_he) + '<small>' + esc(r.sdt) + '</small></td><td>' + (r.err ? '<span class="tag ' + (/bỏ qua/.test(r.err) ? 't-new' : 't-late') + '">' + esc(r.err) + '</span>' : '<span class="tag t-ok">Hợp lệ</span>') + '</td></tr>' }).join('') + '</tbody></table></div></div>' +
+        '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Dòng</th><th>Mã hồ sơ</th><th>Họ tên</th><th>Ngày sinh</th><th>Liên hệ</th><th>Kết quả kiểm tra</th></tr></thead><tbody>' + ST.imp.slice(0, 30).map(function (r) { return '<tr><td>' + r._dong + '</td><td>' + esc(r.ma_tcqg) + '</td><td>' + esc(r.ho_ten) + '</td><td>' + esc(r.ngay_sinh) + '</td><td>' + esc(r.ten_lien_he) + '<small>' + esc(r.sdt) + '</small></td><td>' + (r.err ? '<span class="tag ' + (/bỏ qua/.test(r.err) ? 't-new' : 't-late') + '">' + esc(r.err) + '</span>' : '<span class="tag t-ok">Hợp lệ</span>') + '</td></tr>' }).join('') + '</tbody></table></div></div>' +
         '<div class="acts"><button class="btn b1" id="nok" ' + (ok.length ? '' : 'disabled') + '>Nạp ' + ok.length + ' khách hợp lệ</button></div>';
     }
     if (ST.impRes) h += '<div class="alert"><i>✓</i><div><b>Đã nạp xong</b><small>Thêm mới ' + ST.impRes.them_moi + ' · bỏ qua do trùng ' + ST.impRes.trung_bo_qua + ' · lỗi ' + ST.impRes.loi.length + '</small></div><button class="btn b2" data-go="a_kho" style="min-height:38px;margin-left:auto">Mở Kho Data</button></div>';
@@ -451,7 +457,7 @@ var ASM = (function () {
   }
 
   /* ---------- Thư viện, Tài khoản ---------- */
-  function pgAcc() { return head('Tài khoản của tôi', '', '') + '<div class="card"><div class="alert"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>' + esc(ME.email) + ' · ASM</small></div></div><button class="btn b3" id="cpw" style="width:100%;margin-bottom:8px">Đổi mật khẩu</button><button class="btn b3" id="out" style="width:100%">Đăng xuất</button></div>' }
+  function pgAcc() { return head('Tài khoản của tôi', '', '') + '<div class="card"><div class="alert"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>' + esc(ME.email) + ' · ASM</small></div></div><button class="btn b3" id="cpw" style="width:100%;margin-bottom:8px">Đổi mật khẩu</button><button class="btn b3" id="out" style="width:100%">Đăng xuất</button><div class="vxc" id="vxc" role="button" tabindex="0" title="Chạm để sao chép phiên bản"><b>' + BRAND.app + '</b>' + BRAND.mota + '<br><em>' + BRAND.nghia + '</em><br>Biên soạn: ' + BRAND.tacgia + ' · ' + BRAND.kv + '<br>' + BRAND.vtext() + ' · bản dựng ' + BRAND.build() + '</div></div>' }
   X.u = { head: head, sel: sel, shops: shops, staffOf: staffOf, qlOf: qlOf, pct: pct, ST: ST };
 
   /* ---------- vẽ và gắn sự kiện ---------- */
@@ -479,6 +485,7 @@ var ASM = (function () {
     on('#bshop', 'onchange', function (x) { ST.bcShop = x.value; render() }); on('#bst', 'onchange', function (x) { ST.bcSt = x.value; render() });
     on('#xl', 'onclick', exportTurns); on('#xn', 'onclick', exportStaff); on('#out', 'onclick', logout); on('#cpw', 'onclick', pwModal);
     on('#lkbtn', 'onclick', function () { if (window.MSG) MSG.lookup() });
+    on('#vxc', 'onclick', function () { copy(BRAND.app + ' ' + BRAND.vtext() + ' · bản dựng ' + BRAND.build()); toast('Đã sao chép phiên bản') });
     X.binders.forEach(function (f) { f(on) });
   }
   return { render: render, X: X };
@@ -1100,7 +1107,7 @@ var ASMIMG = (function () {
     return h
   }
   function creds(title, email, pw) {
-    var d = modal(), url = location.origin + location.pathname, txt = 'Đăng nhập LC TCQG HUB\nLink: ' + url + '\nEmail: ' + email + '\nMật khẩu: ' + pw;
+    var d = modal(), url = location.origin + location.pathname, txt = 'Đăng nhập ' + BRAND.app + '\nLink: ' + url + '\nEmail: ' + email + '\nMật khẩu: ' + pw;
     sheet(d, '<h2 style="font-size:18px;margin:0 0 6px">' + esc(title) + '</h2><div class="meta" style="margin-bottom:10px">Mật khẩu chỉ hiện một lần ở đây. Gửi cho nhân viên và nhắc đổi mật khẩu ở mục Tài khoản.</div><div class="alert" style="display:block;font-size:15px;line-height:1.7"><div>Email: <b>' + esc(email) + '</b></div><div>Mật khẩu: <b style="font-size:18px;letter-spacing:.5px">' + esc(pw) + '</b></div></div><div class="acts" style="margin-top:8px"><button class="btn b1" id="cc">Chép thông tin đăng nhập</button><button class="btn b3" id="cx">Đóng</button></div>', 480);
     q(d, '#cc').onclick = function () { copy(txt); toast('Đã chép thông tin đăng nhập') }; q(d, '#cx').onclick = function () { d.remove() }
   }
@@ -1209,9 +1216,10 @@ var ASMIMG = (function () {
 
   /* ================= PHÁC ĐỒ ================= */
   function pgPd() {
-    var t = AS.pd, days = Math.round(Number(t.tv || 0) * Number(t.tu)), due = MSG.dueRules(days, t.tg);
+    var LB = MSG._t.LIB; if (!LB.rows && !LB.err && !AS.pdAsk) { AS.pdAsk = 1; MSG.ensureLib(function () { if (S.page === 'a_pd') render() }) }
+    var pi = MSG.pdInfo(), t = AS.pd, days = Math.round(Number(t.tv || 0) * Number(t.tu)), due = MSG.dueRules(days, t.tg);
     var h = head('Phác đồ vaccine', 'Quy tắc "khi nào": vaccine nào đến tuổi nào, tính từ ngày sinh. App dùng để gợi ý "vaccine đã đến tuổi" trong tin nhắn của nhân viên. Dòng chỉ hiện cho nhân viên khi đang dùng.', '<button class="btn b1" id="pd-new">+ Thêm dòng phác đồ</button>');
-    h += '<div class="ro"><b>Phác đồ đầy đủ nạp ở Thư viện → "Phác đồ &amp; từ điển vaccine"</b> (kéo file Excel: xem trước, chờ duyệt, bác sĩ duyệt). Từ đó nhân viên có nút <b>Tra cứu vaccine</b>. Bảng nhập tay bên dưới là phác đồ mẫu đang dùng cho khối "vaccine bé đến tuổi" trong tin nhắn, sẽ được thay bằng phác đồ nạp từ Excel khi anh duyệt.<div style="margin-top:10px"><button class="btn b1" id="pd-up">Nạp phác đồ đầy đủ từ Excel →</button></div></div><div class="ro" style="background:var(--warn-bg);color:var(--warn)"><b>Dữ liệu mẫu minh họa.</b> Các độ tuổi bên dưới chưa phải phác đồ chuẩn đã duyệt. Bác sĩ cần nhập và duyệt phác đồ thật trước khi dùng cho khách thật; dòng "Chờ duyệt" không hiện cho nhân viên.</div>';
+    h += '<div class="ro"><b>Phác đồ đầy đủ nạp ở Thư viện → "Phác đồ &amp; từ điển vaccine"</b> (kéo file Excel: xem trước, chờ duyệt, bác sĩ duyệt). Từ đó nhân viên có nút <b>Từ điển vaccine</b> và khối "vaccine bé đến tuổi" trong tin nhắn. Bảng nhập tay bên dưới là phác đồ mẫu cũ, chỉ dùng khi chưa nạp phác đồ Excel.<div style="margin-top:10px"><button class="btn b1" id="pd-up">Nạp phác đồ đầy đủ từ Excel →</button></div></div>' + (pi.on ? '<div class="ro" style="background:var(--ok-bg);color:var(--ok)"><b>Đang dùng phác đồ từ Excel</b> (' + pi.n + ' vaccine, ' + pi.groups.length + ' nhóm). Mục "vaccine bé đến tuổi" trong tin nhắn lấy từ đây. Nhóm không tự gợi ý theo tuổi (vẫn tra cứu được trong Từ điển vaccine): <b>' + esc(pi.groups.filter(function (g) { return !g.auto }).map(function (g) { return g.name }).join(', ') || 'không có') + '</b>. Bảng nhập tay bên dưới là phác đồ mẫu cũ, không còn được dùng.</div>' : '<div class="ro" style="background:var(--warn-bg);color:var(--warn)"><b>Dữ liệu mẫu minh họa.</b> Các độ tuổi bên dưới chưa phải phác đồ chuẩn đã duyệt. Bác sĩ cần nhập và duyệt phác đồ thật trước khi dùng cho khách thật; dòng "Chờ duyệt" không hiện cho nhân viên.</div>') + '';
     h += '<div class="card"><h2>Thử nhanh: bé ở tuổi này thì gợi ý những vaccine nào?</h2><div class="row" style="flex-wrap:wrap"><input id="pd-tv" type="number" min="0" value="' + esc(t.tv) + '" style="width:90px;border:1px solid var(--line);border-radius:12px;padding:10px;min-height:44px;background:var(--card)">' + sel('pd-tu', [['1', 'ngày'], ['7', 'tuần'], ['30', 'tháng'], ['365', 'năm']], t.tu) + sel('pd-tg', [['', 'Cả nam và nữ'], ['M', 'Nam'], ['F', 'Nữ']], t.tg) + '<span class="meta">= ' + days + ' ngày tuổi</span></div><div style="margin-top:10px">' + (due.length ? due.map(function (r) { return tag('t-today', r.ten) }).join('') : '<span class="meta">Chưa có vaccine nào đang dùng ở tuổi này.</span>') + '</div></div>';
     h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Vaccine</th><th>Từ tuổi</th><th>Đến tuổi</th><th>Giới tính</th><th>Phác đồ (số mũi, khoảng cách)</th><th>Ghi chú cho nhân viên</th><th>Trạng thái</th><th style="min-width:170px"></th></tr></thead><tbody>' + D.rules.map(function (r) {
       var b = function (k, tx) { return '<button class="btn b3" data-pd' + k + '="' + esc(r.ma) + '" style="min-height:36px;font-size:13px">' + tx + '</button>' };
@@ -1374,7 +1382,10 @@ var MSG = (function () {
 @media (prefers-color-scheme:dark){.mlink,.abt.o{color:#7ee0df}.mp,.cnt,.li .ico{color:#7ee0df}.mp.ro{color:var(--muted)}.abt.s{background:#1b4b63}.tg i{background:#3a5163}.mcard.on{background:#12343f}}
 .lbtn{background:none;border:0;text-align:left;color:inherit;padding:0;cursor:pointer;font:inherit}
 .sdtbox{display:flex;gap:8px;padding:2px 14px 12px 64px}.sdtbox input,.fvi{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);min-height:44px;font:inherit;color:var(--ink)}.sdtbox input{flex:1;min-width:0}.fvi{display:block;width:100%;margin-top:6px}
-.mp.zero{background:var(--warn-bg);color:var(--warn)}.mp.lkw{white-space:normal;line-height:1.35;border-radius:12px;text-align:left;max-width:100%}.mcard.vac .mtags{margin-top:0}.mcard.vac .mc1{align-items:center}
+.mp.zero{background:var(--warn-bg);color:var(--warn)}.mp.lkw{white-space:normal;line-height:1.35;border-radius:12px;text-align:left;max-width:100%}
+.lkt{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}.lkt summary{list-style:none;cursor:pointer;padding:11px 13px;display:grid;gap:3px}.lkt summary::-webkit-details-marker{display:none}.lkt summary b{font-size:14.5px;line-height:1.35}.lkt summary small{color:var(--muted);font-size:12.5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.lkt[open] summary small{display:none}.lkx{padding:0 13px 6px;font-size:14px;line-height:1.55}.lkt .mlink{margin:2px 13px 11px}
+.lkn{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.lkn::-webkit-scrollbar{display:none}.lkn button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:7px 12px;font-size:13px;font-weight:600;min-height:36px}
+.lkage{display:grid;grid-template-columns:1fr 1.3fr;gap:8px;margin-bottom:6px}.lkage select,.lkage input{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:44px;color:var(--ink);min-width:0;font-size:15px}.mcard.vac .mtags{margin-top:0}.mcard.vac .mc1{align-items:center}
 .psw{display:flex;gap:6px;margin-top:10px}.psw button{flex:1;border:1.5px solid var(--line);background:var(--card);border-radius:13px;min-height:42px;font-weight:600;font-size:13.5px;color:var(--ink);transition:border-color .15s,background .15s}.psw button.on{border-color:var(--teal);background:var(--tint);color:var(--teal-d)}
 .ibtn{flex:none;width:42px;height:42px;border-radius:14px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;color:var(--teal-d);margin-right:8px}.ibtn svg{width:20px;height:20px}
 .lkf{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lkf select{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:44px;color:var(--ink);min-width:0}
@@ -1402,7 +1413,7 @@ var MSG = (function () {
   var GROUPS = [['KH_MOI', 'KH mới'], ['CSKH_SAU_TIEM', 'CSKH sau tiêm'], ['BAU_NHI', 'Bầu – Nhi'], ['CHUNG', 'Chung']];
   var XH = [['', 'Tự động theo người liên hệ'], ['mẹ', 'mẹ'], ['bố', 'bố'], ['anh', 'anh'], ['chị', 'chị'], ['cô', 'cô'], ['chú', 'chú'], ['bác', 'bác'], ['ông', 'ông'], ['bà', 'bà']];
   var TABS = [['CD', 'Theo vaccine', 'MAU_CHU_DE'], ['NHI', 'Sơ sinh & Nhi', 'MAU_TUOI'], ['CH', 'Mẫu chung', 'MAU_CHUNG'], ['ST', 'Sau tiêm', 'MAU_SAU_TIEM']];
-  var LIBT = ['MAU_CHU_DE', 'MAU_TUOI', 'MAU_SAU_TIEM', 'MAU_CHUNG', 'CTKM', 'NGUY_CO', 'BANG_GIA', 'PHAC_DO'], MAXLEN = 6000, LONG = 900;   /* LONG: từ ngần này ký tự thì cảnh báo "tin dài"; MAXLEN: giới hạn cứng. Lịch sử chỉ ghi 2000 ký tự đầu (u_msg_log). */
+  var LIBT = ['MAU_CHU_DE', 'MAU_TUOI', 'MAU_SAU_TIEM', 'MAU_CHUNG', 'CTKM', 'NGUY_CO', 'BANG_GIA', 'PHAC_DO', 'HOI_DAP'], MAXLEN = 6000, LONG = 900;   /* LONG: từ ngần này ký tự thì cảnh báo "tin dài"; MAXLEN: giới hạn cứng. Lịch sử chỉ ghi 2000 ký tự đầu (u_msg_log). */
 
   function strip(s) { return String(s || '').replace(/\s*\([^)]*\)/g, '').trim() }
   function given(s) { var p = strip(s).split(/\s+/); return p[p.length - 1] || '' }
@@ -1431,7 +1442,38 @@ var MSG = (function () {
   function activeTpl() { return (D.tpl || []).filter(function (x) { return x.trang_thai === 'DANG_DUNG' }) }
   function tplById(ma) { return (D.tpl || []).filter(function (x) { return x.ma === ma })[0] }
   function tplForStep(step) { return activeTpl().filter(function (x) { return x.nhom === 'KH_MOI' && x.buoc === step }) }
-  function dueRules(days, gender) { if (days == null) return []; return (D.rules || []).filter(function (r) { return r.trang_thai === 'DANG_DUNG' && days >= r.tu_ngay && (r.den_ngay == null || days <= r.den_ngay) && (!r.gioi_tinh || r.gioi_tinh === gender) }) }
+  /* PHÁC ĐỒ TỪ EXCEL (khu PHAC_DO): khi đã nạp và duyệt thì THAY phác đồ mẫu nhập tay. Mỗi nhóm vaccine chuẩn (6 trong 1, Phế cầu, Rota…) là một mục; nhóm "đến tuổi" khi có ÍT NHẤT MỘT dòng vaccine
+   * thuộc nhóm có tuổi bắt đầu ≤ tuổi bé ≤ tuổi kết thúc (để trống = không giới hạn). Nhóm trong PD_OFF (hoặc ô "Tự gợi ý theo tuổi" = Không) không tự gợi ý nhưng vẫn tra cứu và chọn tay được. */
+  var PD_OFF = ['dai', 'uon van', 'thuong han', 'ta', 'zona', 'rsv', 'khac'], PDG = { k: '', v: [] };
+  function pdOn() { return libRows('PHAC_DO').length > 0 }
+  function pdGroups() {
+    var k = 'pd|' + LIB.at + '|' + libRows('PHAC_DO').length; if (PDG.k === k) return PDG.v;
+    var by = {}, ord = []; libRows('PHAC_DO').forEach(function (r) {
+      var d = r.d, nm = oneLine(d.nhom_vaccine) || shortName(d.phong_benh) || 'Khác', key = nv(nm).trim(); if (!by[key]) { by[key] = { key: key, name: nm, rows: [], keys: [] }; ord.push(key) }
+      by[key].rows.push(r); var bk = brandKey(d.ten_vaccine); if (bk && by[key].keys.indexOf(bk) < 0) by[key].keys.push(bk)
+    });
+    var v = ord.map(function (x) { var g = by[x], fl = g.rows.map(function (r) { return fk(r.d.goi_y_tuoi || '').trim() }).filter(Boolean); g.auto = fl.length ? !fl.some(function (f) { return /^(khong|no|0|false)/.test(f) }) : PD_OFF.indexOf(g.key) < 0; return g });
+    PDG = { k: k, v: v }; return v
+  }
+  function pdAge(r) { var tu = Number(r.d.tuoi_bat_dau_ngay), kt = r.d.tuoi_ket_thuc_ngay; kt = (kt == null || kt === '') ? null : Number(kt); return { tu: isNaN(tu) ? 0 : tu, kt: kt !== null && isNaN(kt) ? null : kt } }
+  function pdRule(g, rows) {
+    var a = rows.map(pdAge), tu = Math.min.apply(null, a.map(function (x) { return x.tu })), open = a.some(function (x) { return x.kt === null }), kt = open ? null : Math.max.apply(null, a.map(function (x) { return x.kt }));
+    return { ma: 'pd:' + g.key, ten: g.name, ma_vaccine: '', tu_ngay: tu, den_ngay: kt, gioi_tinh: null, trang_thai: 'DANG_DUNG', phac_do: '', cau_goi_y: '', tu_khoa: '', cap_nhat_luc: String(LIB.at), _keys: g.keys, _brands: rows.map(function (r) { return r.d.ten_vaccine }) }
+  }
+  function pdInfo() { var on = pdOn(); return { on: on, n: libRows('PHAC_DO').length, groups: on ? pdGroups().map(function (g) { return { name: g.name, auto: g.auto, n: g.rows.length } }) : [] } }
+  function allRules() { return pdOn() ? pdGroups().map(function (g) { return pdRule(g, g.rows) }) : (D.rules || []).filter(function (r) { return r.trang_thai === 'DANG_DUNG' }) }
+  function dueRules(days, gender) {
+    if (days == null) return [];
+    if (pdOn()) return pdGroups().filter(function (g) { return g.auto }).map(function (g) { var q = g.rows.filter(function (r) { var a = pdAge(r); return days >= a.tu && (a.kt === null || days <= a.kt) }); return q.length ? pdRule(g, q) : null }).filter(Boolean);
+    return (D.rules || []).filter(function (r) { return r.trang_thai === 'DANG_DUNG' && days >= r.tu_ngay && (r.den_ngay == null || days <= r.den_ngay) && (!r.gioi_tinh || r.gioi_tinh === gender) })
+  }
+  function soonRules(days, gender) {
+    if (days == null) return [];
+    if (pdOn()) return pdGroups().filter(function (g) { return g.auto }).map(function (g) {
+      var now = g.rows.some(function (r) { var a = pdAge(r); return days >= a.tu && (a.kt === null || days <= a.kt) }), nx = g.rows.filter(function (r) { var a = pdAge(r); return a.tu > days && a.tu - days <= 45 }); return !now && nx.length ? pdRule(g, nx) : null
+    }).filter(Boolean);
+    return (D.rules || []).filter(function (r) { return r.trang_thai === 'DANG_DUNG' && days < r.tu_ngay && r.tu_ngay - days <= 45 && (!r.gioi_tinh || r.gioi_tinh === gender) })
+  }
 
   /* ---------- hiện trong chi tiết khách ---------- */
   function counters(t) {
@@ -1502,9 +1544,10 @@ var MSG = (function () {
     BG = { at: LIB.at, g: ord.map(function (k) { return by[k] }) }; return BG
   }
   function mkVRule(r) {
-    var ck = 'r:' + r.ma + '|' + LIB.at + '|' + r.cap_nhat_luc + '|' + (r.tu_khoa || ''); if (VC[ck]) return VC[ck];
+    var ck = 'r:' + r.ma + '|' + LIB.at + '|' + r.cap_nhat_luc + '|' + (r.tu_khoa || '') + '|' + r.tu_ngay + '|' + r.den_ngay; if (VC[ck]) return VC[ck];
     var phr = phrasesOf(r.ten + ';' + (r.tu_khoa || '')), keys = [], groups = [];
     bgIndex().g.forEach(function (g) { if (phr.some(function (p) { return has(g.norm, p) || g.keys.indexOf(p) >= 0 || g.bn.some(function (b) { return has(b, p) }) })) { groups.push(g); g.keys.forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k) }) } });
+    (r._keys || []).forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k) });
     return (VC[ck] = { id: 'rule:' + r.ma, name: r.ten, rule: r, phr: phr, keys: keys, groups: groups, from: 'RULE' })
   }
   function mkVbg(g) {
@@ -1514,7 +1557,7 @@ var MSG = (function () {
   }
   function reg(V) { VM[V.id] = V; return V }
   function dueVacs() { var c = cust(), d = custDays(c); return dueRules(d, c.gioi_tinh).map(mkVRule) }
-  function soonVacs() { var c = cust(), d = custDays(c); if (d == null) return []; return (D.rules || []).filter(function (r) { return r.trang_thai === 'DANG_DUNG' && d < r.tu_ngay && r.tu_ngay - d <= 45 && (!r.gioi_tinh || r.gioi_tinh === c.gioi_tinh) }).map(mkVRule) }
+  function soonVacs() { var c = cust(), d = custDays(c); return soonRules(d, c.gioi_tinh).map(mkVRule) }
   function ageOf(V) { var r = V.rule; return r ? 'từ ' + dayLabel(r.tu_ngay) + (r.den_ngay != null ? ' đến ' + dayLabel(r.den_ngay) : ' trở lên') : 'theo Bảng giá' }
 
   var TABS_BY = {};
@@ -1570,7 +1613,7 @@ var MSG = (function () {
     var st = itemsOf('ST'); P.st = st.filter(function (o) { return o.letter === 'C' && o.vac && (anyHas(nv(o.vac), phr) || anyHas(nv(o.vac), keys)) }); P.stGen = st.filter(function (o) { return o.letter === 'A' });
     return (PC[k] = P)
   }
-  function linkReport() { return (D.rules || []).map(function (r) { var V = mkVRule(r), P = profile(V); return { rule: r, name: r.ten, groups: V.groups.map(function (g) { return g.short }), keys: V.keys, tv: P.tv.length, nc: P.nc.length, km: P.km.length, st: P.st.length, tvT: P.tv.slice(0, 3).map(function (o) { return o.ten }), ncT: P.nc.map(function (x) { return x.d.benh }), stT: P.st.map(function (o) { return o.ten }) } }) }
+  function linkReport() { return allRules().map(function (r) { var V = mkVRule(r), P = profile(V); return { rule: r, name: r.ten, groups: V.groups.map(function (g) { return g.short }), keys: V.keys, tv: P.tv.length, nc: P.nc.length, km: P.km.length, st: P.st.length, tvT: P.tv.slice(0, 3).map(function (o) { return o.ten }), ncT: P.nc.map(function (x) { return x.d.benh }), stT: P.st.map(function (o) { return o.ten }) } }) }
 
   /* ---------- màn soạn tin ---------- */
   var S = null, host = null;
@@ -1779,7 +1822,7 @@ var MSG = (function () {
   }
   /* màn chọn vaccine khác (ngoài danh sách gợi ý theo tuổi): phác đồ đầy đủ + Bảng giá */
   function drawVac() {
-    var q = fk(S.vq.trim()), rules = (D.rules || []).filter(function (r) { return r.trang_thai === 'DANG_DUNG' && (!q || fk(r.ten + ' ' + (r.tu_khoa || '')).indexOf(q) >= 0) }).map(mkVRule), bg = bgIndex().g.filter(function (g) { return !q || fk(g.name + ' ' + g.brands.join(' ')).indexOf(q) >= 0 }).map(mkVbg);
+    var q = fk(S.vq.trim()), rules = allRules().filter(function (r) { return !q || fk(r.ten + ' ' + (r.tu_khoa || '') + ' ' + (r._brands || []).join(' ')).indexOf(q) >= 0 }).map(mkVRule), bg = bgIndex().g.filter(function (g) { return !q || fk(g.name + ' ' + g.brands.join(' ')).indexOf(q) >= 0 }).map(mkVbg);
     var h = '<div class="msheet">' + hdrBack('Chọn vaccine', 'App tự nối nguy cơ, khuyến mãi, tư vấn, sau tiêm') + '<div class="mbody"><div class="msearch">' + ic('search') + '<input id="vqi" placeholder="Tìm vaccine hoặc tên thương mại…" value="' + esc(S.vq) + '" aria-label="Tìm vaccine"></div>' +
       '<section><div class="mh">Theo phác đồ (' + rules.length + ')</div>' + (rules.length ? '<div class="mlist">' + rules.map(function (v) { return vacCard(v) }).join('') + '</div>' : '<div class="mnote"><span>Không có dòng phác đồ phù hợp.</span></div>') + '</section>' +
       '<section><div class="mh">Theo Bảng giá (' + bg.length + ')</div>' + (LIB.loading && !LIB.rows ? skeleton() : bg.length ? '<div class="mlist">' + bg.map(function (v) { return vacCard(v) }).join('') + '</div>' : '<div class="mnote"><span>Không có nhóm vaccine phù hợp.</span></div>') + '</section></div></div>';
@@ -1877,11 +1920,13 @@ var MSG = (function () {
       .then(function () { return load(true) }).then(render, function (e) { if (fake) { var i = D.tt.indexOf(fake); if (i >= 0) D.tt.splice(i, 1); t.trang_thai = prevSt; relast(t.ma_luot); render() } fail(e) })
   }
 
-  /* ---------- TRA CỨU VACCINE (Hải 24/11 đêm): hồ sơ từng vaccine lấy từ Thư viện đã duyệt ----------
-   * Danh sách = khu "Phác đồ & từ điển vaccine" (nếu đã nạp), không thì Bảng giá. Mỗi thẻ: tuổi, phác đồ, nước SX, chống chỉ định, phản ứng sau tiêm, nguy cơ & đường lây,
-   * giá + khuyến mãi hôm nay, câu tư vấn, tin sau tiêm. Mở từ màn soạn tin thì có nút "Dùng cho tin nhắn" để tự điền đúng vaccine đó. */
+  /* ---------- TỪ ĐIỂN VACCINE (Hải 24-25/11): MỘT nút tra cứu mọi thứ về vaccine, lấy từ Thư viện đã duyệt ----------
+   * Tab "Tìm vaccine": gõ tên, bệnh, nước sản xuất → hồ sơ: phác đồ, chống chỉ định, nguy cơ & đường lây, giá, khuyến mãi hôm nay, mẫu tư vấn, hỏi đáp & xử lý từ chối, tin sau tiêm.
+   * Tab "Theo tuổi": nhập năm sinh / ngày sinh / tuổi → những vaccine tiêm được hiện tại (theo tuổi bắt đầu, kết thúc trong Phác đồ) kèm giá và khuyến mãi.
+   * Danh sách = khu "Phác đồ & từ điển vaccine" (nếu đã nạp), không thì Bảng giá. Mở từ màn soạn tin thì có nút "Dùng cho tin nhắn" để tự điền đúng vaccine đó. */
   var LK = null, lkHost = null;
   var LK_AGES = [['', 'Mọi lứa tuổi', null, null], ['A', 'Sơ sinh (dưới 1 tháng)', 0, 30], ['B', '1 – 12 tháng', 30, 365], ['C', '1 – 2 tuổi', 365, 730], ['D', '2 – 9 tuổi', 730, 3285], ['E', '9 – 18 tuổi', 3285, 6570], ['F', 'Người lớn 18 – 50 tuổi', 6570, 18263], ['G', 'Trên 50 tuổi', 18263, 40000]];
+  var LK_MODES = [['nam', 'Năm sinh', 'ví dụ 2024'], ['ngay', 'Ngày sinh', 'ví dụ 15/03/2024'], ['tuoi', 'Tuổi (năm)', 'ví dụ 35'], ['thang', 'Tháng tuổi', 'ví dụ 8']];
   function lkRows() {
     var pd = libRows('PHAC_DO'); if (pd.length) return pd.map(function (r) { return { src: 'PD', id: 'pd' + r.id, name: r.d.ten_vaccine || '', benh: oneLine(r.d.phong_benh), d: r.d } });
     return libRows('BANG_GIA').map(function (r) { return { src: 'BG', id: 'bg' + r.id, name: r.d.ten_vaccine || '', benh: oneLine(r.d.phong_benh), d: r.d } })
@@ -1897,69 +1942,143 @@ var MSG = (function () {
   function lkPrice(row) { var key = brandKey(row.name); return libRows('BANG_GIA').filter(function (r) { return has(nv(r.d.ten_vaccine), key) }) }
   function lkKm(row, P) { var key = brandKey(row.name), out = []; P.km.forEach(function (g) { g.items.forEach(function (d) { if (has(nv(d.ten_sp), key)) out.push({ g: g, d: d }) }) }); return out }
   function lkAgeOk(row, a) { if (!a || a[2] == null) return true; var d = row.d, tu = Number(d.tuoi_bat_dau_ngay), kt = d.tuoi_ket_thuc_ngay == null ? null : Number(d.tuoi_ket_thuc_ngay); if (isNaN(tu)) return true; return tu < a[3] && (kt == null || kt >= a[2]) }
+  /* văn bản mẫu hiển thị trong từ điển: có khách đang mở thì điền sẵn tên, Shop…; không thì biến {{…}} thành [mô tả] để nhân viên tự thay */
+  function lkRaw(t) { var x = nl(t); if (S && host && S.t) { try { x = fill(x, cxS()) } catch (e) { } } return x.replace(/\{\{([A-Z0-9_]+)\}\}/g, function (m, k) { return '[' + (VARDESC[k] || k) + ']' }) }
+  /* tuổi từ năm sinh / ngày sinh / tuổi → khoảng ngày [nhỏ nhất, lớn nhất] */
+  function lkParseAge(mode, v) {
+    v = String(v || '').trim(); if (!v) return null; var now = new Date(), y = now.getFullYear(), t0 = Date.UTC(y, now.getMonth(), now.getDate()), D1 = 86400000, m, n;
+    if (mode === 'nam') { n = Number(v); if (!/^\d{4}$/.test(v) || n < 1900 || n > y) return { err: 'Năm sinh gồm 4 chữ số, từ 1900 đến ' + y + '.' }; return { a: [Math.max(0, Math.round((t0 - Date.UTC(n, 11, 31)) / D1)), Math.round((t0 - Date.UTC(n, 0, 1)) / D1)], label: 'sinh năm ' + n + ' (' + (y - n) + ' tuổi)', approx: true } }
+    if (mode === 'ngay') { m = /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/.exec(v); if (!m) return { err: 'Nhập ngày sinh dạng 15/03/2024.' }; var b = Date.UTC(+m[3], +m[2] - 1, +m[1]); if (isNaN(b) || new Date(b).getUTCDate() !== +m[1] || b > t0) return { err: 'Ngày sinh không hợp lệ.' }; var d = Math.round((t0 - b) / D1); return { a: [d, d], label: 'sinh ' + v + ' · ' + dayLabel(d) } }
+    n = Math.floor(Number(v.replace(',', '.'))); if (isNaN(n) || n < 0 || n > 120) return { err: 'Nhập một số từ 0 đến 120.' };
+    if (mode === 'tuoi') return { a: [Math.round(n * 365.25), Math.round((n + 1) * 365.25) - 1], label: 'đã tròn ' + n + ' tuổi', approx: true };
+    return { a: [Math.round(n * 30.4375), Math.round((n + 1) * 30.4375) - 1], label: 'đã tròn ' + n + ' tháng', approx: true }
+  }
+  function lkElig(row, a) { var q = pdAge(row); if (a[0] >= q.tu && (q.kt === null || a[1] <= q.kt)) return 2; return a[1] >= q.tu && (q.kt === null || a[0] <= q.kt) ? 1 : 0 }   /* 2 = chắc chắn, 1 = tùy ngày sinh */
+  function lkKmNames() { var out = []; ctkmGroups().forEach(function (g) { if (!g.chung) g.items.forEach(function (d) { out.push(nv(d.ten_sp)) }) }); return out }
+  function lkPriceMin(row) { var p = lkPrice(row).map(function (r) { return Number(r.d.gia) }).filter(function (n) { return n > 0 }); return p.length ? Math.min.apply(null, p) : null }
+  /* hỏi đáp & xử lý từ chối: khu HOI_DAP (nhóm vaccine = tên vaccine/nhóm/bệnh, hoặc "Chung" cho mọi vaccine) */
+  function lkFaq(row, V) {
+    var out = []; libRows('HOI_DAP').forEach(function (r) {
+      var d = r.d, n = nv(d.nhom_vaccine || ''), gen = !String(d.nhom_vaccine || '').trim() || ['chung', 'tat ca', 'moi vaccine', 'moi loai'].some(function (p) { return has(n, p) });
+      var hit = !gen && (anyHas(n, V.phr) || anyHas(n, V.keys) || V.phr.some(function (p) { return has(n, p) }) || has(n, nv(row.d.nhom_vaccine || '').trim()) || has(n, nv(row.name).trim()));
+      if (gen || hit) out.push({ gen: gen, d: d })
+    });
+    return out.sort(function (a, b) { return (a.gen ? 1 : 0) - (b.gen ? 1 : 0) })
+  }
   function lookup(opts) {
-    if (lkHost) return; opts = opts || {}; LK = { q: opts.q || '', age: '', benh: '', lim: 30, sel: null, fromSheet: !!(S && host), src: null };
+    if (lkHost) return; opts = opts || {}; LK = { tab: opts.tab || 'tim', q: opts.q || '', age: '', benh: '', lim: 30, sel: null, fromSheet: !!(S && host), am: 'nam', av: '', cp: {} };
     lkHost = document.createElement('div'); lkHost.className = 'modal mm first'; lkHost.style.zIndex = 60; lkHost.onclick = function (e) { if (e.target === lkHost) lkClose() }; document.body.appendChild(lkHost);
     document.addEventListener('keydown', lkKey); setTimeout(function () { if (lkHost) lkHost.classList.remove('first') }, 450); loadLib(); lkDraw()
   }
   function lkClose() { document.removeEventListener('keydown', lkKey); if (lkHost) lkHost.remove(); lkHost = null; LK = null }
   function lkKey(e) { if (e.key === 'Escape' && lkHost) { if (LK.sel) { LK.sel = null; lkDraw() } else lkClose() } }
   function lkDraw() {
-    if (!lkHost || !LK) return; var b = lkHost.querySelector('.mbody'), top = b ? b.scrollTop : 0; if (LK.sel) lkDetail(); else lkList(); if (top && !LK.sel) { var nb = lkHost.querySelector('.mbody'); if (nb) nb.scrollTop = top }
+    if (!lkHost || !LK) return; var b = lkHost.querySelector('.mbody'), top = b ? b.scrollTop : 0; if (LK.sel) lkDetail(); else if (LK.tab === 'tuoi') lkAgeView(); else lkList(); if (top && !LK.sel) { var nb = lkHost.querySelector('.mbody'); if (nb) nb.scrollTop = top }
   }
+  function lkHead(sub) {
+    return '<div class="mhd"><div class="mtop"><div class="mav">' + ic('book') + '</div><div class="mtt"><div class="t1">Từ điển vaccine</div><div class="t2">' + esc(sub) + '</div></div><button class="mclose" id="lx" aria-label="Đóng">' + ic('x') + '</button></div>' +
+      '<div class="mseg" role="tablist"><button role="tab" aria-selected="' + (LK.tab === 'tim') + '" class="' + (LK.tab === 'tim' ? 'on' : '') + '" data-lt="tim">' + ic('search') + 'Tìm vaccine</button><button role="tab" aria-selected="' + (LK.tab === 'tuoi') + '" class="' + (LK.tab === 'tuoi' ? 'on' : '') + '" data-lt="tuoi">' + ic('clock') + 'Theo tuổi</button></div></div>'
+  }
+  function lkBindHead() {
+    lkHost.querySelector('#lx').onclick = lkClose;
+    [].slice.call(lkHost.querySelectorAll('[data-lt]')).forEach(function (b) { b.onclick = function () { LK.tab = b.dataset.lt; LK.lim = 30; lkDraw(); var nb = lkHost.querySelector('.mbody'); if (nb) nb.scrollTop = 0 } });
+    [].slice.call(lkHost.querySelectorAll('[data-lk]')).forEach(function (b) { b.onclick = function () { LK.sel = b.dataset.lk; lkDraw(); var nb = lkHost.querySelector('.mbody'); if (nb) nb.scrollTop = 0 } })
+  }
+  function lkSubline(rows) { var pdOn_ = rows.length && rows[0].src === 'PD'; return LIB.rows ? rows.length + ' vaccine' + (pdOn_ ? ' · phác đồ, giá, khuyến mãi, tư vấn' : ' · từ Bảng giá (chưa nạp phác đồ)') : 'Đang tải…' }
   function lkList() {
     var rows = lkRows(), q = fk(LK.q.trim()), qt = q ? q.split(/\s+/) : [], ageSel = LK_AGES.filter(function (a) { return a[0] === LK.age })[0], groups = {}, order = [];
     rows.forEach(function (r) { var g = lkGroup(r); if (!groups[g]) { groups[g] = 0; order.push(g) } groups[g]++ }); order.sort(function (a, b) { return a.localeCompare(b, 'vi') });
     var list = rows.filter(function (r) { return (!LK.benh || lkGroup(r) === LK.benh) && lkAgeOk(r, ageSel) && (!qt.length || (function (hay) { return qt.every(function (t) { return hay.indexOf(t) >= 0 }) })(fk(r.name + ' ' + r.benh + ' ' + (r.d.nuoc_sx || '') + ' ' + (r.d.nhom_vaccine || '') + ' ' + lkGroup(r)))) });
     list.sort(function (a, b) { return lkGroup(a).localeCompare(lkGroup(b), 'vi') || a.name.localeCompare(b.name, 'vi') });
-    var more = list.length > LK.lim, shown = list.slice(0, LK.lim), pdOn = rows.length && rows[0].src === 'PD';
-    var h = '<div class="msheet"><div class="mhd"><div class="mtop"><div class="mav">' + ic('book') + '</div><div class="mtt"><div class="t1">Tra cứu vaccine</div><div class="t2">' + (LIB.rows ? rows.length + ' vaccine' + (pdOn ? ' · từ Phác đồ & từ điển' : ' · từ Bảng giá (chưa nạp phác đồ)') : 'Đang tải…') + '</div></div><button class="mclose" id="lx" aria-label="Đóng">' + ic('x') + '</button></div></div><div class="mbody">' +
+    var more = list.length > LK.lim, shown = list.slice(0, LK.lim);
+    var h = '<div class="msheet">' + lkHead(lkSubline(rows)) + '<div class="mbody">' +
       '<div class="msearch">' + ic('search') + '<input id="lq" placeholder="Tên vaccine, bệnh, nước sản xuất… (ví dụ Bexsero, HPV, Bỉ)" value="' + esc(LK.q) + '" aria-label="Tìm vaccine"></div>' +
       '<div class="lkf"><select id="la" aria-label="Lứa tuổi">' + LK_AGES.map(function (a) { return '<option value="' + a[0] + '"' + (a[0] === LK.age ? ' selected' : '') + '>' + esc(a[1]) + '</option>' }).join('') + '</select><select id="lb" aria-label="Nhóm bệnh"><option value="">Mọi nhóm bệnh</option>' + order.map(function (g) { return '<option value="' + esc(g) + '"' + (g === LK.benh ? ' selected' : '') + '>' + esc(g.slice(0, 46)) + ' (' + groups[g] + ')</option>' }).join('') + '</select></div>';
     if (LIB.loading && !LIB.rows) h += skeleton();
     else if (!rows.length) h += '<div class="mwarn"><b>Chưa có dữ liệu để tra cứu.</b> ASM nạp Bảng giá hoặc "Phác đồ & từ điển vaccine" ở mục Thư viện thì danh sách sẽ hiện ở đây.</div>';
-    else h += '<div class="mnote"><span>' + list.length + ' kết quả. Chạm vào vaccine để xem hồ sơ.</span></div><div class="mlist">' + (shown.length ? shown.map(function (r) {
-      var d = r.d, age = d.do_tuoi || '', tags = (d.nuoc_sx ? '<span class="mp">' + esc(d.nuoc_sx) + '</span>' : '') + (age ? '<span class="mp ro">' + esc(age.slice(0, 40)) + '</span>' : '');
-      return '<button class="mcard" data-lk="' + esc(r.id) + '"><div class="mc1"><b>' + esc(r.name) + '</b>' + ic('chev') + '</div><div class="mnote" style="margin-top:-2px"><span>' + esc(lkGroup(r).slice(0, 60)) + '</span></div>' + (tags ? '<div class="mtags">' + tags + '</div>' : '') + '</button>'
-    }).join('') + (more ? '<button class="abt o" id="lmore2">Hiện thêm (' + (list.length - LK.lim) + ')</button>' : '') : '<div class="mwarn">Không có vaccine phù hợp bộ lọc.</div>') + '</div>';
-    h += '</div></div>'; lkHost.innerHTML = h; lkHost.querySelector('#lx').onclick = lkClose;
+    else h += '<div class="mnote"><span>' + list.length + ' kết quả. Chạm vào vaccine để xem hồ sơ.</span></div><div class="mlist">' + (shown.length ? shown.map(lkCard).join('') + (more ? '<button class="abt o" id="lmore2">Hiện thêm (' + (list.length - LK.lim) + ')</button>' : '') : '<div class="mwarn">Không có vaccine phù hợp bộ lọc.</div>') + '</div>';
+    h += '</div></div>'; lkHost.innerHTML = h; lkBindHead();
     var li = lkHost.querySelector('#lq'); li.oninput = function () { LK.q = li.value; LK.lim = 30; var pos = li.selectionStart; lkDraw(); var n = lkHost.querySelector('#lq'); n.focus(); n.setSelectionRange(pos, pos) };
     var sa = lkHost.querySelector('#la'); sa.onchange = function () { LK.age = sa.value; LK.lim = 30; lkDraw() }; var sb = lkHost.querySelector('#lb'); sb.onchange = function () { LK.benh = sb.value; LK.lim = 30; lkDraw() };
-    var lm = lkHost.querySelector('#lmore2'); if (lm) lm.onclick = function () { LK.lim += 30; lkDraw() };
-    [].slice.call(lkHost.querySelectorAll('[data-lk]')).forEach(function (b) { b.onclick = function () { LK.sel = b.dataset.lk; lkDraw(); var nb = lkHost.querySelector('.mbody'); if (nb) nb.scrollTop = 0 } })
+    var lm = lkHost.querySelector('#lmore2'); if (lm) lm.onclick = function () { LK.lim += 30; lkDraw() }
   }
-  function lkSec(title, body) { return body ? '<section><div class="mh">' + esc(title) + '</div>' + body + '</section>' : '' }
+  function lkCard(r, extra) {
+    var d = r.d, age = d.do_tuoi || '', pm = r.src === 'PD' || r.src === 'BG' ? lkPriceMin(r) : null, tags = (d.nuoc_sx ? '<span class="mp">' + esc(d.nuoc_sx) + '</span>' : '') + (age ? '<span class="mp ro">' + esc(age.slice(0, 40)) + '</span>' : '') + (extra || '');
+    return '<button class="mcard" data-lk="' + esc(r.id) + '"><div class="mc1"><b>' + esc(r.name) + '</b>' + ic('chev') + '</div><div class="mnote" style="margin-top:-2px"><span>' + esc(lkGroup(r).slice(0, 60)) + '</span></div>' + (tags ? '<div class="mtags">' + tags + '</div>' : '') + '</button>'
+  }
+  /* Tab "Theo tuổi": bé/khách ở tuổi này tiêm được những vaccine nào hiện tại */
+  function lkAgeView() {
+    var rows = lkRows(), pdOn_ = rows.length && rows[0].src === 'PD', pa = lkParseAge(LK.am, LK.av), mode = LK_MODES.filter(function (m) { return m[0] === LK.am })[0];
+    var h = '<div class="msheet">' + lkHead(lkSubline(rows)) + '<div class="mbody"><div class="lkage"><select id="lam" aria-label="Cách nhập tuổi">' + LK_MODES.map(function (m) { return '<option value="' + m[0] + '"' + (m[0] === LK.am ? ' selected' : '') + '>' + esc(m[1]) + '</option>' }).join('') + '</select><input id="lav" inputmode="' + (LK.am === 'ngay' ? 'text' : 'numeric') + '" placeholder="' + esc(mode[2]) + '" value="' + esc(LK.av) + '" aria-label="' + esc(mode[1]) + '" autocomplete="off"></div>';
+    if (LIB.loading && !LIB.rows) h += skeleton();
+    else if (!pdOn_) h += '<div class="mwarn"><b>Chưa nạp "Phác đồ & từ điển vaccine".</b> ASM nạp ở mục Thư viện thì mới tra được vaccine theo tuổi.</div>';
+    else if (!pa) h += '<div class="mnote"><span>Nhập năm sinh, ngày sinh, tuổi hoặc tháng tuổi để xem vaccine tiêm được hiện tại, kèm giá và khuyến mãi hôm nay.</span></div>';
+    else if (pa.err) h += '<div class="mwarn">' + esc(pa.err) + '</div>';
+    else {
+      var kmN = lkKmNames(), a = pa.a, by = {}, ord = [], offBy = {}, offOrd = [], soon = [], total = 0, offN = 0;
+      var gAuto = {}; pdGroups().forEach(function (g) { gAuto[g.key] = g.auto });
+      rows.forEach(function (r) {
+        var nm = oneLine(r.d.nhom_vaccine) || shortName(r.benh) || 'Khác', key = nv(nm).trim(), auto = gAuto[key] !== false, e = lkElig(r, a);
+        if (e) { var tgt = auto ? by : offBy, o = auto ? ord : offOrd; if (!tgt[nm]) { tgt[nm] = []; o.push(nm) } tgt[nm].push({ r: r, e: e }); if (auto) total++; else offN++ }
+        else if (auto) { var q = pdAge(r); if (q.tu > a[1] && q.tu - a[1] <= 45) soon.push(r) }
+      });
+      var card = function (x) {
+        var pm = lkPriceMin(x.r), km = kmN.some(function (n) { return has(n, brandKey(x.r.name)) });
+        return lkCard(x.r, (pm ? '<span class="mp gr">từ ' + esc(money(pm)) + '</span>' : '') + (km ? '<span class="mp or">Có khuyến mãi</span>' : '') + (x.e === 1 ? '<span class="mp zero">tùy ngày sinh</span>' : ''))
+      };
+      h += '<div class="tcard"><div class="tctop"><div class="tt">Khách ' + esc(pa.label) + '</div></div><div class="mtags"><span class="mp gr">' + total + ' vaccine tiêm được hiện tại</span>' + (ord.length ? '<span class="mp">' + ord.length + ' nhóm</span>' : '') + '</div></div>';
+      if (pa.approx && LK.am === 'nam') h += '<div class="mnote"><span>Chỉ biết năm sinh nên có vaccine ghi "tùy ngày sinh". Nhập ngày sinh để chính xác.</span></div>';
+      h += ord.length ? ord.map(function (nm) { return '<section><div class="mh">' + esc(nm) + ' (' + by[nm].length + ')</div><div class="mlist">' + by[nm].map(card).join('') + '</div></section>' }).join('') : '<div class="mwarn">Chưa có vaccine nào trong phác đồ phù hợp tuổi này.</div>';
+      if (soon.length) h += '<section><div class="mh">Sắp đến tuổi (trong 45 ngày)</div><div class="mlist">' + soon.map(function (r) { return lkCard(r) }).join('') + '</div></section>';
+      if (offN) h += '<details class="lkt"><summary><b>Tiêm theo chỉ định riêng (' + offN + ')</b><small>Dại, uốn ván, thương hàn, tả, zona, RSV người lớn… không tự gợi ý theo tuổi, nhưng vẫn tra được</small></summary><div style="padding:0 10px 10px"><div class="mlist">' + offOrd.map(function (nm) { return offBy[nm].map(card).join('') }).join('') + '</div></div></details>';
+      h += '<div class="mnote"><span>Dựa trên tuổi bắt đầu, kết thúc trong phác đồ đã duyệt. Bác sĩ quyết định chỉ định cuối cùng.</span></div>'
+    }
+    h += '</div></div>'; lkHost.innerHTML = h; lkBindHead();
+    var am = lkHost.querySelector('#lam'); am.onchange = function () { LK.am = am.value; LK.av = ''; lkDraw(); var n = lkHost.querySelector('#lav'); if (n) n.focus() };
+    var av = lkHost.querySelector('#lav'); av.oninput = function () { LK.av = av.value; var pos = av.selectionStart; lkDraw(); var n = lkHost.querySelector('#lav'); n.focus(); n.setSelectionRange(pos, pos) }; if (!LK.av && !LK.sel && LK.tab === 'tuoi') av.focus()
+  }
+  function lkSec(title, body, id) { return body ? '<section' + (id ? ' id="' + id + '"' : '') + '><div class="mh">' + esc(title) + '</div>' + body + '</section>' : '' }
+  function lkTpl(o, k) { var t = lkRaw(o.text); LK.cp[k] = t; return '<details class="lkt"><summary><b>' + esc(o.ten) + '</b><small>' + esc(oneLine(t).slice(0, 120)) + '…</small></summary><div class="lkx">' + esc(t).replace(/\n/g, '<br>') + '</div><button class="mlink" data-cp="' + k + '">Sao chép nội dung</button></details>' }
   function lkSummary(row, P, price, km) {
     var d = row.d, L = [row.name + ' – ' + (row.benh || '')]; if (d.do_tuoi) L.push('Độ tuổi: ' + d.do_tuoi); if (d.nuoc_sx) L.push('Nước SX: ' + d.nuoc_sx); if (d.noi_dung_tu_van) L.push('Phác đồ: ' + oneLine(d.noi_dung_tu_van));
     if (P.nc[0]) L.push('Nguy cơ: ' + oneLine(P.nc[0].d.nguy_co).slice(0, 200)); if (price.length) L.push('Giá: ' + price.map(function (r) { return money(r.d.gia) }).join(' / ')); if (km.length) L.push('Khuyến mãi: ' + km.slice(0, 3).map(function (x) { return itemLine(x.d, false, false).replace(/^- /, '') }).join('; '));
     return L.join('\n')
   }
   function lkDetail() {
-    var row = lkRows().filter(function (r) { return r.id === LK.sel })[0]; if (!row) { LK.sel = null; lkList(); return }
-    var V = lkVac(row), P = profile(V), d = row.d, price = lkPrice(row), km = lkKm(row, P), has_ = function (v) { return v != null && String(v).trim() !== '' };
+    var row = lkRows().filter(function (r) { return r.id === LK.sel })[0]; if (!row) { LK.sel = null; lkDraw(); return }
+    var V = lkVac(row), P = profile(V), d = row.d, price = lkPrice(row), km = lkKm(row, P), faq = lkFaq(row, V), has_ = function (v) { return v != null && String(v).trim() !== '' }; LK.cp = {};
     var tu = has_(d.tuoi_bat_dau_ngay) ? Number(d.tuoi_bat_dau_ngay) : null, kt = has_(d.tuoi_ket_thuc_ngay) ? Number(d.tuoi_ket_thuc_ngay) : null, infer = /tự suy/.test(d.ghi_chu || '');
     var age = '';
     if (d.do_tuoi) age += '<div><b>Độ tuổi chỉ định:</b> ' + esc(d.do_tuoi) + '</div>';
     if (tu != null) age += '<div><b>Từ</b> ' + esc(dayLabel(tu)) + ' tuổi' + (kt != null ? ' <b>đến</b> ' + esc(dayLabel(kt)) : ' <b>trở lên</b>') + (infer && kt != null ? ' <span class="mp or">tuổi kết thúc tự suy, chờ bác sĩ</span>' : '') + '</div>';
     if (d.noi_dung_tu_van) age += '<div style="margin-top:6px"><b>Phác đồ tham khảo:</b><br>' + esc(nl(d.noi_dung_tu_van)).replace(/\n/g, '<br>') + '</div>';
     if (d.so_mui) age += '<div><b>Số mũi:</b> ' + esc(d.so_mui) + '</div>'; if (d.khoang_cach_ngay) age += '<div><b>Khoảng cách mũi:</b> ' + esc(d.khoang_cach_ngay) + '</div>';
-    var pro = ''; if (d.chong_chi_dinh) pro += '<div><b>Chống chỉ định / thận trọng:</b> ' + esc(d.chong_chi_dinh) + '</div>'; if (d.phan_ung) pro += '<div><b>Phản ứng sau tiêm thường gặp:</b> ' + esc(d.phan_ung) + '</div>'; if (d.nhom_vaccine) pro += '<div><b>Nhóm vaccine:</b> ' + esc(d.nhom_vaccine) + '</div>';
+    var pro = ''; if (d.chong_chi_dinh) pro += '<div><b>Chống chỉ định / thận trọng:</b> ' + esc(d.chong_chi_dinh) + '</div>'; if (d.phan_ung) pro += '<div><b>Phản ứng sau tiêm thường gặp:</b> ' + esc(d.phan_ung) + '</div>'; if (d.luu_y) pro += '<div><b>Lưu ý khi tiêm:</b> ' + esc(d.luu_y) + '</div>'; if (d.nhom_vaccine) pro += '<div><b>Nhóm vaccine:</b> ' + esc(d.nhom_vaccine) + '</div>';
     var nc = P.nc.map(function (r) { var x = r.d; return '<div class="lkb"><b>' + esc(x.benh) + '</b><div>' + esc(oneLine(x.nguy_co)) + '</div>' + (x.lay_qua ? '<div><b>Lây qua:</b> ' + esc(oneLine(x.lay_qua)) + '</div>' : '') + (x.trieu_chung ? '<div><b>Triệu chứng:</b> ' + esc(oneLine(x.trieu_chung)) + '</div>' : '') + (x.mua_vung ? '<div><b>Mùa & vùng:</b> ' + esc(oneLine(x.mua_vung)) + '</div>' : '') + (x.diem_can_nho ? '<div><b>Cần nhớ:</b> ' + esc(oneLine(x.diem_can_nho)) + '</div>' : '') + '</div>' }).join('');
     var gia = price.map(function (r) { return '<div class="lkr"><span>' + esc(r.d.ten_vaccine) + '</span><b>' + esc(money(r.d.gia)) + '</b></div>' }).join('') + (price[0] && (price[0].d.tu_ngay || price[0].d.den_ngay) ? '<div class="meta">Kỳ áp dụng: ' + esc(dmy(price[0].d.tu_ngay)) + ' – ' + esc(dmy(price[0].d.den_ngay)) + '</div>' : '');
     var kmh = km.map(function (x) { return '<div class="lkb"><b>' + esc(x.g.title) + '</b><div>' + esc(itemLine(x.d, false, false).replace(/^- /, '')) + '</div>' + (x.d.ghi_chu ? '<div class="meta">' + esc(oneLine(x.d.ghi_chu)) + '</div>' : '') + '<div class="meta">Áp dụng đến ' + esc(dmy(x.g.den)) + '</div></div>' }).join('');
-    var tv = P.tv.slice(0, 3).map(function (o) { return '<div class="lkb"><b>' + esc(o.ten) + '</b><div>' + esc(oneLine(o.text).slice(0, 220)) + '…</div></div>' }).join('');
-    var st = (P.st.length ? P.st : []).slice(0, 2).map(function (o) { return '<div class="lkb"><b>' + esc(o.ten) + '</b><div>' + esc(oneLine(o.text).slice(0, 200)) + '…</div></div>' }).join('');
+    var tv = P.tv.map(function (o, i) { return lkTpl(o, 'tv' + i) }).join(''), st = P.st.map(function (o, i) { return lkTpl(o, 'st' + i) }).join('');
+    var refuse = faq.filter(function (x) { return /tu choi|do dap|ngai|khong muon/.test(fk(x.d.loai || '')) }), qa = faq.filter(function (x) { return refuse.indexOf(x) < 0 });
+    var fqItem = function (x, k) { var t = lkRaw(x.d.tra_loi) + (x.d.luu_y ? '\n(Lưu ý: ' + nl(x.d.luu_y) + ')' : ''); LK.cp[k] = lkRaw(x.d.tra_loi); return '<details class="lkt"><summary><b>' + esc(oneLine(x.d.tinh_huong)) + '</b><small>' + (x.gen ? 'Dùng chung mọi vaccine · ' : '') + esc(oneLine(lkRaw(x.d.tra_loi)).slice(0, 100)) + '…</small></summary><div class="lkx">' + esc(t).replace(/\n/g, '<br>') + (x.d.nguon ? '<div class="meta" style="margin-top:6px">Nguồn: ' + esc(oneLine(x.d.nguon)) + '</div>' : '') + '</div><button class="mlink" data-cp="' + k + '">Sao chép câu trả lời</button></details>' };
+    var hd = (refuse.length ? '<div class="mh mh2">Khi khách từ chối, do dự (' + refuse.length + ')</div>' + refuse.map(function (x, i) { return fqItem(x, 'fr' + i) }).join('') : '') + (qa.length ? '<div class="mh mh2">Khách hay hỏi (' + qa.length + ')</div>' + qa.map(function (x, i) { return fqItem(x, 'fq' + i) }).join('') : '');
+    var nav = [['lks-pd', 'Phác đồ'], ['lks-gia', 'Giá & khuyến mãi'], ['lks-tv', 'Tư vấn' + (P.tv.length ? ' (' + P.tv.length + ')' : '')], ['lks-hd', 'Hỏi đáp, từ chối' + (faq.length ? ' (' + faq.length + ')' : '')], ['lks-st', 'Sau tiêm' + (P.st.length ? ' (' + P.st.length + ')' : '')]];
     var h = '<div class="msheet"><div class="mhd"><div class="mtop"><button class="mclose" id="lb2" aria-label="Quay lại">' + ic('back') + '</button><div class="mtt"><div class="t1">' + esc(row.name) + '</div><div class="t2">' + esc(lkGroup(row)) + '</div></div><button class="mclose" id="lx" aria-label="Đóng">' + ic('x') + '</button></div></div><div class="mbody">' +
       '<div class="tcard"><div class="mtags" style="margin-top:0">' + (d.nuoc_sx ? '<span class="mp">Nước SX: ' + esc(d.nuoc_sx) + '</span>' : '') + (row.benh ? '<span class="mp ro lkw">' + esc(row.benh.slice(0, 120)) + '</span>' : '') + '</div></div>' +
-      lkSec('Độ tuổi & phác đồ', age ? '<div class="ls lkp">' + age + '</div>' : '<div class="mnote"><span>Chưa có tuổi, phác đồ trong kho cho vaccine này.</span></div>') + lkSec('Lưu ý chuyên môn', pro ? '<div class="ls lkp">' + pro + '</div>' : '<div class="mnote"><span>Chưa có chống chỉ định, phản ứng sau tiêm trong kho (ASM bổ sung ở Thư viện → Phác đồ & từ điển vaccine).</span></div>') +
-      lkSec('Nguy cơ & đường lây', nc || '<div class="mnote"><span>Kho Nguy cơ chưa có bệnh này.</span></div>') + lkSec('Giá niêm yết', gia) + lkSec('Khuyến mãi còn hiệu lực hôm nay', kmh || '<div class="mnote"><span>Hôm nay chưa có khuyến mãi cho vaccine này.</span></div>') + lkSec('Câu tư vấn gợi ý (' + P.tv.length + ')', tv || '<div class="mnote"><span>Kho chưa có mẫu tư vấn riêng.</span></div>') + lkSec('Tin CSKH sau tiêm (' + P.st.length + ')', st) +
+      '<div class="lkn">' + nav.map(function (n) { return '<button data-go="' + n[0] + '">' + esc(n[1]) + '</button>' }).join('') + '</div>' +
+      lkSec('Độ tuổi & phác đồ', age ? '<div class="ls lkp">' + age + '</div>' : '<div class="mnote"><span>Chưa có tuổi, phác đồ trong kho cho vaccine này.</span></div>', 'lks-pd') + lkSec('Lưu ý chuyên môn', pro ? '<div class="ls lkp">' + pro + '</div>' : '<div class="mnote"><span>Chưa có chống chỉ định, phản ứng sau tiêm trong kho (ASM bổ sung ở Thư viện → Phác đồ & từ điển vaccine).</span></div>') +
+      lkSec('Nguy cơ & đường lây', nc || '<div class="mnote"><span>Kho Nguy cơ chưa có bệnh này.</span></div>') + lkSec('Giá niêm yết', gia || '<div class="mnote"><span>Bảng giá chưa có vaccine này.</span></div>', 'lks-gia') + lkSec('Khuyến mãi còn hiệu lực hôm nay', kmh || '<div class="mnote"><span>Hôm nay chưa có khuyến mãi cho vaccine này.</span></div>') +
+      lkSec('Mẫu tư vấn (' + P.tv.length + ')', tv || '<div class="mnote"><span>Kho chưa có mẫu tư vấn riêng cho vaccine này.</span></div>', 'lks-tv') +
+      lkSec('Hỏi đáp & xử lý từ chối', hd || '<div class="mnote"><span>Kho chưa có hỏi đáp, tình huống từ chối cho vaccine này. ASM nạp ở Thư viện → "Hỏi đáp & xử lý từ chối".</span></div>', 'lks-hd') +
+      lkSec('Tin CSKH sau tiêm (' + P.st.length + ')', st || '<div class="mnote"><span>Kho chưa có tin sau tiêm riêng cho vaccine này.</span></div>', 'lks-st') +
       '<div class="mnote"><span>Nội dung do ASM duyệt trong Thư viện. App chỉ tra cứu và gợi ý, không thay chỉ định của bác sĩ.</span></div></div><div class="mft"><div class="act2">' + (LK.fromSheet ? '<button class="abt p" id="luse">' + ic('chat') + '<span><b>Dùng cho tin nhắn</b><small>tự điền đúng vaccine này</small></span></button>' : '') + '<button class="abt g" id="lcopy">' + ic('copy') + '<span><b>Sao chép tóm tắt</b><small>gửi cho đồng nghiệp</small></span></button></div></div></div>';
     lkHost.innerHTML = h; lkHost.querySelector('#lx').onclick = lkClose; lkHost.querySelector('#lb2').onclick = function () { LK.sel = null; lkDraw() };
     var cp = lkHost.querySelector('#lcopy'); if (cp) cp.onclick = function () { copy(lkSummary(row, P, price, km)); toast('Đã chép tóm tắt ' + row.name) };
+    [].slice.call(lkHost.querySelectorAll('[data-cp]')).forEach(function (b) { b.onclick = function () { copy(LK.cp[b.dataset.cp] || ''); toast('Đã sao chép') } });
+    [].slice.call(lkHost.querySelectorAll('[data-go]')).forEach(function (b) { b.onclick = function () { var el = lkHost.querySelector('#' + b.dataset.go); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } });
     var us = lkHost.querySelector('#luse'); if (us) us.onclick = function () { lkClose(); if (S && host) setVaccine(lkVac(row)) }
   }
 
-  return { open: open, counters: counters, scriptBlock: scriptBlock, preview: preview, fill: fill, dueRules: dueRules, custDays: custDays, dayLabel: dayLabel, VARS: VARS, VARDESC: VARDESC, STEPS: STEPS, GROUPS: GROUPS, ensureLib: ensureLib, linkReport: linkReport, lookup: lookup, _t: { audFit: audFit, ctkmGroups: ctkmGroups, ctkmText: ctkmText, ncText: ncText, itemsOf: itemsOf, libRows: libRows, isBau: isBau, LIB: LIB, nv: nv, phrasesOf: phrasesOf, brandKey: brandKey, mkVRule: mkVRule, mkVbg: mkVbg, profile: profile, bgIndex: bgIndex, linkReport: linkReport } }
+  return { open: open, counters: counters, scriptBlock: scriptBlock, preview: preview, fill: fill, dueRules: dueRules, soonRules: soonRules, pdInfo: pdInfo, custDays: custDays, dayLabel: dayLabel, VARS: VARS, VARDESC: VARDESC, STEPS: STEPS, GROUPS: GROUPS, ensureLib: ensureLib, linkReport: linkReport, lookup: lookup, _t: { audFit: audFit, ctkmGroups: ctkmGroups, ctkmText: ctkmText, ncText: ncText, itemsOf: itemsOf, libRows: libRows, isBau: isBau, LIB: LIB, nv: nv, phrasesOf: phrasesOf, brandKey: brandKey, mkVRule: mkVRule, mkVbg: mkVbg, profile: profile, bgIndex: bgIndex, linkReport: linkReport } }
 })();
 
 ;
