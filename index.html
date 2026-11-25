@@ -384,8 +384,10 @@ $('#lf').onsubmit=function(ev){ev.preventDefault();var b=$('#lbtn');b.disabled=t
 addEventListener('resize',function(){if(ME&&D)render()});
 function dsig(){return D?D.turns.length+':'+D.tt.length+':'+D.turns.map(function(t){return t.ma_luot+t.trang_thai+(t.d_xong||'')}).join(','):''}
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&ME&&D&&Date.now()-loadedAt>30000){var s0=dsig();load(true).then(function(){if(dsig()!==s0)render()},function(){})}});
+/* bấm vào bất kỳ chỗ nào của ô ngày thì mở bảng chọn lịch */
+document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261125v"></script>
+<script src="app.js?v=20261125w"></script>
 </body>
 </html>
