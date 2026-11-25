@@ -4,7 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1D8787">
-<title>LC TCQG HUB – Khu làm việc</title>
+<title>Vaxora Care · Chăm sóc khách tiêm chủng KV19</title>
+<meta name="description" content="Vaxora Care · Công cụ chăm sóc khách tiêm chủng khu vực 19. One · Reach · Access.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Vaxora Care">
+<meta property="og:title" content="Vaxora Care · Chăm sóc khách tiêm chủng KV19">
+<meta property="og:description" content="Công cụ chăm sóc khách tiêm chủng khu vực 19. One · Reach · Access.">
+<meta name="apple-mobile-web-app-title" content="Vaxora Care"><meta name="application-name" content="Vaxora Care">
+<script>
+/* BỘ NHẬN DIỆN: đổi tên, mô tả, người biên soạn, phiên bản ở MỘT chỗ này */
+window.BRAND={ten:'Vaxora',app:'Vaxora Care',nghia:'One · Reach · Access',mota:'Công cụ chăm sóc khách tiêm chủng khu vực 19',kv:'Khu vực 19',tacgia:'HaiDT9',ver:'1.0',ngay:'25/11/2026'};
+BRAND.build=function(){var s=[].slice.call(document.scripts).map(function(x){return x.src}).filter(function(x){return /app\.js/.test(x)})[0]||'',m=/v=([0-9a-z]+)/.exec(s);return m?m[1]:'dev'};
+BRAND.vtext=function(){return 'v'+BRAND.ver+' · '+BRAND.ngay};
+BRAND.line=function(){return '<b>'+BRAND.app+'</b> · '+BRAND.kv+'<br>Biên soạn: '+BRAND.tacgia+' · '+BRAND.vtext()};
+</script>
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
 :root{--teal:#1D8787;--teal-d:#146767;--navy:#082A3E;--orange:#FD8206;--ink:#101519;--muted:#455768;--soft:#7a8b9b;--line:#E0E5EB;--bg:#F3F5F7;--tint:#E6F7FA;--card:#fff;
@@ -33,6 +46,7 @@ main{min-width:0;display:grid;gap:14px;align-content:start}main>*{min-width:0;ma
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line);padding:16px}.card h2{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.st{padding:14px}.st .l{color:var(--muted);font-size:13.5px}.st .v{font-size:28px;font-weight:700;letter-spacing:-.8px}
 .pill{font-size:11.5px;background:var(--tint);color:var(--teal-d);border-radius:99px;padding:2px 9px;font-weight:600}
+.vx{margin-top:18px;text-align:center;color:var(--soft);font-size:12px;line-height:1.6}.vx b{color:var(--muted)}.vxc{margin-top:14px;padding:12px 14px;border-radius:14px;background:var(--bg);font-size:12.5px;line-height:1.6;color:var(--muted);cursor:pointer}.vxc b{display:block;color:var(--ink);font-size:14px}.vxc em{font-style:normal;color:var(--teal-d);font-weight:600}
 .alert{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:var(--bg);margin-bottom:8px;font-size:14px}.alert i{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:none;font-style:normal;background:var(--tint)}.alert small{display:block;color:var(--muted)}
 .a-bad i{background:var(--bad-bg);color:var(--bad)}.a-warn i{background:var(--warn-bg);color:var(--warn)}
 .two{display:grid;grid-template-columns:1.3fr 1fr;gap:12px}
@@ -99,12 +113,14 @@ html,body{max-width:100%;overflow-x:hidden}
 <div class="env" id="env">Bản thử · dữ liệu giả · Supabase Singapore</div>
 <section class="login" id="login" hidden>
   <form class="lcard" id="lf" autocomplete="on">
-    <div id="llogo"></div><h1>Đăng nhập</h1><p>Khu làm việc chăm sóc khách hàng</p>
+    <div id="llogo"></div><h1>Đăng nhập</h1><p>Vaxora Care · Khu làm việc chăm sóc khách hàng</p>
     <label class="field">Email công ty<input id="em" type="email" autocomplete="username" required placeholder="ten@congty.vn"></label>
     <label class="field">Mã PIN / mật khẩu<input id="pw" type="password" autocomplete="current-password" required></label>
     <div class="err" id="lerr" hidden></div>
     <button class="btn b1" id="lbtn" style="width:100%" type="submit">Đăng nhập</button>
+    <div class="vx" id="lvx"></div>
   </form>
+<script>document.getElementById("lvx").innerHTML=BRAND.line()</script>
 </section>
 <div class="shell" id="shell" hidden><aside class="side" id="side"></aside><main id="main"></main></div>
 <nav class="tabs" id="tabs" hidden></nav>
@@ -159,7 +175,7 @@ function shell(){var n=nav(),open=D.turns.filter(function(t){return mine_(t)&&op
  var tm=$('#tmore');if(tm)tm.onclick=function(){var d=document.createElement('div');d.className='modal';d.innerHTML='<div class="card" style="width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom))"><h2 style="font-size:17px;margin:2px 4px 8px">Thêm</h2>'+rest_.map(function(x){return '<button class="nav '+(S.page===x[0]?'on':'')+'" data-mp="'+x[0]+'">'+ic(x[2])+x[1]+'</button>'}).join('')+'</div>';document.body.appendChild(d);d.onclick=function(e){if(e.target===d)d.remove()};[].slice.call(d.querySelectorAll('[data-mp]')).forEach(function(b){b.onclick=function(){S.page=b.dataset.mp;S.sel=null;S.open=false;d.remove();render()}})};
  document.querySelectorAll('[data-p]').forEach(function(e){e.onclick=function(){S.page=e.dataset.p;S.sel=null;S.open=false;render()}})}
 function ini(s){var p=String(s||'?').replace(/\s*\([^)]*\)/g,'').trim().split(/\s+/);return (p[0][0]||'')+(p.length>1?p[p.length-1][0]:'')}
-function mtop(){return '<div class="mtop">'+LOGO+'<div class="sp"></div><button class="ibtn" id="lkbtn" aria-label="Tra cứu vaccine" title="Tra cứu vaccine">'+ic('book')+'</button><div class="ava">'+esc(ini(ME.ho_ten))+'</div></div>'}
+function mtop(){return '<div class="mtop">'+LOGO+'<div class="sp"></div><button class="ibtn" id="lkbtn" aria-label="Từ điển vaccine" title="Từ điển vaccine">'+ic('book')+'</button><div class="ava">'+esc(ini(ME.ho_ten))+'</div></div>'}
 /* ===== Hôm nay ===== */
 function today(){var M=D.turns.filter(mine_),ql=ME.vai_tro==='QUAN_LY',now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
  var cnt={need:0,back:0,done:0};M.forEach(function(t){cnt[catOf(t)]++});
@@ -251,13 +267,13 @@ function histPage(){var it=[];D.events.forEach(function(e){it.push({d:e.d,a:(({G
 function teamPage(){var st=shopStaff();return mtop()+'<div class="greet"><h1>Đội ngũ</h1><p>Tiến độ từng người trong Shop.</p></div><div class="card" style="padding:6px 8px"><table><thead><tr><th>Nhân viên</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Đồng ý tiêm</th><th>Liên hệ gần nhất</th></tr></thead><tbody>'+st.map(function(x){return '<tr><td><b>'+esc(nm(x.ma))+'</b></td><td>'+x.tong+'</td><td>'+x.mo+'</td><td>'+x.xong+'</td><td>'+x.dong_y+'</td><td>'+(x.lq?ago(x.lq):'chưa có')+'</td></tr>'}).join('')+'</tbody></table></div>'}
 function kpiPage(){var M=D.turns.filter(mine_),xong=M.filter(function(t){return t.trang_thai==='HOAN_THANH'}),dy=xong.filter(function(t){var c=cat(t.ma_ket_qua);return c&&c.ma==='DONG_Y'}).length;
  return mtop()+'<div class="greet"><h1>KPI</h1><p>Chỉ số tạm để xem. Công thức KPI chính thức chưa chốt nên chưa dùng để đánh giá.</p></div><div class="stats"><div class="card st"><div class="l">Được giao</div><div class="v">'+M.length+'</div></div><div class="card st"><div class="l">Hoàn thành</div><div class="v">'+xong.length+'</div></div><div class="card st"><div class="l">Đồng ý tiêm</div><div class="v">'+dy+'</div></div><div class="card st"><div class="l">Tỷ lệ đồng ý / hoàn thành</div><div class="v">'+(xong.length?Math.round(dy/xong.length*100)+'%':'–')+'</div></div></div>'}
-function accPage(){return mtop()+'<div class="greet"><h1>Tài khoản</h1></div><div class="card"><div class="alert"><div class="ava">'+esc(ini(ME.ho_ten))+'</div><div><b>'+esc(ME.ho_ten)+'</b><small>'+esc(ME.email)+' · '+(ME.vai_tro==='QUAN_LY'?'Quản lý':'Nhân viên')+' · '+esc(shopName(ME.id_shop))+'</small></div></div><label class="field" style="display:block;margin-bottom:12px">SĐT của anh/chị (hiện trong chữ ký mọi tin nhắn gửi khách)<div class="row" style="margin-top:6px"><input id="mysdt" type="tel" inputmode="tel" value="'+esc(ME.sdt||'')+'" placeholder="Ví dụ 0912345678" autocomplete="tel" style="flex:1;min-width:0"><button class="btn b1" id="sdtsave" style="flex:none">Lưu</button></div></label><button class="btn b3" id="cpw" style="width:100%;margin-bottom:8px">Đổi mật khẩu</button><button class="btn b3" id="out" style="width:100%">Đăng xuất</button></div>'}
+function accPage(){return mtop()+'<div class="greet"><h1>Tài khoản</h1></div><div class="card"><div class="alert"><div class="ava">'+esc(ini(ME.ho_ten))+'</div><div><b>'+esc(ME.ho_ten)+'</b><small>'+esc(ME.email)+' · '+(ME.vai_tro==='QUAN_LY'?'Quản lý':'Nhân viên')+' · '+esc(shopName(ME.id_shop))+'</small></div></div><label class="field" style="display:block;margin-bottom:12px">SĐT của anh/chị (hiện trong chữ ký mọi tin nhắn gửi khách)<div class="row" style="margin-top:6px"><input id="mysdt" type="tel" inputmode="tel" value="'+esc(ME.sdt||'')+'" placeholder="Ví dụ 0912345678" autocomplete="tel" style="flex:1;min-width:0"><button class="btn b1" id="sdtsave" style="flex:none">Lưu</button></div></label><button class="btn b3" id="cpw" style="width:100%;margin-bottom:8px">Đổi mật khẩu</button><button class="btn b3" id="out" style="width:100%">Đăng xuất</button><div class="vxc" id="vxc" role="button" tabindex="0" title="Chạm để sao chép phiên bản"><b>'+BRAND.app+'</b>'+BRAND.mota+'<br><em>'+BRAND.nghia+'</em><br>Biên soạn: '+BRAND.tacgia+' · '+BRAND.kv+'<br>'+BRAND.vtext()+' · bản dựng '+BRAND.build()+'</div></div>'}
 /* ===== Vẽ và gắn sự kiện ===== */
 function render(){if(!ME||!D)return;if(ME.vai_tro==='ASM'&&window.ASM){ASM.render();if(window.PGR)PGR.run();return}shell();var m=$('#main'),p=S.page;m.innerHTML=({today:today,data:dataPage,hist:histPage,team:teamPage,kpi:kpiPage,acc:accPage}[p]||today)();bind();if(S.sel)showDetail();if(window.PGR)PGR.run()}
 function bind(){var gq=$('#gq');if(gq)gq.oninput=function(){S.q=gq.value;var pos=gq.selectionStart;render();var n=$('#gq');if(n){n.focus();n.setSelectionRange(pos,pos)}};
  document.querySelectorAll('.chip[data-t]').forEach(function(b){b.onclick=function(){S.tab=b.dataset.t;S.sel=null;render()}});document.querySelectorAll('.chip[data-s]').forEach(function(b){b.onclick=function(){S.scope=b.dataset.s;render()}});document.querySelectorAll('.chip[data-f]').forEach(function(b){b.onclick=function(){S.filter=b.dataset.f;render()}});
  document.querySelectorAll('.q,tr.click').forEach(function(el){el.onclick=function(e){if(e.target.closest('[data-stop]'))return;S.sel=el.dataset.id;S.open=innerWidth<960;render()}});
- var ch=$('#chia');if(ch)ch.onclick=chiaSheet;document.querySelectorAll('[data-nhan]').forEach(function(b){b.onclick=function(e){e.stopPropagation();var t=D.turns.filter(function(x){return x.ma_luot===b.dataset.nhan})[0];if(t&&window.MSG)MSG.open(t,0)}});var lkb=$('#lkbtn');if(lkb)lkb.onclick=function(){if(window.MSG)MSG.lookup()};var cw=$('#cpw');if(cw)cw.onclick=pwModal;var sv=$('#sdtsave');if(sv)sv.onclick=saveMyPhone;var o=$('#out');if(o)o.onclick=logout}
+ var ch=$('#chia');if(ch)ch.onclick=chiaSheet;document.querySelectorAll('[data-nhan]').forEach(function(b){b.onclick=function(e){e.stopPropagation();var t=D.turns.filter(function(x){return x.ma_luot===b.dataset.nhan})[0];if(t&&window.MSG)MSG.open(t,0)}});var lkb=$('#lkbtn');if(lkb)lkb.onclick=function(){if(window.MSG)MSG.lookup()};var cw=$('#cpw');if(cw)cw.onclick=pwModal;var vxc=$('#vxc');if(vxc)vxc.onclick=function(){copy(BRAND.app+' '+BRAND.vtext()+' · bản dựng '+BRAND.build());toast('Đã sao chép phiên bản')};var sv=$('#sdtsave');if(sv)sv.onclick=saveMyPhone;var o=$('#out');if(o)o.onclick=logout}
 function toast(t,u,bad){clearTimeout(timer);var e=$('#toast');e.className='toast on'+(bad?' bad':'');$('#tt').textContent=t;$('#undo').hidden=true;timer=setTimeout(function(){e.classList.remove('on')},bad?5000:2200)}
 /* ===== Đăng nhập, khởi động ===== */
 function showLogin(msg){ME=null;D=null;$('#shell').hidden=true;$('#tabs').hidden=true;$('#login').hidden=false;$('#llogo').innerHTML=LOGO;var e=$('#lerr');e.hidden=!msg;e.textContent=msg||''}
@@ -272,6 +288,6 @@ addEventListener('resize',function(){if(ME&&D)render()});
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&ME&&D&&Date.now()-loadedAt>30000)load(true).then(render,function(){})});
 start();
 </script>
-<script src="app.js?v=20261124o"></script>
+<script src="app.js?v=20261125c"></script>
 </body>
 </html>
