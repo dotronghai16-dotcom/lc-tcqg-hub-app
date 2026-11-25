@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125r) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125s) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -287,7 +287,7 @@ var ASM = (function () {
   function qlOf(id) { var q = staffOf(id).filter(function (a) { return a.vai_tro === 'QUAN_LY' }).map(function (a) { return a.ho_ten }); return q.length ? q.join(', ') : '–' }
   function turnsByCust() { var m = {}; D.turns.forEach(function (t) { (m[t.ma_khach] = m[t.ma_khach] || []).push(t) }); return m }
   function custState(ts) { if (!ts || !ts.length) return 'kho'; return ts.some(open_) ? 'dang' : 'xong' }
-  function yes(t) { var c = cat(t.ma_ket_qua); return t.trang_thai === 'HOAN_THANH' && c && c.ma === 'DONG_Y' }
+  function yes(t) { return tdt(t) }
   function pct(a, b) { return b ? Math.round(a / b * 100) : 0 }
   function sel(id, opts, val) { return '<select id="' + id + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(val) ? ' selected' : '') + '>' + esc(o[1]) + '</option>' }).join('') + '</select>' }
 
@@ -319,17 +319,17 @@ var ASM = (function () {
     var all = statsFor(ST.shop), first = ME.ho_ten.trim().split(/\s+/).pop(), SH = shops();
     var h = head('Chào anh ' + esc(first) + ', khu vực có <span style="color:var(--teal)">' + SH.length + ' Shop</span>', 'Tổng hợp toàn khu vực · ' + new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }),
       '<div style="display:flex;gap:8px;align-items:center"><span class="meta">Shop:</span>' + sel('fshop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), ST.shop) + '</div>');
-    h += '<div class="stats stats6">' + [['Khách trong kho', tot], ['Chưa giao', kho], ['Đang giữ', all.mo], ['Hoàn thành', all.xong], ['Đồng ý tiêm', all.dy], ['Quá hạn gọi', all.qh]].map(function (x, i) { return '<div class="card st"><div class="l">' + x[0] + '</div><div class="v"' + (i === 5 && x[1] ? ' style="color:var(--bad)"' : '') + '>' + x[1] + '</div></div>' }).join('') + '</div>';
+    h += '<div class="stats stats6">' + [['Khách trong kho', tot], ['Chưa giao', kho], ['Đang giữ', all.mo], ['Hoàn thành', all.xong], ['Hẹn / đã tiêm', all.dy], ['Quá hạn gọi', all.qh]].map(function (x, i) { return '<div class="card st"><div class="l">' + x[0] + '</div><div class="v"' + (i === 5 && x[1] ? ' style="color:var(--bad)"' : '') + '>' + x[1] + '</div></div>' }).join('') + '</div>';
     var al = '';
     if (kho) al += '<div class="alert"><i>▦</i><div><b>' + kho + ' khách chưa được giao</b><small>Đang nằm trong kho</small></div><button class="btn b2" data-go="a_kho" style="min-height:38px;margin-left:auto">Phân công</button></div>';
     if (all.chia) al += '<div class="alert a-warn"><i>⇄</i><div><b>' + all.chia + ' lượt giao cho Shop chờ chia</b><small>Quản lý chia khi bạn bật quyền cho lần giao đó</small></div><button class="btn b2" data-go="a_pc" style="min-height:38px;margin-left:auto">Xem lần giao</button></div>';
     if (all.qh) al += '<div class="alert a-bad"><i>⚠</i><div><b>' + all.qh + ' lượt quá hạn liên hệ</b><small>Tính từ "Ngày cần liên hệ" của từng lượt</small></div></div>';
     h += '<div class="card"><h2>Cần chú ý</h2>' + (al || '<div class="alert"><i>✓</i><div><b>Chưa có gì cần chú ý</b></div></div>') + '</div>';
-    h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">So sánh các Shop <span class="pill">bấm một Shop để xem nhân viên</span></h2><div class="tw"><table><thead><tr><th>Shop</th><th>Quản lý</th><th>NV</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Đồng ý tiêm</th><th style="min-width:120px">Tiến độ</th><th>Quá hạn</th></tr></thead><tbody>' +
+    h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">So sánh các Shop <span class="pill">bấm một Shop để xem nhân viên</span></h2><div class="tw"><table><thead><tr><th>Shop</th><th>Quản lý</th><th>NV</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Hẹn / đã tiêm</th><th style="min-width:120px">Tiến độ</th><th>Quá hạn</th></tr></thead><tbody>' +
       SH.map(function (s) { var x = statsFor(s.id_shop); return '<tr class="click" data-shop="' + esc(s.id_shop) + '"' + (ST.shop === s.id_shop ? ' style="background:var(--tint)"' : '') + '><td><b>' + esc(s.ten_shop) + '</b><small>' + esc(s.ma_shop) + '</small></td><td>' + esc(qlOf(s.id_shop)) + '</td><td>' + staffOf(s.id_shop).length + '</td><td>' + x.luot + '</td><td>' + x.mo + '</td><td>' + x.xong + '</td><td>' + x.dy + '</td><td><div class="bar" style="height:6px;border-radius:99px;background:var(--bg);overflow:hidden"><i style="display:block;height:100%;width:' + pct(x.xong, x.luot) + '%;background:var(--teal)"></i></div><small>' + pct(x.xong, x.luot) + '%</small></td><td>' + (x.qh ? '<span class="tag t-late">' + x.qh + '</span>' : '0') + '</td></tr>' }).join('') + '</tbody></table></div></div>';
     if (ST.shop) {
       var staff = staffOf(ST.shop);
-      h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">Nhân viên · ' + esc(shopName(ST.shop)) + '</h2><div class="tw"><table><thead><tr><th>Nhân viên</th><th>Chức danh</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Đồng ý tiêm</th><th>Quá hạn</th></tr></thead><tbody>' + staff.map(function (a) {
+      h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">Nhân viên · ' + esc(shopName(ST.shop)) + '</h2><div class="tw"><table><thead><tr><th>Nhân viên</th><th>Chức danh</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Hẹn / đã tiêm</th><th>Quá hạn</th></tr></thead><tbody>' + staff.map(function (a) {
         var T = D.turns.filter(function (t) { return t.recipient_type === 'EMPLOYEE' && t.ma_tk_nhan === a.ma_tk }), mo = T.filter(open_).length, xx = T.filter(function (t) { return t.trang_thai === 'HOAN_THANH' }).length, dy = T.filter(yes).length, qh = T.filter(function (t) { return overdueDays(t) > 0 }).length;
         return '<tr><td><b>' + esc(a.ho_ten) + '</b></td><td>' + (a.vai_tro === 'QUAN_LY' ? 'Quản lý' : 'Nhân viên') + '</td><td>' + T.length + '</td><td>' + mo + '</td><td>' + xx + '</td><td>' + dy + '</td><td>' + (qh ? '<span class="tag t-late">' + qh + '</span>' : '0') + '</td></tr>' }).join('') + '</tbody></table></div></div>';
     }
@@ -444,7 +444,7 @@ var ASM = (function () {
     T.forEach(function (t) { var k = t.recipient_type === 'EMPLOYEE' ? t.ma_tk_nhan : 'SHOP:' + t.id_shop, r = by[k] = by[k] || { k: k, t: t, n: 0, mo: 0, xong: 0, dy: 0 }; r.n++; if (open_(t)) r.mo++; if (t.trang_thai === 'HOAN_THANH') r.xong++; if (yes(t)) r.dy++ });
     var h = head('Kết quả & xuất', 'Xem kết quả theo nhân viên và xuất dữ liệu ra file CSV (mở được bằng Excel).', '');
     h += '<div class="top" style="flex-wrap:wrap">' + sel('bshop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), ST.bcShop) + sel('bst', [['', 'Mọi trạng thái'], ['MO', 'Đang mở'], ['HOAN_THANH', 'Hoàn thành'], ['THU_HOI', 'Đã thu hồi']], ST.bcSt) + '<span class="sp"></span><button class="btn b1" id="xl">' + ic('download') + 'Xuất theo lượt (' + T.length + ')</button><button class="btn b3" id="xn">Xuất theo nhân viên</button></div>';
-    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Người nhận</th><th>Shop</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Đồng ý tiêm</th><th>Tỷ lệ đồng ý / hoàn thành</th></tr></thead><tbody>' + Object.keys(by).map(function (k) { return by[k] }).sort(function (a, b) { return b.n - a.n }).map(function (r) {
+    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Người nhận</th><th>Shop</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Hẹn / đã tiêm</th><th>Tỷ lệ hẹn / hoàn thành</th></tr></thead><tbody>' + Object.keys(by).map(function (k) { return by[k] }).sort(function (a, b) { return b.n - a.n }).map(function (r) {
       return '<tr><td><b>' + esc(r.k.indexOf('SHOP:') === 0 ? 'Cả Shop (chưa chia)' : nm(r.k)) + '</b></td><td>' + esc(shopName(r.t.id_shop)) + '</td><td>' + r.n + '</td><td>' + r.mo + '</td><td>' + r.xong + '</td><td>' + r.dy + '</td><td>' + (r.xong ? pct(r.dy, r.xong) + '%' : '–') + '</td></tr>' }).join('') + '</tbody></table></div></div>';
     return h
   }
