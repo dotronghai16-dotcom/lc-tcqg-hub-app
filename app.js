@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125t) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125v) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -2039,7 +2039,7 @@ var MSG = (function () {
   function lkParseAge(mode, v) {
     v = String(v || '').trim(); if (!v) return null; var now = new Date(), y = now.getFullYear(), t0 = Date.UTC(y, now.getMonth(), now.getDate()), D1 = 86400000, m, n;
     if (mode === 'nam') { n = Number(v); if (!/^\d{4}$/.test(v) || n < 1900 || n > y) return { err: 'Năm sinh gồm 4 chữ số, từ 1900 đến ' + y + '.' }; return { a: [Math.max(0, Math.round((t0 - Date.UTC(n, 11, 31)) / D1)), Math.round((t0 - Date.UTC(n, 0, 1)) / D1)], label: 'sinh năm ' + n + ' (' + (y - n) + ' tuổi)', approx: true } }
-    if (mode === 'ngay') { m = /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/.exec(v); if (!m) return { err: 'Nhập ngày sinh dạng 15/03/2024.' }; var b = Date.UTC(+m[3], +m[2] - 1, +m[1]); if (isNaN(b) || new Date(b).getUTCDate() !== +m[1] || b > t0) return { err: 'Ngày sinh không hợp lệ.' }; var d = Math.round((t0 - b) / D1); return { a: [d, d], label: 'sinh ' + v + ' · ' + dayLabel(d) } }
+    if (mode === 'ngay') { var iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); if (iso) v = +iso[3] + '/' + +iso[2] + '/' + iso[1]; m = /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/.exec(v); if (!m) return { err: 'Nhập ngày sinh dạng 15/03/2024.' }; var b = Date.UTC(+m[3], +m[2] - 1, +m[1]); if (isNaN(b) || new Date(b).getUTCDate() !== +m[1] || b > t0) return { err: 'Ngày sinh không hợp lệ.' }; var d = Math.round((t0 - b) / D1); return { a: [d, d], label: 'sinh ' + v + ' · ' + dayLabel(d) } }
     n = Math.floor(Number(v.replace(',', '.'))); if (isNaN(n) || n < 0 || n > 120) return { err: 'Nhập một số từ 0 đến 120.' };
     if (mode === 'tuoi') return { a: [Math.round(n * 365.25), Math.round((n + 1) * 365.25) - 1], label: 'đã tròn ' + n + ' tuổi', approx: true };
     return { a: [Math.round(n * 30.4375), Math.round((n + 1) * 30.4375) - 1], label: 'đã tròn ' + n + ' tháng', approx: true }
@@ -2057,7 +2057,7 @@ var MSG = (function () {
     return out.sort(function (a, b) { return (a.gen ? 1 : 0) - (b.gen ? 1 : 0) })
   }
   function lookup(opts) {
-    if (lkHost) return; opts = opts || {}; LK = { tab: opts.tab || 'tim', q: opts.q || '', age: '', benh: '', lim: 30, sel: null, fromSheet: !!(S && host), am: 'nam', av: '', cp: {} };
+    if (lkHost) return; opts = opts || {}; LK = { tab: opts.tab || 'tim', q: opts.q || '', age: '', benh: '', lim: 30, sel: null, fromSheet: !!(S && host), am: 'nam', av: '', done: {}, doneOpen: false, cp: {} };
     lkHost = document.createElement('div'); lkHost.className = 'modal mm first'; lkHost.style.zIndex = 60; lkHost.onclick = function (e) { if (e.target === lkHost) lkClose() }; document.body.appendChild(lkHost);
     document.addEventListener('keydown', lkKey); setTimeout(function () { if (lkHost) lkHost.classList.remove('first') }, 450); loadLib(); lkDraw()
   }
@@ -2100,7 +2100,25 @@ var MSG = (function () {
   /* Tab "Theo tuổi": bé/khách ở tuổi này tiêm được những vaccine nào hiện tại */
   function lkAgeView() {
     var rows = lkRows(), pdOn_ = rows.length && rows[0].src === 'PD', pa = lkParseAge(LK.am, LK.av), mode = LK_MODES.filter(function (m) { return m[0] === LK.am })[0];
-    var h = '<div class="msheet">' + lkHead(lkSubline(rows)) + '<div class="mbody"><div class="lkage"><select id="lam" aria-label="Cách nhập tuổi">' + LK_MODES.map(function (m) { return '<option value="' + m[0] + '"' + (m[0] === LK.am ? ' selected' : '') + '>' + esc(m[1]) + '</option>' }).join('') + '</select><input id="lav" inputmode="' + (LK.am === 'ngay' ? 'text' : 'numeric') + '" placeholder="' + esc(mode[2]) + '" value="' + esc(LK.av) + '" aria-label="' + esc(mode[1]) + '" autocomplete="off"></div>';
+    var h = '<div class="msheet">' + lkHead(lkSubline(rows)) + '<div class="mbody"><div class="lkage"><select id="lam" aria-label="Cách nhập tuổi">' + LK_MODES.map(function (m) { return '<option value="' + m[0] + '"' + (m[0] === LK.am ? ' selected' : '') + '>' + esc(m[1]) + '</option>' }).join('') + '</select>' + (LK.am === 'ngay' ? '<input id="lav" type="date" min="1900-01-01" max="' + lkIso(new Date()) + '" value="' + esc(LK.av) + '" aria-label="Ngày sinh">' : '<input id="lav" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" placeholder="' + esc(mode[2]) + '" value="' + esc(LK.av) + '" aria-label="' + esc(mode[1]) + '" autocomplete="off">') + '</div>' + lkDoneBox(rows, pdOn_);
+    h += '<div id="lkres">' + lkAgeBody(rows, pdOn_, pa) + '</div></div></div>'; lkHost.innerHTML = h; lkBindHead();
+    var am = lkHost.querySelector('#lam'); am.onchange = function () { LK.am = am.value; LK.av = ''; lkDraw(); var n = lkHost.querySelector('#lav'); if (n) n.focus() };
+    var av = lkHost.querySelector('#lav'), tm = null, upd = function () { LK.av = av.value; var r = lkHost.querySelector('#lkres'); if (r) r.innerHTML = lkAgeBody(lkRows(), true, lkParseAge(LK.am, LK.av)) };
+    av.oninput = function () { clearTimeout(tm); tm = setTimeout(upd, 250) }; av.onchange = function () { clearTimeout(tm); upd() };
+    var dn = lkHost.querySelector('#lkdone'); if (dn) { dn.ontoggle = function () { LK.doneOpen = dn.open }; [].forEach.call(dn.querySelectorAll('input[data-d]'), function (c) { c.onchange = function () { var k = c.getAttribute('data-d'); if (c.checked) LK.done[k] = 1; else delete LK.done[k]; var n = Object.keys(LK.done).length, sm = dn.querySelector('summary b'); if (sm) sm.textContent = 'Khách đã tiêm vaccine nào?' + (n ? ' (' + n + ')' : ''); upd() } }) }
+    if (!LK.av && !LK.sel && LK.tab === 'tuoi' && LK.am !== 'ngay') av.focus()
+  }
+  function lkIso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) }
+  function lkTok(benh) { return String(benh || '').split(/[;,\/+\n]|\s-\s/).map(function (x) { return { k: nv(x).trim(), t: x.trim() } }).filter(function (x) { return x.k.length > 2 }) }
+  function lkDoneSet(rows) { var o = {}; rows.forEach(function (r) { if (LK.done[r.id]) lkTok(r.benh).forEach(function (x) { o[x.k] = 1 }) }); return o }
+  function lkOverlap(r, dset) { var tk = lkTok(r.benh), hit = tk.filter(function (x) { return dset[x.k] }); return hit.length ? { full: hit.length === tk.length, names: hit.map(function (x) { return x.t }) } : null }
+  function lkDoneBox(rows, on) {
+    if (!on) return ''; var n = Object.keys(LK.done).length, by = {}, ord = [];
+    rows.forEach(function (r) { var g = oneLine(r.d.nhom_vaccine) || 'Khác'; if (!by[g]) { by[g] = []; ord.push(g) } by[g].push(r) });
+    return '<details class="lkt" id="lkdone"' + (LK.doneOpen ? ' open' : '') + '><summary><b>Khách đã tiêm vaccine nào?' + (n ? ' (' + n + ')' : '') + '</b><small>Tích vaccine khách đã tiêm để loại trừ và gợi ý vaccine còn phù hợp</small></summary><div style="padding:0 10px 10px;max-height:240px;overflow:auto">' + ord.map(function (g) { return '<div class="mh" style="margin-top:8px">' + esc(g) + '</div>' + by[g].map(function (r) { return '<label style="display:flex;gap:8px;align-items:center;padding:6px 0"><input type="checkbox" data-d="' + esc(r.id) + '"' + (LK.done[r.id] ? ' checked' : '') + '> ' + esc(r.name) + '</label>' }).join('') }).join('') + '</div></details>'
+  }
+  function lkAgeBody(rows, pdOn_, pa) {
+    var h = '';
     if (LIB.loading && !LIB.rows) h += skeleton();
     else if (!pdOn_) h += '<div class="mwarn"><b>Chưa nạp "Phác đồ & từ điển vaccine".</b> ASM nạp ở mục Thư viện thì mới tra được vaccine theo tuổi.</div>';
     else if (!pa) h += '<div class="mnote"><span>Nhập năm sinh, ngày sinh, tuổi hoặc tháng tuổi để xem vaccine tiêm được hiện tại, kèm giá và khuyến mãi hôm nay.</span></div>';
@@ -2108,8 +2126,11 @@ var MSG = (function () {
     else {
       var kmN = lkKmNames(), a = pa.a, by = {}, ord = [], offBy = {}, offOrd = [], soon = [], total = 0, offN = 0;
       var gAuto = {}; pdGroups().forEach(function (g) { gAuto[g.key] = g.auto });
+      var dset = lkDoneSet(rows), doneL = rows.filter(function (r) { return LK.done[r.id] }), ovL = [];
       rows.forEach(function (r) {
+        if (LK.done[r.id]) return;
         var nm = oneLine(r.d.nhom_vaccine) || shortName(r.benh) || 'Khác', key = nv(nm).trim(), auto = gAuto[key] !== false, e = lkElig(r, a);
+        var ov = (e && auto) ? lkOverlap(r, dset) : null; if (ov) { ovL.push({ r: r, ov: ov }); return }
         if (e) { var tgt = auto ? by : offBy, o = auto ? ord : offOrd; if (!tgt[nm]) { tgt[nm] = []; o.push(nm) } tgt[nm].push({ r: r, e: e }); if (auto) total++; else offN++ }
         else if (auto) { var q = pdAge(r); if (q.tu > a[1] && q.tu - a[1] <= 45) soon.push(r) }
       });
@@ -2120,13 +2141,13 @@ var MSG = (function () {
       h += '<div class="tcard"><div class="tctop"><div class="tt">Khách ' + esc(pa.label) + '</div></div><div class="mtags"><span class="mp gr">' + total + ' vaccine tiêm được hiện tại</span>' + (ord.length ? '<span class="mp">' + ord.length + ' nhóm</span>' : '') + '</div></div>';
       if (pa.approx && LK.am === 'nam') h += '<div class="mnote"><span>Chỉ biết năm sinh nên có vaccine ghi "tùy ngày sinh". Nhập ngày sinh để chính xác.</span></div>';
       h += ord.length ? ord.map(function (nm) { return '<section><div class="mh">' + esc(nm) + ' (' + by[nm].length + ')</div><div class="mlist">' + by[nm].map(card).join('') + '</div></section>' }).join('') : '<div class="mwarn">Chưa có vaccine nào trong phác đồ phù hợp tuổi này.</div>';
+      if (doneL.length) h += '<section><div class="mh">Khách đã tiêm (' + doneL.length + ')</div><div class="mlist">' + doneL.map(function (r) { return lkCard(r, '<span class="mp zero">đã tiêm</span>') }).join('') + '</div></section>';
+      if (ovL.length) h += '<section><div class="mh">Trùng bệnh với vaccine đã tiêm (' + ovL.length + ')</div><div class="mnote"><span>Cùng phòng bệnh với vaccine khách đã tiêm. App chưa biết khách đã tiêm mấy mũi, nên bác sĩ quyết định tiêm tiếp, tiêm nhắc hay đổi loại.</span></div><div class="mlist">' + ovL.map(function (x) { return lkCard(x.r, '<span class="mp or">' + (x.ov.full ? 'Trùng toàn bộ: ' : 'Trùng một phần: ') + esc(x.ov.names.slice(0, 3).join(', ')) + '</span>') }).join('') + '</div></section>';
       if (soon.length) h += '<section><div class="mh">Sắp đến tuổi (trong 45 ngày)</div><div class="mlist">' + soon.map(function (r) { return lkCard(r) }).join('') + '</div></section>';
       if (offN) h += '<details class="lkt"><summary><b>Tiêm theo chỉ định riêng (' + offN + ')</b><small>Dại, uốn ván, thương hàn, tả, zona, RSV người lớn… không tự gợi ý theo tuổi, nhưng vẫn tra được</small></summary><div style="padding:0 10px 10px"><div class="mlist">' + offOrd.map(function (nm) { return offBy[nm].map(card).join('') }).join('') + '</div></div></details>';
       h += '<div class="mnote"><span>Dựa trên tuổi bắt đầu, kết thúc trong phác đồ đã duyệt. Bác sĩ quyết định chỉ định cuối cùng.</span></div>'
     }
-    h += '</div></div>'; lkHost.innerHTML = h; lkBindHead();
-    var am = lkHost.querySelector('#lam'); am.onchange = function () { LK.am = am.value; LK.av = ''; lkDraw(); var n = lkHost.querySelector('#lav'); if (n) n.focus() };
-    var av = lkHost.querySelector('#lav'); av.oninput = function () { LK.av = av.value; var pos = av.selectionStart; lkDraw(); var n = lkHost.querySelector('#lav'); n.focus(); n.setSelectionRange(pos, pos) }; if (!LK.av && !LK.sel && LK.tab === 'tuoi') av.focus()
+    return h
   }
   function lkSec(title, body, id) { return body ? '<section' + (id ? ' id="' + id + '"' : '') + '><div class="mh">' + esc(title) + '</div>' + body + '</section>' : '' }
   function lkTpl(o, k) { var t = lkRaw(o.text); LK.cp[k] = t; return '<details class="lkt"><summary><b>' + esc(o.ten) + '</b><small>' + esc(oneLine(t).slice(0, 120)) + '…</small></summary><div class="lkx">' + esc(t).replace(/\n/g, '<br>') + '</div><button class="mlink" data-cp="' + k + '">Sao chép nội dung</button></details>' }
