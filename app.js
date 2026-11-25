@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125g) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125h) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -2014,7 +2014,7 @@ var MSG = (function () {
       '<div class="lkf"><select id="la" aria-label="Lứa tuổi">' + LK_AGES.map(function (a) { return '<option value="' + a[0] + '"' + (a[0] === LK.age ? ' selected' : '') + '>' + esc(a[1]) + '</option>' }).join('') + '</select><select id="lb" aria-label="Nhóm bệnh"><option value="">Mọi nhóm bệnh</option>' + order.map(function (g) { return '<option value="' + esc(g) + '"' + (g === LK.benh ? ' selected' : '') + '>' + esc(g.slice(0, 46)) + ' (' + groups[g] + ')</option>' }).join('') + '</select></div>';
     if (LIB.loading && !LIB.rows) h += skeleton();
     else if (!rows.length) h += '<div class="mwarn"><b>Chưa có dữ liệu để tra cứu.</b> ASM nạp Bảng giá hoặc "Phác đồ & từ điển vaccine" ở mục Thư viện thì danh sách sẽ hiện ở đây.</div>';
-    else h += '<div class="mnote"><span>' + list.length + ' kết quả. Chạm vào vaccine để xem hồ sơ.</span></div><div class="mlist">' + (shown.length ? shown.map(lkCard).join('') + (more ? '<button class="abt o" id="lmore2">Hiện thêm (' + (list.length - LK.lim) + ')</button>' : '') : '<div class="mwarn">Không có vaccine phù hợp bộ lọc.</div>') + '</div>';
+    else h += '<div class="mnote"><span>' + list.length + ' kết quả. Chạm vào vaccine để xem hồ sơ.</span></div><div class="mlist">' + (shown.length ? shown.map(function (r) { return lkCard(r) }).join('') + (more ? '<button class="abt o" id="lmore2">Hiện thêm (' + (list.length - LK.lim) + ')</button>' : '') : '<div class="mwarn">Không có vaccine phù hợp bộ lọc.</div>') + '</div>';
     h += '</div></div>'; lkHost.innerHTML = h; lkBindHead();
     var li = lkHost.querySelector('#lq'); li.oninput = function () { LK.q = li.value; LK.lim = 30; var pos = li.selectionStart; lkDraw(); var n = lkHost.querySelector('#lq'); n.focus(); n.setSelectionRange(pos, pos) };
     var sa = lkHost.querySelector('#la'); sa.onchange = function () { LK.age = sa.value; LK.lim = 30; lkDraw() }; var sb = lkHost.querySelector('#lb'); sb.onchange = function () { LK.benh = sb.value; LK.lim = 30; lkDraw() };
