@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125o) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125p) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -225,6 +225,8 @@ var PGR = (function () {
         if (!hasBB && nonEmpty <= 2) { boQua.push({ dong: r + 1, ly_do: 'Dòng ghi chú, không có dữ liệu chính' }); continue }
       }
       cols.forEach(function (c) { if (c.tuKy && o[c.k] === undefined && ky[c.k === 'tu_ngay' ? 'tu' : 'den']) o[c.k] = ky[c.k === 'tu_ngay' ? 'tu' : 'den'] });
+      /* file từ NotebookLM đôi khi lọt ký tự Hán "脑" (não) vào chữ Việt: sửa cho mọi khu */
+      Object.keys(o).forEach(function (k) { if (typeof o[k] === 'string' && o[k].indexOf('脑') >= 0) o[k] = o[k].replace(/\s*脑/g, ' não') });
       if (cfg.hau) cfg.hau(o);
       o._dong = r + 1; rows.push(o);
     }
