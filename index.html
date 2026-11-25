@@ -110,7 +110,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
 }
 
 /* ===== Giao diện điện thoại: không tràn ngang, chữ gọn, thanh menu dưới kiểu app ===== */
-html,body{max-width:100%;overflow-x:hidden}
+html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{overflow-x:clip}}select,input,textarea{max-width:100%}.row2>div,.row2 .field{min-width:0;max-width:100%}.row2 select{min-width:0;width:100%;text-overflow:ellipsis}
 .stats6{grid-template-columns:repeat(6,1fr)}.stats4{grid-template-columns:repeat(4,1fr)}
 @media(max-width:959px){
  body{font-size:15px}
@@ -126,7 +126,6 @@ html,body{max-width:100%;overflow-x:hidden}
  th{font-size:11px}td{padding:9px 8px;font-size:14px}
  .shell{padding-bottom:96px}
  .tabs{left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:22px;padding:5px;box-shadow:0 8px 28px rgba(8,42,62,.18);background:var(--card)}
- @supports(backdrop-filter:blur(8px)){.tabs{background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
  .tab{border-radius:17px;font-size:10.5px;font-weight:600;gap:3px;min-height:50px;padding:6px 0 5px;letter-spacing:.1px}
  .tab svg.i{width:22px;height:22px}
  .tab.on{background:var(--tint);color:var(--teal-d)}
@@ -387,6 +386,6 @@ function dsig(){return D?D.turns.length+':'+D.tt.length+':'+D.turns.map(function
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&ME&&D&&Date.now()-loadedAt>30000){var s0=dsig();load(true).then(function(){if(dsig()!==s0)render()},function(){})}});
 start();
 </script>
-<script src="app.js?v=20261125t"></script>
+<script src="app.js?v=20261125u"></script>
 </body>
 </html>
