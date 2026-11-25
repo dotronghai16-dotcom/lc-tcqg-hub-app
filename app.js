@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125c) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125g) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -1342,7 +1342,17 @@ var MSG = (function () {
 .abt{border:0;border-radius:16px;min-height:56px;padding:0 8px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-align:left;transition:transform .12s,box-shadow .2s,opacity .2s}
 .abt:active{transform:scale(.97)}.abt:disabled{opacity:.45;box-shadow:none}.abt svg{width:22px;height:22px}.abt span{display:grid;line-height:1.15}.abt b{font-size:15px}.abt small{font-size:11px;font-weight:500;opacity:.85;white-space:nowrap}
 .abt.p{background:linear-gradient(135deg,#1f9494,#126868);color:#fff;box-shadow:0 8px 18px rgba(29,135,135,.32)}.abt.s{background:var(--navy);color:#fff}.abt.g{background:var(--card);border:1.5px solid var(--line);color:var(--ink)}
-.abt.o{border:1.5px solid var(--teal);background:var(--card);color:var(--teal-d);min-height:46px;width:100%}.abt.mbig{width:100%;min-height:50px;margin-top:6px}
+.abt.o{border:1.5px solid var(--teal);background:var(--card);color:var(--teal-d);min-height:46px;width:100%}
+.mhd{color:var(--ink);background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px 10px}
+.mav{background:var(--tint);border:0;color:var(--teal-d);-webkit-backdrop-filter:none;backdrop-filter:none}
+.mtt .t2{color:var(--muted)}.mclose{border:0;background:var(--bg);color:var(--ink)}.mclose:active{background:var(--line)}
+.mseg{background:var(--bg);border:0;margin-top:10px;-webkit-backdrop-filter:none;backdrop-filter:none}
+.mseg button{color:var(--muted);min-height:38px;font-size:13.5px}.mseg button.on{background:var(--teal);color:#fff;box-shadow:0 4px 12px rgba(29,135,135,.3)}
+.abt.s{background:var(--card);border:1.5px solid var(--teal);color:var(--teal-d)}
+.act3{grid-template-columns:1.35fr 1fr 1.15fr}.act3 .abt{flex-direction:row;min-height:52px;gap:7px}.act3 .abt small{display:none}.act3 .abt svg{width:20px;height:20px}
+.mpv{flex:none;padding:10px 14px 0;background:var(--bg)}.mpv .ed textarea{min-height:0;height:96px;resize:none;font-size:14px;line-height:1.5;padding:8px 12px}
+.mpv .ed .eh,.mpv .ed .ef{padding:6px 12px}.mpv .ed .eh b,.mpv .badge,.mpv .cnt{white-space:nowrap}.mpv .badge{font-size:11.5px;padding:3px 9px}.cnt.warn{background:var(--warn-bg);color:var(--warn)}.act3 .abt b{white-space:nowrap;font-size:14.5px}.mpv .ed{transition:border-color .3s,box-shadow .3s}.mpv.flash .ed{animation:vflash .9s cubic-bezier(.2,.8,.2,1)}
+@keyframes vflash{0%{border-color:var(--teal);box-shadow:0 0 0 4px rgba(0,187,186,.28);background:var(--tint)}100%{border-color:var(--line);box-shadow:var(--shadow)}}.abt.mbig{width:100%;min-height:50px;margin-top:6px}
 .stp{display:grid;grid-template-columns:repeat(5,1fr);position:relative;padding-top:2px}.stp:before{content:"";position:absolute;left:10%;right:10%;top:20px;height:2px;background:var(--line)}
 .stp button{border:0;background:none;display:grid;justify-items:center;gap:6px;position:relative;padding:0 2px;font-weight:600;font-size:12px;color:var(--muted);min-height:68px;align-content:start}
 .stp i{position:relative;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--line);font-style:normal;font-size:12px;font-weight:700;color:var(--muted);transition:background .18s,border-color .18s,box-shadow .18s,color .18s}
@@ -1495,7 +1505,7 @@ var MSG = (function () {
       var by = {}; a.forEach(function (r) { (by[r.loai] = by[r.loai] || []).push({ id: r.id, stt: r.stt, d: r.data || {} }) }); LIB.rows = by; LIB.at = Date.now(); LIB.loading = false; LIB.err = null; PC = {}; afterLib()
     }, function (e) { LIB.loading = false; LIB.err = e || {}; afterLib() })
   }
-  function afterLib() { if (S && host) draw(true); if (lkHost) lkDraw(); var c = LIB.cbs.splice(0); c.forEach(function (f) { try { f() } catch (e) { } }) }
+  function afterLib() { if (S && host) { autoVac(); draw(true) } if (lkHost) lkDraw(); var c = LIB.cbs.splice(0); c.forEach(function (f) { try { f() } catch (e) { } }) }
   function ensureLib(cb) { if (cb) LIB.cbs.push(cb); loadLib(); if (LIB.rows && !LIB.loading) { var c = LIB.cbs.splice(0); c.forEach(function (f) { try { f() } catch (e) { } }) } }
   function isBau(loai, d) {
     if (!AN_BAU) return false; var f = loai === 'MAU_TUOI' ? (d.nhom_tuoi || '') + ' ' + (d.buoc || '') : loai === 'MAU_CHUNG' ? (d.chu_de || '') + ' ' + (d.ap_dung || '') + ' ' + (d.ten_ngan || '') : loai === 'MAU_CHU_DE' ? (d.chu_de || '') + ' ' + (d.nhom_ap_dung || '') : loai === 'MAU_SAU_TIEM' ? (d.ten_mau || '') : '';
@@ -1625,7 +1635,14 @@ var MSG = (function () {
     S = { t: t, ci: Math.min(ci || 0, links.length - 1), mode: 'QT', step: step, pq: pickQT(tplForStep(step)[0]), vac: null, purpose: 'TV', pk: null, st: null, km: {}, nc: {}, sig: true, dc: false, xh: '', fv: {}, view: 'main', pt: 'CD', pg: '', pq2: '', lim: 40, pm: true, pctx: 'tv', cf: '', cm: true, nq: '', vq: '', img: {}, iq: '', it: '', text: '', base: '', sending: false, snap: null, dirty: false };
     host = document.createElement('div'); host.className = 'modal mm first'; host.onclick = function (e) { if (e.target === host) close() }; document.body.appendChild(host);
     document.addEventListener('keydown', onKey); setTimeout(function () { if (host) host.classList.remove('first') }, 450);
-    loadFiles(); loadLib(); regen()
+    loadFiles(); loadLib(); autoVac(); regen()
+  }
+  /* Hải 25/11: mở màn soạn tin là có sẵn vaccine đầu tiên bé đã đến tuổi (một chạm để đổi hoặc bỏ). Chỉ bật nguy cơ đầu tiên, KHÔNG tự bật khuyến mãi để tin không quá dài. */
+  function autoVac() {
+    if (!S || S.vacAuto || S.vac || S.mode !== 'QT' || !LIB.rows || S.text !== S.base) return; S.vacAuto = true;
+    var due = dueVacs(), dd = custDays(cust()); if (dd != null && dd > 60) { var nl = due.filter(function (v) { return nv(v.name).trim() !== 'lao' }); if (nl.length) due = nl }   /* Lao tiêm lúc sơ sinh: bé trên 2 tháng thì không tự chọn */
+    if (!due.length) return; var V = reg(due[0]); S.vac = V; S.purpose = 'TV'; applyKit(); S.km = {}; var k = Object.keys(S.nc); S.nc = {}; if (k[0]) S.nc[k[0]] = 1;
+    S.base = compose(); S.text = S.base
   }
   function close() { document.removeEventListener('keydown', onKey); if (host) host.remove(); host = null; S = null }
   function link() { return (D.links[S.t.ma_khach] || [])[S.ci] || {} }
@@ -1737,17 +1754,18 @@ var MSG = (function () {
     var c = cust(), l = link(), links = D.links[S.t.ma_khach] || [], tel = telOf(l), edited = S.text !== S.base, len = S.text.length, over = len > MAXLEN, nm = msgCount(), nImg = Object.keys(S.img).length;
     var ini = (given(l.ho_ten) || l.quan_he || '?').charAt(0).toUpperCase(), due = dueVacs();
     var h = '<div class="msheet" role="dialog" aria-label="Soạn tin"><div class="mhd"><div class="mtop"><div class="mav">' + esc(ini) + '</div><div class="mtt"><div class="t1">Soạn tin cho ' + esc(cap(l.quan_he || 'người liên hệ')) + ' ' + esc(given(l.ho_ten)) + '</div><div class="t2">Bé ' + esc(given(c.ho_ten)) + (tuoiTxt(c) ? ' · ' + esc(tuoiTxt(c)) : '') + (tel ? ' · ' + esc(tel) : '') + '</div></div><button class="mclose" id="mx" aria-label="Đóng">' + ic('x') + '</button></div>' +
-      '<div class="mseg" role="tablist"><button role="tab" aria-selected="' + (S.mode === 'QT') + '" class="' + (S.mode === 'QT' ? 'on' : '') + '" data-mode="QT">' + ic('route') + 'Theo quy trình</button><button role="tab" aria-selected="' + (S.mode === 'KHO') + '" class="' + (S.mode === 'KHO' ? 'on' : '') + '" data-mode="KHO">' + ic('layers') + 'Theo vaccine</button></div></div><div class="mbody">';
+      '<div class="mseg" role="tablist"><button role="tab" aria-selected="' + (S.mode === 'QT') + '" class="' + (S.mode === 'QT' ? 'on' : '') + '" data-mode="QT">' + ic('route') + 'Theo quy trình</button><button role="tab" aria-selected="' + (S.mode === 'KHO') + '" class="' + (S.mode === 'KHO' ? 'on' : '') + '" data-mode="KHO">' + ic('layers') + 'Theo vaccine</button></div></div>' +
+      '<div class="mpv"><div class="ed"><div class="eh"><b>Tin sẽ gửi</b><span class="sp"></span><span class="cnt' + (nm >= 2 ? ' warn' : '') + '" title="Số lần đã nhắn khách này">Nhắn ' + nm + '/2</span><span class="badge ' + (edited ? 'b-ed' : 'b-ok') + '" id="bd">' + (edited ? 'Đã sửa tay' : 'Đúng theo mẫu') + '</span></div><textarea id="tx" aria-label="Nội dung tin" placeholder="Chọn vaccine hoặc mẫu, hoặc tự viết nội dung tin…">' + esc(S.text) + '</textarea><div class="ef"><button class="mlink" id="rs">' + ic('reset').replace('class="i"', 'class="i" style="width:16px;height:16px;vertical-align:-3px"') + ' Khôi phục theo mẫu</button><span class="sp"></span><span id="cc" class="' + lenInfo(len).cls + '">' + lenInfo(len).txt + '</span></div></div></div><div class="mbody">';
     if (links.length > 1) h += '<section><div class="mh">Gửi cho</div><div class="sg3">' + links.map(function (x, i) { return '<button data-ci="' + i + '" class="' + (i === S.ci ? 'on' : '') + '">' + esc(cap(x.quan_he || 'Liên hệ')) + (x.ho_ten ? ' ' + esc(given(x.ho_ten)) : '') + '</button>' }).join('') + '</div></section>';
     h += S.mode === 'QT' ? qtBlock() : khoBlock();
-    h += '<section><div class="mh">Nội dung tin</div><div class="ed"><div class="eh"><b>' + (nm ? 'Tin thứ ' + (nm + 1) : 'Tin đầu tiên') + '</b><span class="sp"></span><span class="badge ' + (edited ? 'b-ed' : 'b-ok') + '" id="bd">' + (edited ? 'Đã sửa tay' : 'Đúng theo mẫu') + '</span></div><textarea id="tx" aria-label="Nội dung tin" placeholder="Chọn vaccine hoặc mẫu, hoặc tự viết nội dung tin…">' + esc(S.text) + '</textarea><div class="ef"><button class="mlink" id="rs">' + ic('reset').replace('class="i"', 'class="i" style="width:16px;height:16px;vertical-align:-3px"') + ' Khôi phục theo mẫu</button><span class="sp"></span><span id="cc" class="' + lenInfo(len).cls + '">' + lenInfo(len).txt + '</span></div></div></section>';
     h += phCard() + kitList() + imgBlock();
     var can = !!S.text.trim() && !over;
-    h += '</div><div class="mft">' + (nImg ? '<button class="abt o" id="sendimg">' + ic('image') + 'Gửi kèm ' + nImg + ' ảnh · chia sẻ sang Zalo</button>' : '') + '<div class="mst"><span class="cnt">Nhắn ' + nm + '/2</span><span>' + (over ? 'Tin quá dài (trên ' + MAXLEN + ' ký tự), hãy rút ngắn để gửi.' : len > LONG ? 'Tin dài: Zalo gửi được, SMS sẽ tách nhiều tin. Có thể tắt bớt phần ở mục "Tự điền" bên dưới.' : 'Chạm nút gửi: app làm đúng việc của nút đó và tự ghi 1 lần "Nhắn".') + '</span></div><div class="act3">' +
+    h += '</div><div class="mft">' + (nImg ? '<button class="abt o" id="sendimg">' + ic('image') + 'Gửi kèm ' + nImg + ' ảnh · chia sẻ sang Zalo</button>' : '') + (over || len > LONG ? '<div class="mst"><span>' + (over ? 'Tin quá dài (trên ' + MAXLEN + ' ký tự), hãy rút ngắn để gửi.' : 'Tin dài: Zalo gửi được, SMS sẽ tách nhiều tin. Có thể tắt bớt phần ở mục "Tự điền" bên dưới.') + '</span></div>' : '') + '<div class="act3">' +
       '<button class="abt p" data-go="ZALO" ' + (can ? '' : 'disabled') + '>' + ic('chat') + '<span><b>Zalo</b><small>chép tin + mở Zalo</small></span></button>' +
       '<button class="abt s" data-go="SMS" ' + (can ? '' : 'disabled') + '>' + ic('sms') + '<span><b>SMS</b><small>' + (tel ? 'tới ' + esc(tel) : 'chưa có số') + '</small></span></button>' +
       '<button class="abt g" data-go="SAO_CHEP" ' + (can ? '' : 'disabled') + '>' + ic('copy') + '<span><b>Sao chép</b><small>chỉ chép tin</small></span></button></div></div></div>';
-    host.innerHTML = h; bindMain()
+    host.innerHTML = h; bindMain();
+    if (S.lastTxt !== undefined && S.lastTxt !== S.text) { var pv = host.querySelector('.mpv'); if (pv) pv.classList.add('flash') } S.lastTxt = S.text
   }
   function bindMain() {
     var q = function (s) { return host.querySelector(s) }, all = function (s) { return [].slice.call(host.querySelectorAll(s)) };
@@ -1883,7 +1901,7 @@ var MSG = (function () {
     var grp = group(), L = F.map(function (f) { return { f: f, s: imgScore(f, names, grp) } }).filter(function (x) { return x.s > 0 }).sort(function (a, b) { return b.s - a.s }).slice(0, 8);
     return '<section><div class="mh">Ảnh đính kèm · gợi ý theo khách và vaccine</div>' + (L.length ? '<div class="imgrow">' + L.map(function (x) { return thumbBtn(x.f) }).join('') + '</div>' : '<div class="mnote"><span>Chưa có ảnh nào hợp. Bấm "Xem tất cả ảnh".</span></div>') + '<button class="abt o" id="imore">' + ic('image') + 'Xem tất cả ảnh (' + F.length + ')</button></section>'
   }
-  function thumbBtn(f) { return '<button class="ithumb ' + (S.img[f.id] ? 'on' : '') + '" data-img="' + esc(f.id) + '">' + (f.anh_nho ? '<img src="' + f.anh_nho + '" alt="">' : '<div style="height:64px;display:grid;place-items:center;color:var(--soft)">PDF</div>') + '<span>' + esc(f.ten.slice(0, 24)) + '</span>' + (S.img[f.id] ? '<b class="ick">✓</b>' : '') + '</button>' }
+  function thumbBtn(f) { return '<button class="ithumb ' + (S.img[f.id] ? 'on' : '') + '" data-img="' + esc(f.id) + '">' + (f.anh_nho ? '<img src="' + f.anh_nho + '" alt="">' : '<div style="height:64px;display:grid;place-items:center;color:var(--soft)">PDF</div>') + '<span>' + esc(/^https?\b/i.test(f.ten) ? (f.chu_de || 'Ảnh') : f.ten.slice(0, 24)) + '</span>' + (S.img[f.id] ? '<b class="ick">✓</b>' : '') + '</button>' }
   function drawImgs() {
     var F = D.files || [], q = fk(S.iq), L = F.filter(function (f) { return (!S.it || f.thu_muc === S.it) && (!q || fk(f.ten + ' ' + f.chu_de).indexOf(q) >= 0) }), T = { '': 'Tất cả', VACCINE_DOI_TUONG: 'Vaccine', CAM_NANG_BAU: 'Cẩm nang bầu', CTKM_VOUCHER: 'Khuyến mãi' }, nI = Object.keys(S.img).length;
     host.innerHTML = '<div class="msheet">' + hdrBack('Chọn ảnh đính kèm', nI ? nI + ' ảnh đã chọn' : 'Chạm vào ảnh để chọn') + '<div class="mbody"><div class="mchips">' + Object.keys(T).map(function (k) { return '<button class="' + (S.it === k ? 'on' : '') + '" data-it="' + k + '">' + T[k] + '</button>' }).join('') + '</div><div class="msearch">' + ic('search') + '<input id="iqi" placeholder="Tìm ảnh…" value="' + esc(S.iq) + '" aria-label="Tìm ảnh"></div><div class="imggrid">' + (L.length ? L.map(thumbBtn).join('') : '<div class="mwarn" style="grid-column:1/-1">Không có ảnh phù hợp.</div>') + '</div></div>' + checkFoot(nI) + '</div>';
