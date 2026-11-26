@@ -1,11 +1,11 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126f) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126h) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
  * Chạy sau mỗi lần vẽ màn hình (PGR.run). Không đổi dữ liệu: chỉ ẩn bớt dòng ngoài trang hiện tại. Bảng có thuộc tính data-nopg tự phân trang riêng (Kho Data).
  * Số dòng chọn được nhớ trên máy (localStorage). Trang hiện tại nhớ theo từng bảng; khi số dòng đổi (lọc, tìm) thì về trang 1. */
 var PGR = (function () {
-  var KEY = 'lc_pgsz', SIZES = [10, 15, 20], st = {};
+  var KEY = 'lc_pgsz', SIZES = [10, 15, 20, 30, 50, 100], st = {};
   function size() { var v = 15; try { v = Number(localStorage.getItem(KEY)) || 15 } catch (e) { } return SIZES.indexOf(v) >= 0 ? v : 15 }
   function setSize(n) { try { localStorage.setItem(KEY, String(n)) } catch (e) { } }
   function opts() { var s = size(); return SIZES.map(function (n) { return '<option value="' + n + '"' + (n === s ? ' selected' : '') + '>' + n + ' dòng</option>' }).join('') }
@@ -314,19 +314,65 @@ var ASM = (function () {
     T.forEach(function (t) { if (open_(t)) o.mo++; if (t.trang_thai === 'HOAN_THANH') o.xong++; if (yes(t)) o.dy++; if (overdueDays(t) > 0) o.qh++; if (t.recipient_type === 'SHOP' && t.trang_thai === 'DA_GIAO') o.chia++ });
     return o
   }
+  /* Tổng quan (26/11/2026): 3 tầng. Tầng 1 chỉ số có thứ bậc, tầng 2 việc cần xử lý ngay + xu hướng 14 ngày, tầng 3 so sánh Shop có tìm kiếm, lọc, sắp xếp. */
+  function dkey(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) }
+  function series(shopId, n) {
+    var days = [], i, ix = {}, d0 = today0();
+    for (i = n - 1; i >= 0; i--) { var d = new Date(d0.getTime() - i * 864e5); ix[dkey(d)] = days.length; days.push({ d: d, giao: 0, xong: 0 }) }
+    D.turns.forEach(function (t) {
+      if (shopId && t.id_shop !== shopId) return;
+      if (t.d_giao && !isNaN(t.d_giao)) { var k = dkey(t.d_giao); if (ix[k] != null) days[ix[k]].giao++ }
+      if (t.trang_thai === 'HOAN_THANH' && t.d_xong && !isNaN(t.d_xong)) { var k2 = dkey(t.d_xong); if (ix[k2] != null) days[ix[k2]].xong++ }
+    });
+    return days
+  }
+  function chartSvg(days) {
+    var W = 560, H = 170, L = 30, B = 24, T = 10, R = 6, n = days.length, mx = 1; days.forEach(function (x) { mx = Math.max(mx, x.giao, x.xong) });
+    var step = Math.max(1, Math.ceil(mx / 4)); mx = step * 4; var cw = (W - L - R) / n, bw = Math.min(14, cw * .36), g = '', b = '', lb = '', i;
+    for (i = 0; i <= 4; i++) { var y = T + (H - T - B) * (1 - i / 4); g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '" class="gl"/><text x="' + (L - 6) + '" y="' + (y + 3.5).toFixed(1) + '" class="gt" text-anchor="end">' + (step * i) + '</text>' }
+    days.forEach(function (x, j) {
+      var cx = L + cw * j + cw / 2, hg = (H - T - B) * x.giao / mx, hx = (H - T - B) * x.xong / mx, lab = ('0' + x.d.getDate()).slice(-2) + '/' + ('0' + (x.d.getMonth() + 1)).slice(-2);
+      b += '<rect x="' + (cx - bw - 1).toFixed(1) + '" y="' + (H - B - hg).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(0, hg).toFixed(1) + '" rx="3" class="bg"><title>' + lab + ': giao ' + x.giao + '</title></rect><rect x="' + (cx + 1).toFixed(1) + '" y="' + (H - B - hx).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(0, hx).toFixed(1) + '" rx="3" class="bx"><title>' + lab + ': hoàn thành ' + x.xong + '</title></rect>';
+      if (j % 2 === (n - 1) % 2) lb += '<text x="' + cx.toFixed(1) + '" y="' + (H - 6) + '" class="gt" text-anchor="middle">' + lab + '</text>'
+    });
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="chart" role="img" aria-label="Biểu đồ giao và hoàn thành 14 ngày gần nhất">' + g + b + lb + '</svg>'
+  }
+  function shopRows() {
+    var SH = shops(), rows = SH.map(function (s) { var x = statsFor(s.id_shop); return { s: s, x: x, ptr: x.luot ? Math.round(x.xong / x.luot * 100) : -1, ql: qlOf(s.id_shop), nv: staffOf(s.id_shop).length } });
+    var live = rows.filter(function (r) { return r.x.luot > 0 }), best = null, worst = null;
+    if (live.length >= 3) { live.forEach(function (r) { if (!best || r.ptr > best.ptr) best = r; if (!worst || r.ptr < worst.ptr) worst = r }); if (best === worst) best = worst = null }
+    rows.forEach(function (r) { r.tag = r === best ? 'Dẫn đầu' : r === worst ? 'Cần hỗ trợ' : '' });
+    var q = (ST.sq || '').trim().toLowerCase(); if (q) rows = rows.filter(function (r) { return (r.s.ten_shop + ' ' + r.s.ma_shop + ' ' + r.ql).toLowerCase().indexOf(q) >= 0 });
+    if (ST.late) rows = rows.filter(function (r) { return r.x.qh > 0 });
+    var k = ST.ssort || 'qh', dir = ST.sdir || -1, val = function (r) { return k === 'ten' ? r.s.ten_shop : k === 'luot' ? r.x.luot : k === 'mo' ? r.x.mo : k === 'ptr' ? r.ptr : k === 'dy' ? r.x.dy : r.x.qh };
+    rows.sort(function (a, b) { var A = val(a), B = val(b), c = typeof A === 'string' ? A.localeCompare(B) : A - B; return (c * dir) || a.s.ma_shop.localeCompare(b.s.ma_shop) });
+    return rows
+  }
+  function sortTh(key, label, num) { var on = (ST.ssort || 'qh') === key, dir = ST.sdir || -1; return '<th class="' + (num ? 'num ' : '') + (on ? 'on' : '') + '"><button class="srt" data-sort="' + key + '" aria-label="Sắp xếp theo ' + esc(label) + '">' + esc(label) + '<i>' + (on ? (dir < 0 ? '▼' : '▲') : '') + '</i></button></th>' }
   function pgTq() {
     var tc = turnsByCust(), kho = 0, tot = Object.keys(D.cus).length; Object.keys(D.cus).forEach(function (k) { if (custState(tc[k]) === 'kho') kho++ });
-    var all = statsFor(ST.shop), first = ME.ho_ten.trim().split(/\s+/).pop(), SH = shops();
-    var h = head('Chào anh ' + esc(first) + ', khu vực có <span style="color:var(--teal)">' + SH.length + ' Shop</span>', 'Tổng hợp toàn khu vực · ' + new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }),
+    var all = statsFor(ST.shop), first = ME.ho_ten.trim().split(/\s+/).pop(), SH = shops(), ptr = pct(all.xong, all.luot);
+    var h = head('Chào anh ' + esc(first), 'Tổng hợp ' + (ST.shop ? esc(shopName(ST.shop)) : 'toàn khu vực (' + SH.length + ' Shop)') + ' · ' + new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }),
       '<div style="display:flex;gap:8px;align-items:center"><span class="meta">Shop:</span>' + sel('fshop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), ST.shop) + '</div>');
-    h += '<div class="stats stats6">' + [['Khách trong kho', tot], ['Chưa giao', kho], ['Đang giữ', all.mo], ['Hoàn thành', all.xong], ['Hẹn / đã tiêm', all.dy], ['Quá hạn gọi', all.qh]].map(function (x, i) { return '<div class="card st"><div class="l">' + x[0] + '</div><div class="v"' + (i === 5 && x[1] ? ' style="color:var(--bad)"' : '') + '>' + x[1] + '</div></div>' }).join('') + '</div>';
-    var al = '';
-    if (kho) al += '<div class="alert"><i>▦</i><div><b>' + kho + ' khách chưa được giao</b><small>Đang nằm trong kho</small></div><button class="btn b2" data-go="a_kho" style="min-height:38px;margin-left:auto">Phân công</button></div>';
-    if (all.chia) al += '<div class="alert a-warn"><i>⇄</i><div><b>' + all.chia + ' lượt giao cho Shop chờ chia</b><small>Quản lý chia khi bạn bật quyền cho lần giao đó</small></div><button class="btn b2" data-go="a_pc" style="min-height:38px;margin-left:auto">Xem lần giao</button></div>';
-    if (all.qh) al += '<div class="alert a-bad"><i>⚠</i><div><b>' + all.qh + ' lượt quá hạn liên hệ</b><small>Tính từ "Ngày cần liên hệ" của từng lượt</small></div></div>';
-    h += '<div class="card"><h2>Cần chú ý</h2>' + (al || '<div class="alert"><i>✓</i><div><b>Chưa có gì cần chú ý</b></div></div>') + '</div>';
-    h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">So sánh các Shop <span class="pill">bấm một Shop để xem nhân viên</span></h2><div class="tw"><table><thead><tr><th>Shop</th><th>Quản lý</th><th>NV</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Hẹn / đã tiêm</th><th style="min-width:120px">Tiến độ</th><th>Quá hạn</th></tr></thead><tbody>' +
-      SH.map(function (s) { var x = statsFor(s.id_shop); return '<tr class="click" data-shop="' + esc(s.id_shop) + '"' + (ST.shop === s.id_shop ? ' style="background:var(--tint)"' : '') + '><td><b>' + esc(s.ten_shop) + '</b><small>' + esc(s.ma_shop) + '</small></td><td>' + esc(qlOf(s.id_shop)) + '</td><td>' + staffOf(s.id_shop).length + '</td><td>' + x.luot + '</td><td>' + x.mo + '</td><td>' + x.xong + '</td><td>' + x.dy + '</td><td><div class="bar" style="height:6px;border-radius:99px;background:var(--bg);overflow:hidden"><i style="display:block;height:100%;width:' + pct(x.xong, x.luot) + '%;background:var(--teal)"></i></div><small>' + pct(x.xong, x.luot) + '%</small></td><td>' + (x.qh ? '<span class="tag t-late">' + x.qh + '</span>' : '0') + '</td></tr>' }).join('') + '</tbody></table></div></div>';
+    /* Tầng 1: tổng quan, 1 chỉ số chính + 3 chỉ số quan trọng + 2 chỉ số phụ */
+    h += '<section class="tier"><h2 class="tl">Tổng quan</h2><div class="kp"><div class="card kp-hero"><div class="l">Tiến độ xử lý</div><div class="big">' + ptr + '<small>%</small></div><div class="pb" role="progressbar" aria-valuenow="' + ptr + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + ptr + '%"></i></div><div class="meta">' + all.xong + ' / ' + all.luot + ' lượt đã hoàn thành</div></div>' +
+      '<div class="card kp-m"><div class="l">Đang xử lý</div><div class="v">' + all.mo + '</div></div><div class="card kp-m"><div class="l">Hẹn / tiêm</div><div class="v ok">' + all.dy + '</div></div><div class="card kp-m' + (all.qh ? ' bad' : '') + '"><div class="l">Quá hạn gọi</div><div class="v">' + all.qh + '</div></div></div>' +
+      '<div class="kp2"><button data-go="a_kho"><b>' + tot + '</b> khách trong kho</button><button data-go="a_kho"><b>' + kho + '</b> chưa giao</button><button data-go="a_pc"><b>' + all.chia + '</b> lượt chờ chia</button></div></section>';
+    /* Tầng 2: điều hành */
+    var sv = '';
+    if (all.qh) sv += '<div class="sv sv1"><div class="sn">' + all.qh + '</div><div class="sb"><span class="sl">Khẩn</span><b>lượt quá hạn liên hệ</b><small>Tính từ "Ngày cần liên hệ" của từng lượt</small></div><button class="btn b1" data-late="1">Xem Shop</button></div>';
+    if (all.chia) sv += '<div class="sv sv2"><div class="sn">' + all.chia + '</div><div class="sb"><span class="sl">Cần làm</span><b>lượt giao cho Shop chờ chia</b><small>Quản lý chia khi bạn bật quyền cho lần giao đó</small></div><button class="btn b2" data-go="a_pc">Mở</button></div>';
+    if (kho) sv += '<div class="sv sv3"><div class="sn">' + kho + '</div><div class="sb"><span class="sl">Nên làm</span><b>khách chưa được giao</b><small>Đang nằm trong kho</small></div><button class="btn b2" data-go="a_kho">Phân công</button></div>';
+    var days = series(ST.shop, 14), w1 = 0, w0 = 0; days.forEach(function (x, i) { if (i >= 7) w1 += x.xong; else w0 += x.xong }); var dl = w1 - w0;
+    h += '<section class="tier"><h2 class="tl">Điều hành</h2><div class="t2"><div class="card"><h2>Cần xử lý ngay</h2>' + (sv || '<div class="alert"><i>✓</i><div><b>Chưa có gì cần xử lý</b></div></div>') + '</div>' +
+      '<div class="card"><div class="row2"><h2 style="margin:0">Tiến độ 14 ngày gần nhất</h2><span class="trend ' + (dl > 0 ? 'up' : dl < 0 ? 'down' : '') + '">' + (dl > 0 ? '▲ +' + dl : dl < 0 ? '▼ ' + dl : '–') + ' so với 7 ngày trước</span></div>' + chartSvg(days) + '<div class="lg"><span><i class="bg"></i>Được giao</span><span><i class="bx"></i>Hoàn thành</span><span class="meta">7 ngày gần: ' + w1 + ' hoàn thành</span></div></div></div></section>';
+    /* Tầng 3: phân tích */
+    var rows = shopRows();
+    var tb = rows.map(function (r) { var x = r.x; return '<tr class="click' + (x.luot ? '' : ' idle') + '" data-shop="' + esc(r.s.id_shop) + '"' + (ST.shop === r.s.id_shop ? ' style="background:var(--tint)"' : '') + '><td class="nm"><b>' + esc(r.s.ten_shop) + '</b> ' + (r.tag ? '<span class="tag ' + (r.tag === 'Dẫn đầu' ? 't-ok' : 't-late') + '">' + r.tag + '</span>' : '') + '<small>' + esc(r.s.ma_shop) + ' · QL ' + esc(r.ql) + ' · ' + r.nv + ' NV</small></td><td class="num">' + x.luot + '</td><td class="num">' + x.mo + '</td><td class="pc"><div class="bar2"><i style="width:' + Math.max(0, r.ptr) + '%"></i></div><span>' + (r.ptr < 0 ? '–' : r.ptr + '%') + '</span></td><td class="num">' + x.dy + '</td><td class="num">' + (x.qh ? '<span class="tag t-late">' + x.qh + '</span>' : '0') + '</td></tr>' }).join('');
+    var cards = rows.map(function (r) { var x = r.x; return '<button class="shc" data-shop="' + esc(r.s.id_shop) + '"><div class="shh"><b>' + esc(r.s.ten_shop) + '</b>' + (r.tag ? '<span class="tag ' + (r.tag === 'Dẫn đầu' ? 't-ok' : 't-late') + '">' + r.tag + '</span>' : '') + '</div><div class="bar2"><i style="width:' + Math.max(0, r.ptr) + '%"></i></div><div class="shn"><span>' + (r.ptr < 0 ? '–' : r.ptr + '%') + ' hoàn thành</span><span>' + x.mo + ' đang mở</span><span>' + x.dy + ' hẹn</span>' + (x.qh ? '<span class="tag t-late">' + x.qh + ' quá hạn</span>' : '') + '</div></button>' }).join('');
+    h += '<section class="tier"><h2 class="tl">Phân tích</h2><div class="card" style="padding:12px 12px 6px"><div class="row2" style="margin-bottom:8px"><h2 style="margin:0">So sánh các Shop <span class="meta">' + rows.length + '/' + SH.length + '</span></h2><div class="shtool"><div class="search">' + ic('search') + '<input id="sq" placeholder="Tìm Shop, quản lý…" aria-label="Tìm Shop" value="' + esc(ST.sq || '') + '"></div><button class="chip' + (ST.late ? ' on' : '') + '" id="slate">Chỉ Shop quá hạn</button></div></div>' +
+      '<div class="tw only-d"><table class="shtb"><thead><tr>' + sortTh('ten', 'Shop', 0) + sortTh('luot', 'Được giao', 1) + sortTh('mo', 'Đang mở', 1) + sortTh('ptr', 'Hoàn thành', 0) + sortTh('dy', 'Hẹn / tiêm', 1) + sortTh('qh', 'Quá hạn', 1) + '</tr></thead><tbody>' + (tb || '<tr><td colspan="6" class="empty">Không có Shop phù hợp.</td></tr>') + '</tbody></table></div><div class="only-m shl">' + (cards || '<div class="empty">Không có Shop phù hợp.</div>') + '</div>' +
+      '<div class="meta" style="padding:8px 4px">Bấm một Shop để xem nhân viên bên dưới. Bấm tiêu đề cột để sắp xếp.</div></div></section>';
     if (ST.shop) {
       var staff = staffOf(ST.shop);
       h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">Nhân viên · ' + esc(shopName(ST.shop)) + '</h2><div class="tw"><table><thead><tr><th>Nhân viên</th><th>Chức danh</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Hẹn / đã tiêm</th><th>Quá hạn</th></tr></thead><tbody>' + staff.map(function (a) {
@@ -338,24 +384,35 @@ var ASM = (function () {
 
   /* ---------- Kho Data ---------- */
   function khoRows() {
-    var tc = turnsByCust(), q = ST.q.trim().toLowerCase();
+    var tc = turnsByCust(), q = ST.q.trim().toLowerCase(), f0 = ST.kFrom ? new Date(ST.kFrom + 'T00:00:00') : null, f1 = ST.kTo ? new Date(ST.kTo + 'T23:59:59') : null;
     return Object.keys(D.cus).map(function (k) { var c = D.cus[k], ts = tc[k] || [], l = (D.links[k] || [])[0] || {}; return { c: c, ts: ts, st: custState(ts), l: l } }).filter(function (r) {
       if (ST.f && r.st !== ST.f) return false; if (ST.band && bandOf(r.c) !== ST.band) return false;
+      if (ST.kShop && !r.ts.some(function (t) { return t.id_shop === ST.kShop })) return false;
+      if (ST.kNv && !r.ts.some(function (t) { return t.recipient_type === 'EMPLOYEE' && t.ma_tk_nhan === ST.kNv })) return false;
+      if ((f0 || f1) && !r.ts.some(function (t) { var d = t.d_giao; return d && !isNaN(d) && (!f0 || d >= f0) && (!f1 || d <= f1) })) return false;
       if (q && (r.c.ma_khach + ' ' + r.c.ma_tcqg + ' ' + r.c.ho_ten + ' ' + (r.l.sdt || '') + ' ' + (r.l.ho_ten || '')).toLowerCase().indexOf(q) < 0) return false; return true
     }).sort(function (a, b) { return a.c.ma_khach.localeCompare(b.c.ma_khach) })
   }
   function pgKho() {
     var all = khoRows(), base = Object.keys(D.cus).map(function (k) { return custState(turnsByCust()[k]) }), cnt = { '': base.length, kho: 0, dang: 0, xong: 0 }; base.forEach(function (s) { cnt[s]++ });
     var pages = Math.max(1, Math.ceil(all.length / PAGEN())); ST.pg = Math.min(ST.pg, pages); var rows = all.slice((ST.pg - 1) * PAGEN(), ST.pg * PAGEN()), n = Object.keys(ST.sel).length;
-    var h = head('Kho Data', 'Toàn bộ khách. Chọn khách rồi bấm Phân công.', '');
-    h += '<div class="top"><div class="search">' + ic('search') + '<input id="kq" placeholder="Tìm tên, mã hồ sơ, số điện thoại…" value="' + esc(ST.q) + '"></div>' + sel('fband', BANDS, ST.band) + '</div>';
+    var h = head('Kho Data', 'Toàn bộ khách. Lọc, chọn nhiều khách rồi bấm Phân công.', '');
+    var SHK = shops(), staffK = ST.kShop ? staffOf(ST.kShop) : [], act = !!(ST.q || ST.band || ST.f || ST.kShop || ST.kNv || ST.kFrom || ST.kTo);
+    var nAct = [ST.kShop, ST.kNv, ST.kFrom, ST.kTo, ST.band].filter(Boolean).length, kopen = ST.kOpen != null ? ST.kOpen : (window.innerWidth >= 960 || nAct > 0);
+    h += '<div class="kf"><div class="search">' + ic('search') + '<input id="kq" placeholder="Tìm tên, mã khách, số điện thoại…" aria-label="Tìm khách" value="' + esc(ST.q) + '"></div><details class="kfa" id="kfa"' + (kopen ? ' open' : '') + '><summary>Bộ lọc' + (nAct ? ' · ' + nAct + ' đang bật' : '') + '</summary><div class="kfb">' +
+      sel('kshop', [['', 'Mọi Shop']].concat(SHK.map(function (x) { return [x.id_shop, x.ten_shop] })), ST.kShop) +
+      '<select id="knv" aria-label="Nhân viên"' + (ST.kShop ? '' : ' disabled') + '><option value="">' + (ST.kShop ? 'Mọi nhân viên' : 'Chọn Shop trước') + '</option>' + staffK.map(function (a) { return '<option value="' + esc(a.ma_tk) + '"' + (ST.kNv === a.ma_tk ? ' selected' : '') + '>' + esc(a.ho_ten) + '</option>' }).join('') + '</select>' +
+      '<label class="kd"><span>Giao từ</span><input type="date" id="kfrom" value="' + esc(ST.kFrom || '') + '"></label><label class="kd"><span>đến</span><input type="date" id="kto" value="' + esc(ST.kTo || '') + '"></label>' +
+      sel('fband', BANDS, ST.band) + (act ? '<button class="btn b3" id="kclr" style="min-height:42px">Xóa bộ lọc</button>' : '') + '</div></details></div>';
     h += '<div class="chips">' + [['', 'Tất cả'], ['kho', 'Chưa giao'], ['dang', 'Đang giao'], ['xong', 'Đã xong']].map(function (x) { return '<button class="chip ' + (ST.f === x[0] ? 'on' : '') + '" data-f="' + x[0] + '">' + x[1] + '<em>' + cnt[x[0]] + '</em></button>' }).join('') + '</div>';
-    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table data-nopg><thead><tr><th style="width:36px"><input type="checkbox" id="selpg" ' + (rows.length && rows.every(function (r) { return ST.sel[r.c.ma_khach] }) ? 'checked' : '') + ' style="width:20px;height:20px"></th><th>Khách</th><th>Tuổi</th><th>Phụ huynh</th><th>Trạng thái</th><th>Đang giữ</th></tr></thead><tbody>' +
-      rows.map(function (r) { var op = r.ts.filter(open_)[0], who = op ? (op.recipient_type === 'SHOP' ? shopName(op.id_shop) + ' (Shop)' : nm(op.ma_tk_nhan)) : '';
-        return '<tr><td><input type="checkbox" data-k="' + esc(r.c.ma_khach) + '" ' + (ST.sel[r.c.ma_khach] ? 'checked' : '') + ' style="width:20px;height:20px"></td><td><b>' + esc(r.c.ho_ten) + '</b><small>' + esc(r.c.ma_tcqg || r.c.ma_khach) + '</small></td><td>' + esc(ageTxt(r.c)) + '</td><td>' + esc(r.l.ho_ten || '') + '<small>' + esc(r.l.sdt || '') + '</small></td><td>' + ({ kho: '<span class="tag t-tint">Chưa giao</span>', dang: '<span class="tag t-late">Đang giao</span>', xong: '<span class="tag t-ok">Đã xong</span>' })[r.st] + '</td><td>' + esc(who) + '</td></tr>' }).join('') +
+    var tagK = { kho: '<span class="tag t-new">Chưa giao</span>', dang: '<span class="tag t-prog">Đang giao</span>', xong: '<span class="tag t-ok">Đã xong</span>' };
+    var whoOf = function (r) { var op = r.ts.filter(open_)[0]; return op ? (op.recipient_type === 'SHOP' ? shopName(op.id_shop) + ' (Shop)' : nm(op.ma_tk_nhan)) : '' };
+    h += '<div class="card" style="padding:6px 8px"><div class="tw khotw only-d"><table data-nopg><thead><tr><th style="width:36px"><input type="checkbox" id="selpg" aria-label="Chọn cả trang" ' + (rows.length && rows.every(function (r) { return ST.sel[r.c.ma_khach] }) ? 'checked' : '') + ' style="width:20px;height:20px"></th><th>Khách</th><th>Tuổi</th><th>Phụ huynh</th><th>Trạng thái</th><th>Đang giữ</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr' + (ST.sel[r.c.ma_khach] ? ' class="picked"' : '') + '><td><input type="checkbox" data-k="' + esc(r.c.ma_khach) + '" aria-label="Chọn ' + esc(r.c.ho_ten) + '" ' + (ST.sel[r.c.ma_khach] ? 'checked' : '') + ' style="width:20px;height:20px"></td><td><b>' + esc(r.c.ho_ten) + '</b><small>' + esc(r.c.ma_tcqg || r.c.ma_khach) + '</small></td><td>' + esc(ageTxt(r.c)) + '</td><td>' + esc(r.l.ho_ten || '') + '<small>' + esc(r.l.sdt || '') + '</small></td><td>' + tagK[r.st] + '</td><td>' + esc(whoOf(r)) + '</td></tr>' }).join('') +
       (rows.length ? '' : '<tr><td colspan="6" class="empty">Không có khách phù hợp.</td></tr>') + '</tbody></table></div>' +
-      '<div class="row2" style="padding:10px"><span class="meta">' + all.length + ' khách · trang ' + ST.pg + '/' + pages + '</span><div style="display:flex;gap:8px;align-items:center"><select data-pgsize style="border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:var(--card);min-height:38px">' + [10, 15, 20].map(function (n) { return '<option value="' + n + '"' + (n === PAGEN() ? ' selected' : '') + '>' + n + ' dòng</option>' }).join('') + '</select><button class="btn b3" data-pg="-1" style="min-height:38px">‹</button><button class="btn b3" data-pg="1" style="min-height:38px">›</button></div></div></div>';
-    h += '<div class="bulk" style="' + (n ? '' : 'display:none') + '"><b>Đã chọn ' + n + ' khách</b><span class="sp"></span>' + (all.length > n ? '<button class="btn b3" id="seltop" style="min-height:42px">Chọn cả ' + all.length + ' khách đang lọc</button>' : '') + '<button class="btn b3" id="selclr" style="min-height:42px">Bỏ chọn</button><button class="btn b1" id="asg" style="min-height:42px">Phân công</button></div>';
+      '<div class="only-m kcards"><button class="btn b3" data-selpage style="min-height:40px;justify-self:start">Chọn cả trang</button>' + rows.map(function (r) { return '<label class="kc' + (ST.sel[r.c.ma_khach] ? ' picked' : '') + '"><input type="checkbox" data-k="' + esc(r.c.ma_khach) + '" aria-label="Chọn ' + esc(r.c.ho_ten) + '" ' + (ST.sel[r.c.ma_khach] ? 'checked' : '') + '><span class="kb"><b>' + esc(r.c.ho_ten) + '</b><small>' + esc(ageTxt(r.c)) + (r.l.ho_ten ? ' · ' + esc(r.l.ho_ten) : '') + (r.l.sdt ? ' · ' + esc(r.l.sdt) : '') + '</small>' + (whoOf(r) ? '<small>Đang giữ: ' + esc(whoOf(r)) + '</small>' : '') + '</span>' + tagK[r.st] + '</label>' }).join('') + (rows.length ? '' : '<div class="empty">Không có khách phù hợp.</div>') + '</div>' +
+      '<div class="row2" style="padding:10px"><span class="meta">' + all.length + ' khách · trang ' + ST.pg + '/' + pages + '</span><div style="display:flex;gap:8px;align-items:center"><select data-pgsize aria-label="Số dòng mỗi trang" style="border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:var(--card);min-height:38px">' + [10, 15, 20, 30, 50, 100].map(function (n) { return '<option value="' + n + '"' + (n === PAGEN() ? ' selected' : '') + '>' + n + ' dòng</option>' }).join('') + '</select><button class="btn b3" data-pg="-1" style="min-height:38px" aria-label="Trang trước">‹</button><button class="btn b3" data-pg="1" style="min-height:38px" aria-label="Trang sau">›</button></div></div></div>';
+    h += '<div class="bulk" style="' + (n ? '' : 'display:none') + '"><b>Đã chọn ' + n + ' khách</b><span class="sp"></span>' + (all.length > n ? '<button class="btn b3" id="seltop" style="min-height:42px" title="Chọn cả ' + all.length + ' khách đang lọc">Chọn cả ' + all.length + '</button>' : '') + '<button class="btn b3" id="selclr" style="min-height:42px">Bỏ chọn</button><button class="btn b1" id="asg" style="min-height:42px">Phân công</button></div>';
     return h
   }
   function assignModal() {
@@ -468,9 +525,18 @@ var ASM = (function () {
     var x, on = function (sel, ev, fn) { var el = $(sel); if (el) el[ev] = function (e) { return fn.call(el, el, e) } };
     document.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { S.page = b.dataset.go; render() } });
     on('#fshop', 'onchange', function (x) { ST.shop = x.value; render() });
-    document.querySelectorAll('tr[data-shop]').forEach(function (r) { r.onclick = function () { ST.shop = ST.shop === r.dataset.shop ? '' : r.dataset.shop; render() } });
+    document.querySelectorAll('[data-shop]').forEach(function (r) { r.onclick = function () { ST.shop = ST.shop === r.dataset.shop ? '' : r.dataset.shop; render() } });
+    document.querySelectorAll('[data-sort]').forEach(function (b) { b.onclick = function (e) { e.stopPropagation(); var k = b.dataset.sort; if ((ST.ssort || 'qh') === k) ST.sdir = -(ST.sdir || -1); else { ST.ssort = k; ST.sdir = k === 'ten' ? 1 : -1 } render() } });
+    on('#sq', 'oninput', function (x) { ST.sq = x.value; var pos = x.selectionStart; render(); var n = $('#sq'); n.focus(); n.setSelectionRange(pos, pos) });
+    on('#slate', 'onclick', function () { ST.late = !ST.late; render() });
+    document.querySelectorAll('[data-late]').forEach(function (b) { b.onclick = function () { ST.late = true; render(); var t = $('.shtb'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' }) } });
     on('#kq', 'oninput', function (x) { ST.q = x.value; ST.pg = 1; var pos = x.selectionStart; render(); var n = $('#kq'); n.focus(); n.setSelectionRange(pos, pos) });
     on('#fband', 'onchange', function (x) { ST.band = x.value; ST.pg = 1; render() });
+    on('#kshop', 'onchange', function (x) { ST.kShop = x.value; ST.kNv = ''; ST.pg = 1; render() }); on('#knv', 'onchange', function (x) { ST.kNv = x.value; ST.pg = 1; render() });
+    on('#kfrom', 'onchange', function (x) { ST.kFrom = x.value; ST.pg = 1; render() }); on('#kto', 'onchange', function (x) { ST.kTo = x.value; ST.pg = 1; render() });
+    on('#kfa', 'ontoggle', function (x) { ST.kOpen = x.open });
+    on('#kclr', 'onclick', function () { ST.q = ST.band = ST.f = ST.kShop = ST.kNv = ST.kFrom = ST.kTo = ''; ST.pg = 1; render() });
+    document.querySelectorAll('[data-selpage]').forEach(function (b) { b.onclick = function () { var all = khoRows(), rs = all.slice((ST.pg - 1) * PAGEN(), ST.pg * PAGEN()), every = rs.every(function (r) { return ST.sel[r.c.ma_khach] }); rs.forEach(function (r) { every ? delete ST.sel[r.c.ma_khach] : ST.sel[r.c.ma_khach] = 1 }); render() } });
     document.querySelectorAll('.chip[data-f]').forEach(function (b) { b.onclick = function () { ST.f = b.dataset.f; ST.pg = 1; render() } });
     document.querySelectorAll('[data-pg]').forEach(function (b) { b.onclick = function () { ST.pg = Math.max(1, ST.pg + Number(b.dataset.pg)); render() } });
     document.querySelectorAll('input[data-k]').forEach(function (b) { b.onchange = function () { b.checked ? ST.sel[b.dataset.k] = 1 : delete ST.sel[b.dataset.k]; render() } });
