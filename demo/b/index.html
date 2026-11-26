@@ -228,7 +228,11 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
  .kp-hero{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:14px;align-items:center;padding:12px 14px}
  .kp-hero .big{grid-column:1;grid-row:1/4;font-size:38px;align-self:center}.kp-hero .l,.kp-hero .pb,.kp-hero .meta{grid-column:2}.kp-hero .pb{margin:6px 0 4px}
  .kp-m{padding:10px 8px}.kp-m .l{font-size:11.5px}.kp-m .v{font-size:22px}
- .kp2{gap:6px}.kp2 button{padding:8px 10px;font-size:12.5px}.kp2 b{font-size:13px}
+ .kp2{flex-wrap:nowrap;gap:6px;overflow-x:auto;scrollbar-width:none}.kp2::-webkit-scrollbar{display:none}.kp2 button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:12px;white-space:nowrap;text-align:center}.kp2 b{font-size:13px}
+ /* thứ tự trên điện thoại: lời chào → việc cần xử lý ngay → tổng quan (+ biểu đồ) → phân tích */
+ main>.row2{order:-10}.tops,.tops>.t2{display:contents}.tops>.tl{order:-9}.tops .cal{order:-8}.tov{order:-7}.tops .cch{order:-6}
+ body[data-role=asm] main .pgbar .btn{min-width:44px}
+ .rt td:not(.rh) small{display:none}
  /* vùng chạm tối thiểu 44px (chỉ ASM, chỉ trong nội dung chính) */
  body[data-role=asm] .mtop .ibtn,body[data-role=asm] .mtop .ava{width:44px;height:44px}
  body[data-role=asm] main .chip,body[data-role=asm] .kp2 button,body[data-role=asm] main .pgbar select,body[data-role=asm] main .pgbar .btn,body[data-role=asm] main summary,body[data-role=asm] main .kd input{min-height:44px}
@@ -500,6 +504,6 @@ document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126j"></script>
+<script src="app.js?v=20261126k"></script>
 </body>
 </html>
