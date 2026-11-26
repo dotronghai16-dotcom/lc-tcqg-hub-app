@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126n) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126o) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -372,9 +372,9 @@ var ASM = (function () {
       '<div class="kp2"><button data-go="a_kho"><b>' + tot + '</b> trong kho</button><button data-go="a_kho"><b>' + kho + '</b> chưa giao</button><button data-go="a_pc"><b>' + all.chia + '</b> chờ chia</button></div></section>';
     /* Tầng 2: điều hành */
     var sv = '', tl = [];
-    if (all.qh) tl.push('<button class="sv sv1" data-late="1" title="Tính từ Ngày cần liên hệ của từng lượt"><span class="sl">Khẩn</span><span class="sn">' + all.qh + '</span><span class="sb">quá hạn liên hệ</span></button>');
+    if (all.qh) tl.push('<button class="sv sv1" data-late="1" title="Tính từ Ngày cần liên hệ của từng lượt"><span class="sl">Khẩn</span><span class="sn">' + all.qh + '</span><span class="sb">quá hạn gọi</span></button>');
     if (all.chia) tl.push('<button class="sv sv2" data-go="a_pc" title="Quản lý chia khi bạn bật quyền cho lần giao đó"><span class="sl">Cần làm</span><span class="sn">' + all.chia + '</span><span class="sb">lượt chờ chia</span></button>');
-    if (kho) tl.push('<button class="sv sv3" data-go="a_kho" title="Khách đang nằm trong kho"><span class="sl">Nên làm</span><span class="sn">' + kho + '</span><span class="sb">khách chưa giao</span></button>');
+    if (kho) tl.push('<button class="sv sv3" data-go="a_kho" title="Khách đang nằm trong kho"><span class="sl">Nên làm</span><span class="sn">' + kho + '</span><span class="sb">chưa giao</span></button>');
     if (tl.length) sv = '<div class="svg3" style="--n:' + tl.length + '">' + tl.join('') + '</div>';
     var days = series(ST.shop, 14), w1 = 0, w0 = 0; days.forEach(function (x, i) { if (i >= 7) w1 += x.xong; else w0 += x.xong }); var dl = w1 - w0;
     var narrow = window.innerWidth < 960, shown = narrow ? days.slice(-7) : days; LASTDAYS = shown;
@@ -1358,7 +1358,7 @@ var ASMIMG = (function () {
     var h = head('Kiểm tra gọi & nhắn', 'Dấu hiệu bất thường trong cách nhân viên ghi nhận kết quả. Công cụ để quản lý kiểm tra, không phải bằng chứng gian lận.', '');
     var cur = function (n) { return t.den === today && t.tu === isoD(new Date(Date.now() - (n - 1) * 864e5)) }, preset = cur(7) || cur(14) || cur(30);
     h += '<div class="chips ov">' + [7, 14, 30].map(function (n) { return '<button class="chip ' + (cur(n) ? 'on' : '') + '" data-nvr="' + n + '">' + n + ' ngày</button>' }).join('') +
-      '<details class="xp"><summary class="chip ' + (preset ? '' : 'on') + '">' + (preset ? 'Tùy chọn' : esc(t.tu) + ' → ' + esc(t.den)) + '</summary><div class="xpm nvr"><label class="field" style="margin:0">Từ ngày<input type="date" id="nv-tu" value="' + esc(t.tu) + '"></label><label class="field" style="margin:0">Đến ngày<input type="date" id="nv-den" value="' + esc(t.den) + '"></label><button class="btn b1" id="nv-go">Xem báo cáo</button></div></details></div>';
+      '<details class="xp"><summary class="chip ' + (preset ? '' : 'on') + '" aria-label="Chọn khoảng ngày">' + ic('clock') + (preset ? '' : ' ' + t.tu.slice(8) + '/' + t.tu.slice(5, 7) + '–' + t.den.slice(8) + '/' + t.den.slice(5, 7)) + '</summary><div class="xpm nvr"><label class="field" style="margin:0">Từ ngày<input type="date" id="nv-tu" value="' + esc(t.tu) + '"></label><label class="field" style="margin:0">Đến ngày<input type="date" id="nv-den" value="' + esc(t.den) + '"></label><button class="btn b1" id="nv-go">Xem báo cáo</button></div></details></div>';
     if (t.err) return h + '<div class="ro" style="background:var(--bad-bg);color:var(--bad)">' + esc(t.err) + '</div>';
     if (t.loading || !t.rows) return h + '<div class="card"><div class="meta">Đang tải…</div></div>';
     var rows = t.rows, flagged = rows.filter(function (r) { return nvScore(r) > 0 }).sort(function (a, b) { return nvScore(b) - nvScore(a) || b.tong - a.tong }), sumTong = 0, sumFlag = 0;
