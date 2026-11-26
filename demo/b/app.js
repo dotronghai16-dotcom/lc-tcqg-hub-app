@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126k) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126m) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -271,7 +271,7 @@ var PGR = (function () {
 var ASM = (function () {
   IC.upload = '<path d="M12 16V4m0 0-4 4m4-4 4 4M5 20h14"/>'; IC.download = '<path d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/>'; IC.swap = '<path d="M7 7h12l-3-3M17 17H5l3 3"/>'; IC.book = '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/>'; IC.shop = '<path d="M4 9 5.5 4h13L20 9M4 9h16v11H4zM9 20v-6h6v6"/>';
   IC.more = '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'; IC.shield = '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>';
-  var NAV = [['a_tq', 'Tổng quan', 'home'], ['a_kho', 'Kho Data', 'list'], ['a_pc', 'Phân công', 'swap'], ['a_nap', 'Nạp Data', 'upload'], ['a_bc', 'Kết quả & xuất', 'chart'], ['a_tk', 'Nhân sự & tài khoản', 'team'], ['a_tl', 'Thư viện', 'book'], ['a_pd', 'Phác đồ', 'shield'], ['a_nv', 'Kiểm tra gọi & nhắn', 'shield'], ['a_cf', 'Cấu hình ghi nhận', 'shield'], ['acc', 'Của tôi', 'user']];
+  var NAV = [['a_tq', 'Tổng quan', 'home'], ['a_kho', 'Kho Data', 'list'], ['a_pc', 'Phân công', 'swap'], ['a_nap', 'Nạp Data', 'upload'], ['a_bc', 'Báo cáo', 'chart'], ['a_tk', 'Nhân sự & tài khoản', 'team'], ['a_tl', 'Thư viện', 'book'], ['a_pd', 'Phác đồ', 'shield'], ['a_nv', 'Kiểm tra gọi & nhắn', 'shield'], ['a_cf', 'Cấu hình ghi nhận', 'shield'], ['acc', 'Của tôi', 'user']];
   var MOBILE = ['a_tq', 'a_kho', 'a_pc', 'a_tk'];
   var X = { pages: {}, binders: [], u: {} };
   var ST = { shop: '', band: '', f: '', q: '', pg: 1, sel: {}, selAll: false, imp: null, bcShop: '', bcSt: '' };
@@ -327,6 +327,12 @@ var ASM = (function () {
     return days
   }
   /* Biểu đồ vẽ theo bề rộng thật của khung (W = số điểm ảnh) để chữ trục luôn đủ lớn: điện thoại 7 ngày, máy tính 14 ngày */
+  /* Ghim cụm đầu trang (tiêu đề + ô tìm + bộ lọc + chip) ở mọi menu: gom các phần tử đầu trang vào một khung dính */
+  function stick(m) {
+    var kids = [].slice.call(m.children), grab = [], i;
+    for (i = 0; i < kids.length; i++) { var k = kids[i]; if ((i === 0 && k.classList.contains('row2')) || (i > 0 && k.matches && k.matches('.kf,.chips,.top,.tbar2,.seg2'))) grab.push(k); else break }
+    if (!grab.length) return; var w = document.createElement('div'); w.className = 'stk'; m.insertBefore(w, grab[0]); grab.forEach(function (k) { w.appendChild(k) })
+  }
   var LASTDAYS = null;
   function fitChart() {
     var w = $('#chw'); if (!w || !LASTDAYS) return; var cw = Math.floor(w.clientWidth);
@@ -365,10 +371,11 @@ var ASM = (function () {
       '<div class="card kp-m"><div class="l">Đang xử lý</div><div class="v">' + all.mo + '</div></div><div class="card kp-m"><div class="l">Hẹn / tiêm</div><div class="v ok">' + all.dy + '</div></div><div class="card kp-m' + (all.qh ? ' bad' : '') + '"><div class="l">Quá hạn gọi</div><div class="v">' + all.qh + '</div></div></div>' +
       '<div class="kp2"><button data-go="a_kho"><b>' + tot + '</b> trong kho</button><button data-go="a_kho"><b>' + kho + '</b> chưa giao</button><button data-go="a_pc"><b>' + all.chia + '</b> chờ chia</button></div></section>';
     /* Tầng 2: điều hành */
-    var sv = '';
-    if (all.qh) sv += '<div class="sv sv1"><div class="sn">' + all.qh + '</div><div class="sb"><span class="sl">Khẩn</span><b>lượt quá hạn liên hệ</b><small>Tính từ "Ngày cần liên hệ" của từng lượt</small></div><button class="btn b1" data-late="1">Xem Shop</button></div>';
-    if (all.chia) sv += '<div class="sv sv2"><div class="sn">' + all.chia + '</div><div class="sb"><span class="sl">Cần làm</span><b>lượt giao cho Shop chờ chia</b><small>Quản lý chia khi bạn bật quyền cho lần giao đó</small></div><button class="btn b2" data-go="a_pc">Mở</button></div>';
-    if (kho) sv += '<div class="sv sv3"><div class="sn">' + kho + '</div><div class="sb"><span class="sl">Nên làm</span><b>khách chưa được giao</b><small>Đang nằm trong kho</small></div><button class="btn b2" data-go="a_kho">Phân công</button></div>';
+    var sv = '', tl = [];
+    if (all.qh) tl.push('<button class="sv sv1" data-late="1" title="Tính từ Ngày cần liên hệ của từng lượt"><span class="sl">Khẩn</span><span class="sn">' + all.qh + '</span><span class="sb">quá hạn liên hệ</span></button>');
+    if (all.chia) tl.push('<button class="sv sv2" data-go="a_pc" title="Quản lý chia khi bạn bật quyền cho lần giao đó"><span class="sl">Cần làm</span><span class="sn">' + all.chia + '</span><span class="sb">lượt chờ chia</span></button>');
+    if (kho) tl.push('<button class="sv sv3" data-go="a_kho" title="Khách đang nằm trong kho"><span class="sl">Nên làm</span><span class="sn">' + kho + '</span><span class="sb">khách chưa giao</span></button>');
+    if (tl.length) sv = '<div class="svg3" style="--n:' + tl.length + '">' + tl.join('') + '</div>';
     var days = series(ST.shop, 14), w1 = 0, w0 = 0; days.forEach(function (x, i) { if (i >= 7) w1 += x.xong; else w0 += x.xong }); var dl = w1 - w0;
     var narrow = window.innerWidth < 960, shown = narrow ? days.slice(-7) : days; LASTDAYS = shown;
     h += '<section class="tier tops"><h2 class="tl">Điều hành</h2><div class="t2"><div class="card cal"><h2>Cần xử lý ngay</h2>' + (sv || '<div class="alert"><i>✓</i><div><b>Chưa có gì cần xử lý</b></div></div>') + '</div>' +
@@ -376,9 +383,8 @@ var ASM = (function () {
     /* Tầng 3: phân tích */
     var rows = shopRows();
     var tb = rows.map(function (r) { var x = r.x; return '<tr class="click' + (x.luot ? '' : ' idle') + '" data-shop="' + esc(r.s.id_shop) + '"' + (ST.shop === r.s.id_shop ? ' style="background:var(--tint)"' : '') + '><td class="nm"><b>' + esc(r.s.ten_shop) + '</b> ' + (r.tag ? '<span class="tag ' + (r.tag === 'Dẫn đầu' ? 't-ok' : 't-late') + '">' + r.tag + '</span>' : '') + '<small>' + esc(r.s.ma_shop) + ' · QL ' + esc(r.ql) + ' · ' + r.nv + ' NV</small></td><td class="num">' + x.luot + '</td><td class="num">' + x.mo + '</td><td class="pc"><div class="bar2"><i style="width:' + Math.max(0, r.ptr) + '%"></i></div><span>' + (r.ptr < 0 ? '–' : r.ptr + '%') + '</span></td><td class="num">' + x.dy + '</td><td class="num">' + (x.qh ? '<span class="tag t-late">' + x.qh + '</span>' : '0') + '</td></tr>' }).join('');
-    var cards = rows.map(function (r) { var x = r.x; return '<button class="shc" data-shop="' + esc(r.s.id_shop) + '"><div class="shh"><b>' + esc(r.s.ten_shop) + '</b>' + (r.tag ? '<span class="tag ' + (r.tag === 'Dẫn đầu' ? 't-ok' : 't-late') + '">' + r.tag + '</span>' : '') + '</div><div class="bar2"><i style="width:' + Math.max(0, r.ptr) + '%"></i></div><div class="shn"><span>' + (r.ptr < 0 ? '–' : r.ptr + '%') + ' hoàn thành</span><span>' + x.mo + ' đang mở</span><span>' + x.dy + ' hẹn</span>' + (x.qh ? '<span class="tag t-late">' + x.qh + ' quá hạn</span>' : '') + '</div></button>' }).join('');
     h += '<section class="tier"><h2 class="tl">Phân tích</h2><div class="card" style="padding:12px 12px 6px"><div class="row2" style="margin-bottom:8px"><h2 style="margin:0">So sánh các Shop <span class="meta">' + rows.length + '/' + SH.length + '</span></h2><div class="shtool"><div class="search">' + ic('search') + '<input id="sq" placeholder="Tìm Shop, quản lý…" aria-label="Tìm Shop" value="' + esc(ST.sq || '') + '"></div><button class="chip' + (ST.late ? ' on' : '') + '" id="slate">Chỉ Shop quá hạn</button></div></div>' +
-      '<div class="tw only-d"><table class="shtb"><thead><tr>' + sortTh('ten', 'Shop', 0) + sortTh('luot', 'Được giao', 1) + sortTh('mo', 'Đang mở', 1) + sortTh('ptr', 'Hoàn thành', 0) + sortTh('dy', 'Hẹn / tiêm', 1) + sortTh('qh', 'Quá hạn', 1) + '</tr></thead><tbody>' + (tb || '<tr><td colspan="6" class="empty">Không có Shop phù hợp.</td></tr>') + '</tbody></table></div><div class="only-m shl">' + (cards || '<div class="empty">Không có Shop phù hợp.</div>') + '</div>' +
+      '<div class="tw"><table class="shtb"><thead><tr>' + sortTh('ten', 'Shop', 0) + sortTh('luot', 'Được giao', 1) + sortTh('mo', 'Đang mở', 1) + sortTh('ptr', 'Hoàn thành', 0) + sortTh('dy', 'Hẹn / tiêm', 1) + sortTh('qh', 'Quá hạn', 1) + '</tr></thead><tbody>' + (tb || '<tr><td colspan="6" class="empty">Không có Shop phù hợp.</td></tr>') + '</tbody></table></div>' +
       '<div class="meta" style="padding:8px 4px">Bấm một Shop để xem nhân viên bên dưới. Bấm tiêu đề cột để sắp xếp.</div></div></section>';
     if (ST.shop) {
       var staff = staffOf(ST.shop);
@@ -405,7 +411,7 @@ var ASM = (function () {
     var pages = Math.max(1, Math.ceil(all.length / PAGEN())); ST.pg = Math.min(ST.pg, pages); var rows = all.slice((ST.pg - 1) * PAGEN(), ST.pg * PAGEN()), n = Object.keys(ST.sel).length;
     var h = head('Kho Data', 'Toàn bộ khách. Lọc, chọn nhiều khách rồi bấm Phân công.', '');
     var SHK = shops(), staffK = ST.kShop ? staffOf(ST.kShop) : [], act = !!(ST.q || ST.band || ST.f || ST.kShop || ST.kNv || ST.kFrom || ST.kTo);
-    var nAct = [ST.kShop, ST.kNv, ST.kFrom, ST.kTo, ST.band].filter(Boolean).length, kopen = ST.kOpen != null ? ST.kOpen : (window.innerWidth >= 960 || nAct > 0);
+    var nAct = [ST.kShop, ST.kNv, ST.kFrom, ST.kTo, ST.band].filter(Boolean).length, kopen = ST.kOpen != null ? ST.kOpen : window.innerWidth >= 960;
     h += '<div class="kf"><div class="search">' + ic('search') + '<input id="kq" placeholder="Tìm tên, mã khách, SĐT…" aria-label="Tìm khách" value="' + esc(ST.q) + '"></div><details class="kfa" id="kfa"' + (kopen ? ' open' : '') + '><summary>Bộ lọc' + (nAct ? ' · ' + nAct + ' đang bật' : '') + '</summary><div class="kfb">' +
       sel('kshop', [['', 'Mọi Shop']].concat(SHK.map(function (x) { return [x.id_shop, x.ten_shop] })), ST.kShop) +
       '<select id="knv" aria-label="Nhân viên"' + (ST.kShop ? '' : ' disabled') + '><option value="">' + (ST.kShop ? 'Mọi nhân viên' : 'Chọn Shop trước') + '</option>' + staffK.map(function (a) { return '<option value="' + esc(a.ma_tk) + '"' + (ST.kNv === a.ma_tk ? ' selected' : '') + '>' + esc(a.ho_ten) + '</option>' }).join('') + '</select>' +
@@ -504,12 +510,20 @@ var ASM = (function () {
   /* ---------- Kết quả & xuất ---------- */
   function bcTurns() { return D.turns.filter(function (t) { return (!ST.bcShop || t.id_shop === ST.bcShop) && (!ST.bcSt || (ST.bcSt === 'MO' ? open_(t) : t.trang_thai === ST.bcSt)) }) }
   function pgBc() {
-    var T = bcTurns(), SH = shops(), by = {};
-    T.forEach(function (t) { var k = t.recipient_type === 'EMPLOYEE' ? t.ma_tk_nhan : 'SHOP:' + t.id_shop, r = by[k] = by[k] || { k: k, t: t, n: 0, mo: 0, xong: 0, dy: 0 }; r.n++; if (open_(t)) r.mo++; if (t.trang_thai === 'HOAN_THANH') r.xong++; if (yes(t)) r.dy++ });
-    var h = head('Kết quả & xuất', 'Xem kết quả theo nhân viên và xuất dữ liệu ra file CSV (mở được bằng Excel).', '');
-    h += '<div class="top" style="flex-wrap:wrap">' + sel('bshop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), ST.bcShop) + sel('bst', [['', 'Mọi trạng thái'], ['MO', 'Đang mở'], ['HOAN_THANH', 'Hoàn thành'], ['THU_HOI', 'Đã thu hồi']], ST.bcSt) + '<span class="sp"></span><button class="btn b1" id="xl">' + ic('download') + 'Xuất theo lượt (' + T.length + ')</button><button class="btn b3" id="xn">Xuất theo nhân viên</button></div>';
-    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Người nhận</th><th>Shop</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Hẹn / đã tiêm</th><th>Tỷ lệ hẹn / hoàn thành</th></tr></thead><tbody>' + Object.keys(by).map(function (k) { return by[k] }).sort(function (a, b) { return b.n - a.n }).map(function (r) {
-      return '<tr><td><b>' + esc(r.k.indexOf('SHOP:') === 0 ? 'Cả Shop (chưa chia)' : nm(r.k)) + '</b></td><td>' + esc(shopName(r.t.id_shop)) + '</td><td>' + r.n + '</td><td>' + r.mo + '</td><td>' + r.xong + '</td><td>' + r.dy + '</td><td>' + (r.xong ? pct(r.dy, r.xong) + '%' : '–') + '</td></tr>' }).join('') + '</tbody></table></div></div>';
+    var T = bcTurns(), SH = shops(), by = {}, kq = {}, nKq = 0, nMo = 0, nXong = 0, nDy = 0;
+    T.forEach(function (t) {
+      var k = t.recipient_type === 'EMPLOYEE' ? t.ma_tk_nhan : 'SHOP:' + t.id_shop, r = by[k] = by[k] || { k: k, t: t, n: 0, mo: 0, xong: 0, dy: 0 }; r.n++;
+      if (open_(t)) { r.mo++; nMo++ } if (t.trang_thai === 'HOAN_THANH') { r.xong++; nXong++ } if (yes(t)) { r.dy++; nDy++ }
+      if (t.ma_ket_qua) { var nm0 = (cat(t.ma_ket_qua) || {}).ten || t.ma_ket_qua; kq[nm0] = (kq[nm0] || 0) + 1; nKq++ }
+    });
+    var h = head('Báo cáo', 'Kết quả chăm sóc theo Shop và nhân viên. Xuất file CSV mở được bằng Excel.', '');
+    h += '<div class="tbar2">' + sel('bshop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), ST.bcShop) + sel('bst', [['', 'Mọi trạng thái'], ['MO', 'Đang mở'], ['HOAN_THANH', 'Hoàn thành'], ['THU_HOI', 'Đã thu hồi']], ST.bcSt) +
+      '<details class="xp"><summary class="btn b1">' + ic('download') + 'Xuất file</summary><div class="xpm"><button class="btn b3" id="xl">Theo từng lượt (' + T.length + ')</button><button class="btn b3" id="xn">Theo nhân viên</button></div></details></div>';
+    h += '<div class="kp3"><div class="card kp-m"><div class="l">Được giao</div><div class="v">' + T.length + '</div></div><div class="card kp-m"><div class="l">Hoàn thành</div><div class="v">' + nXong + '<small> ' + (T.length ? pct(nXong, T.length) : 0) + '%</small></div></div><div class="card kp-m"><div class="l">Hẹn / tiêm</div><div class="v ok">' + nDy + '<small> ' + (nXong ? pct(nDy, nXong) : 0) + '%</small></div></div></div>';
+    var ks = Object.keys(kq).sort(function (a, b) { return kq[b] - kq[a] }), mx = ks.length ? kq[ks[0]] : 1, none = T.length - nKq;
+    h += '<div class="card"><div class="row2"><h2 style="margin:0">Kết quả ghi nhận</h2><span class="meta">' + nKq + '/' + T.length + ' lượt đã có kết quả</span></div>' + (ks.length ? '<div class="kqs">' + ks.map(function (k) { return '<div class="kqr"><span class="kqn">' + esc(k) + '</span><span class="kqb"><i style="width:' + Math.max(4, Math.round(kq[k] / mx * 100)) + '%"></i></span><b>' + kq[k] + '</b></div>' }).join('') + (none > 0 ? '<div class="kqr kqx"><span class="kqn">Chưa ghi kết quả</span><span class="kqb"><i style="width:' + Math.max(4, Math.round(none / mx * 100)) + '%"></i></span><b>' + none + '</b></div>' : '') + '</div>' : '<div class="meta" style="margin-top:8px">Chưa có lượt nào ghi kết quả trong phạm vi lọc.</div>') + '</div>';
+    h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">Theo người nhận</h2><div class="tw"><table class="rt rtb" style="--c:5"><thead><tr><th>Người nhận</th><th>Được giao</th><th>Đang mở</th><th>Hoàn thành</th><th>Hẹn / đã tiêm</th><th>Tỷ lệ hẹn / hoàn thành</th></tr></thead><tbody>' + Object.keys(by).map(function (k) { return by[k] }).sort(function (a, b) { return b.n - a.n }).map(function (r) {
+      return '<tr><td class="rh"><b>' + esc(r.k.indexOf('SHOP:') === 0 ? 'Cả Shop (chưa chia)' : nm(r.k)) + '</b><small>' + esc(shopName(r.t.id_shop)) + '</small></td><td data-label="Giao">' + r.n + '</td><td data-label="Mở">' + r.mo + '</td><td data-label="Xong">' + r.xong + '</td><td data-label="Hẹn">' + r.dy + '</td><td data-label="Tỷ lệ">' + (r.xong ? pct(r.dy, r.xong) + '%' : '–') + '</td></tr>' }).join('') + (T.length ? '' : '<tr><td colspan="6" class="empty">Không có lượt nào trong phạm vi lọc.</td></tr>') + '</tbody></table></div></div>';
     return h
   }
   function exportTurns() {
@@ -528,7 +542,7 @@ var ASM = (function () {
 
   /* ---------- vẽ và gắn sự kiện ---------- */
   function render() {
-    document.body.setAttribute('data-role', 'asm'); shell(); var m = $('#main'), p = S.page; m.innerHTML = ({ a_tq: pgTq, a_kho: pgKho, a_pc: pgPc, a_nap: pgNap, a_bc: pgBc, acc: pgAcc }[p] || X.pages[p] || pgTq)(); fitChart();
+    document.body.setAttribute('data-role', 'asm'); shell(); var m = $('#main'), p = S.page; m.innerHTML = ({ a_tq: pgTq, a_kho: pgKho, a_pc: pgPc, a_nap: pgNap, a_bc: pgBc, acc: pgAcc }[p] || X.pages[p] || pgTq)(); stick(m); fitChart();
     var x, on = function (sel, ev, fn) { var el = $(sel); if (el) el[ev] = function (e) { return fn.call(el, el, e) } };
     document.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { S.page = b.dataset.go; render() } });
     on('#fshop', 'onchange', function (x) { ST.shop = x.value; render() });
@@ -1096,7 +1110,7 @@ var ASMIMG = (function () {
     }
     var all = IM.files, cnt = function (k) { return all.filter(function (f) { return (!k || f.thu_muc === k) && (IM.hidden || f.dang_dung === 'CO') }).length }, q = fold(IM.q);
     var L = all.filter(function (f) { return (!IM.thu || f.thu_muc === IM.thu) && (IM.hidden || f.dang_dung === 'CO') && (!q || fold(f.ten + ' ' + (f.chu_de || '') + ' ' + (f.ten_file || '')).indexOf(q) >= 0) });
-    h += '<div class="top" style="flex-wrap:wrap"><div class="search">' + ic('search') + '<input id="im-q" placeholder="Tìm theo tên, chủ đề…" value="' + esc(IM.q) + '"></div><label class="row" style="cursor:pointer"><input type="checkbox" id="im-hid" ' + (IM.hidden ? 'checked' : '') + ' style="width:20px;height:20px;accent-color:var(--teal)"><span class="meta">Hiện cả ảnh đã ẩn</span></label></div>';
+    h += '<div class="top tbar" style="flex-wrap:wrap"><div class="search">' + ic('search') + '<input id="im-q" placeholder="Tìm theo tên, chủ đề…" value="' + esc(IM.q) + '"></div><label class="row" style="cursor:pointer"><input type="checkbox" id="im-hid" ' + (IM.hidden ? 'checked' : '') + ' style="width:20px;height:20px;accent-color:var(--teal)"><span class="meta">Hiện cả ảnh đã ẩn</span></label></div>';
     h += '<div class="chips">' + [['', 'Tất cả']].concat(Object.keys(THU).map(function (k) { return [k, THU[k]] })).map(function (x) { return '<button class="chip ' + (IM.thu === x[0] ? 'on' : '') + '" data-imt="' + x[0] + '">' + esc(x[1]) + '<em>' + cnt(x[0]) + '</em></button>' }).join('') + '</div>';
     h += '<div class="list gal">' + (L.length ? L.map(function (f) { return '<div class="card"' + (f.dang_dung === 'KHONG' ? ' style="opacity:.55"' : '') + '>' + (f.anh_nho ? '<img src="' + f.anh_nho + '" alt="">' : '<div class="pdf">' + (f.mime === 'application/pdf' ? 'PDF' : 'FILE') + '</div>') + '<b style="font-size:13.5px;line-height:1.3">' + esc(f.ten) + '</b><div>' + tag('t-new', THU[f.thu_muc] || f.thu_muc) + (f.chu_de ? tag('t-today', f.chu_de) : '') + (f.nhom ? tag('t-new', NHOM[f.nhom]) : '') + (f.dang_dung === 'KHONG' ? tag('t-bad', 'đã ẩn') : '') + '</div><div class="row" style="flex-wrap:wrap"><button class="btn b3" data-imv="' + f.id + '" style="min-height:34px;font-size:13px;padding:0 10px">Xem</button><button class="btn b3" data-ime="' + f.id + '" style="min-height:34px;font-size:13px;padding:0 10px">Sửa</button><button class="btn b3" data-imh="' + f.id + '" style="min-height:34px;font-size:13px;padding:0 10px">' + (f.dang_dung === 'CO' ? 'Ẩn' : 'Hiện') + '</button><button class="btn b3" data-imd="' + f.id + '" style="min-height:34px;font-size:13px;padding:0 10px" aria-label="Xóa">✕</button></div></div>' }).join('') : '<div class="card empty" style="grid-column:1/-1">Chưa có ảnh nào. Kéo ảnh vào khung phía trên.</div>') + '</div>';
     return h
@@ -1161,24 +1175,28 @@ var ASMIMG = (function () {
   function fdt(x) { if (!x) return ''; var d = new Date(x); return isNaN(d) ? '' : d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) }
 
   /* ================= NHÂN SỰ & TÀI KHOẢN ================= */
+  function tkRow(a) {
+    var n = openN(a.ma_tk), bs = 'style="min-height:36px;font-size:13px"';
+    return '<tr><td class="rh"><b>' + esc(a.ho_ten) + '</b><small>' + esc(a.email) + '</small></td><td class="nl">' + (a.vai_tro === 'QUAN_LY' ? tag('t-today', 'Quản lý') : 'Nhân viên') + '</td><td class="rp" data-label="SĐT">' + (a.sdt ? esc(fph(a.sdt)) : '<span class="tag t-late">Chưa có</span>') + '</td><td data-label="Đang giữ">' + (n ? n + ' lượt mở' : '–') + '</td><td class="nl">' + (a.trang_thai === 'HOAT_DONG' ? tag('t-ok', 'Hoạt động') : tag('t-bad', 'Đã khóa')) + '</td><td class="nl mk">' + (a.mk_doi_luc ? tag('t-ok', 'Đã đổi') + '<small>' + esc(fdt(a.mk_doi_luc)) + '</small>' : '<span class="tag t-late">Chưa đổi</span>') + '</td><td data-label="Đăng nhập gần nhất">' + (a.dang_nhap_luc ? esc(fdt(a.dang_nhap_luc)) : '<span class="meta">Chưa đăng nhập</span>') + '</td><td class="ra"><div class="row" style="flex-wrap:wrap"><button class="btn b3" data-tkedit="' + esc(a.ma_tk) + '" ' + bs + '>Sửa</button><button class="btn b3" data-tkpw="' + esc(a.ma_tk) + '" ' + bs + '>Mật khẩu</button><button class="btn b3" data-tklock="' + esc(a.ma_tk) + '" ' + bs + '>' + (a.trang_thai === 'HOAT_DONG' ? 'Khóa' : 'Mở khóa') + '</button><button class="btn b3" data-tkdel="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px;color:var(--bad)">Xóa</button></div></td></tr>'
+  }
   function pgTk() {
-    var f = AS.tk, SH = U.shops(), ql = f.q.trim().toLowerCase();
+    var f = AS.tk, SH = U.shops(), ql = f.q.trim().toLowerCase(); f.open = f.open || {};
     var L = accs().filter(function (a) { return (!f.shop || a.id_shop === f.shop) && (!f.st || a.trang_thai === f.st) && (!f.nosdt || !a.sdt) && (!ql || (a.ho_ten + ' ' + a.email).toLowerCase().indexOf(ql) >= 0) })
-      .sort(function (a, b) { return String(a.id_shop).localeCompare(String(b.id_shop)) || (a.vai_tro === b.vai_tro ? a.ho_ten.localeCompare(b.ho_ten) : a.vai_tro === 'QUAN_LY' ? -1 : 1) });
+      .sort(function (a, b) { return (a.vai_tro === b.vai_tro ? a.ho_ten.localeCompare(b.ho_ten) : a.vai_tro === 'QUAN_LY' ? -1 : 1) });
     var cnt = { '': accs().length, HOAT_DONG: 0, NGUNG: 0 }; accs().forEach(function (a) { cnt[a.trang_thai] = (cnt[a.trang_thai] || 0) + 1 });
     var h = head('Nhân sự & tài khoản', 'Tạo tài khoản, đổi Shop, chọn Quản lý cho từng Shop (một Shop có thể có nhiều Quản lý), khóa hoặc mở, xóa, đặt lại mật khẩu. Chỉ ASM làm được.', '<button class="btn b1" id="tk-new">+ Thêm tài khoản</button>');
-    h += window.ASMHR ? ASMHR.card() : '';
-    h += '<div class="card" style="padding:6px 8px"><h2 style="padding:10px 10px 0">Quản lý của từng Shop</h2><div class="tw"><table class="rt"><thead><tr><th>Shop</th><th>Quản lý</th><th>Nhân viên</th><th></th></tr></thead><tbody>' + SH.map(function (s) {
-      var ms = qlList(s.id_shop), nv = accs().filter(function (a) { return a.id_shop === s.id_shop && a.vai_tro === 'NHAN_VIEN' && a.trang_thai === 'HOAT_DONG' }).length;
-      return '<tr><td class="rh"><b>' + esc(s.ten_shop) + '</b><small>' + esc(s.ma_shop) + '</small></td><td data-label="Quản lý">' + (ms.length ? ms.map(function (m) { return esc(m.ho_ten) }).join(', ') : '<span class="tag t-late">Chưa có Quản lý</span>') + '</td><td data-label="Nhân viên">' + nv + '</td><td class="ra"><button class="btn b3" data-setql="' + esc(s.id_shop) + '" style="min-height:36px;font-size:13px">' + 'Chọn Quản lý' + '</button></td></tr>'
-    }).join('') + '</tbody></table></div></div>';
-    h += '<div class="top" style="flex-wrap:wrap"><div class="search">' + ic('search') + '<input id="tk-q" placeholder="Tìm tên hoặc email…" value="' + esc(f.q) + '"></div>' + sel('tk-shop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), f.shop) + '</div>';
+    h += '<div class="tbar2"><div class="search">' + ic('search') + '<input id="tk-q" placeholder="Tìm tên hoặc email…" value="' + esc(f.q) + '"></div>' + sel('tk-shop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), f.shop) + '</div>';
     var noS = accs().filter(function (a) { return a.trang_thai === 'HOAT_DONG' && !a.sdt }).length;
     h += '<div class="chips">' + [['HOAT_DONG', 'Đang hoạt động'], ['NGUNG', 'Đã khóa'], ['', 'Tất cả']].map(function (x) { return '<button class="chip ' + (f.st === x[0] ? 'on' : '') + '" data-tkst="' + x[0] + '">' + x[1] + '<em>' + (cnt[x[0]] || 0) + '</em></button>' }).join('') + '<button class="chip ' + (f.nosdt ? 'on' : '') + '" data-tknosdt="1" title="Người chưa có SĐT thì tin nhắn của họ thiếu số liên hệ">Chưa có SĐT<em>' + noS + '</em></button></div>';
-    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table class="rt"><thead><tr><th>Họ tên</th><th>Vai trò</th><th>Shop</th><th>SĐT</th><th>Đang giữ</th><th>Trạng thái</th><th>Mật khẩu</th><th>Đăng nhập gần nhất</th><th style="min-width:270px"></th></tr></thead><tbody>' + L.map(function (a) {
-      var n = openN(a.ma_tk);
-      return '<tr><td class="rh"><b>' + esc(a.ho_ten) + '</b><small>' + esc(a.email) + '</small></td><td data-label="Vai trò">' + (a.vai_tro === 'QUAN_LY' ? tag('t-today', 'Quản lý') : 'Nhân viên') + '</td><td data-label="Shop">' + esc(shopName(a.id_shop)) + '</td><td data-label="SĐT">' + (a.sdt ? esc(fph(a.sdt)) : '<span class="tag t-late">Chưa có</span>') + '</td><td data-label="Đang giữ">' + (n ? n + ' lượt mở' : '–') + '</td><td data-label="Trạng thái">' + (a.trang_thai === 'HOAT_DONG' ? tag('t-ok', 'Hoạt động') : tag('t-bad', 'Đã khóa')) + '</td><td data-label="Mật khẩu">' + (a.mk_doi_luc ? tag('t-ok', 'Đã đổi') + '<small>' + esc(fdt(a.mk_doi_luc)) + '</small>' : '<span class="tag t-late">Chưa đổi</span>') + '</td><td data-label="Đăng nhập gần nhất" class="rw">' + (a.dang_nhap_luc ? esc(fdt(a.dang_nhap_luc)) : '<span class="meta">Chưa đăng nhập</span>') + '</td><td class="ra"><div class="row" style="flex-wrap:wrap"><button class="btn b3" data-tkedit="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">Sửa</button><button class="btn b3" data-tkpw="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">Mật khẩu</button><button class="btn b3" data-tklock="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px">' + (a.trang_thai === 'HOAT_DONG' ? 'Khóa' : 'Mở khóa') + '</button><button class="btn b3" data-tkdel="' + esc(a.ma_tk) + '" style="min-height:36px;font-size:13px;color:var(--bad)">Xóa</button></div></td></tr>'
-    }).join('') + (L.length ? '' : '<tr><td colspan="9" class="empty">Không có tài khoản phù hợp.</td></tr>') + '</tbody></table></div></div>';
+    var hc = window.ASMHR ? ASMHR.card() : '';
+    h += '<details class="hrbox" id="hrbox"' + (f.hrOpen || /id="hr-go"/.test(hc) ? ' open' : '') + '><summary>' + ic('upload') + 'Nạp danh sách nhân sự từ file Excel/CSV</summary>' + hc + '</details>';
+    var byShop = {}; L.forEach(function (a) { (byShop[a.id_shop] = byShop[a.id_shop] || []).push(a) });
+    var filt = !!(f.q || f.nosdt), shown = SH.filter(function (s) { return (!f.shop || s.id_shop === f.shop) && (byShop[s.id_shop] || (!f.q && !f.nosdt)) });
+    h += '<div class="shgs">' + shown.map(function (s) {
+      var ms = qlList(s.id_shop), ps = byShop[s.id_shop] || [], o = f.open[s.id_shop], open = o != null ? o : ((filt && ps.length > 0) || f.shop === s.id_shop);
+      return '<details class="shg" data-s="' + esc(s.id_shop) + '"' + (open ? ' open' : '') + '><summary><span class="shn1"><b>' + esc(s.ten_shop) + '</b><small>' + (ms.length ? 'Quản lý: ' + ms.map(function (m) { return esc(m.ho_ten) }).join(', ') : '<span class="tag t-late">Chưa có Quản lý</span>') + '</small></span><span class="shcnt">' + ps.length + ' người</span></summary><div class="shb"><div class="shbt"><button class="btn b3" data-setql="' + esc(s.id_shop) + '" style="min-height:36px;font-size:13px">Chọn Quản lý</button></div>' +
+        (ps.length ? '<div class="tw"><table class="rt rta" data-nopg><thead><tr><th>Họ tên</th><th>Vai trò</th><th>SĐT</th><th>Đang giữ</th><th>Trạng thái</th><th>Mật khẩu</th><th>Đăng nhập gần nhất</th><th style="min-width:270px"></th></tr></thead><tbody>' + ps.map(tkRow).join('') + '</tbody></table></div>' : '<div class="meta" style="padding:6px 2px 10px">Không có tài khoản phù hợp với bộ lọc.</div>') + '</div></details>'
+    }).join('') + (shown.length ? '' : '<div class="card"><div class="meta">Không có Shop hoặc tài khoản phù hợp.</div></div>') + '</div>';
     return h
   }
   function creds(title, email, pw) {
@@ -1246,7 +1264,7 @@ var ASMIMG = (function () {
   function tplList() {
     var f = AS.tl, ql = f.q.trim().toLowerCase(), all = D.tpl;
     var L = all.filter(function (x) { return (!f.nhom || x.nhom === f.nhom) && (f.st === '' || (f.st === 'ACTIVE' ? (x.trang_thai === 'DANG_DUNG' || x.trang_thai === 'CHO_DUYET') : x.trang_thai === f.st)) && (!ql || (x.tieu_de + ' ' + x.noi_dung).toLowerCase().indexOf(ql) >= 0) });
-    var h = '<div class="top" style="flex-wrap:wrap"><div class="search">' + ic('search') + '<input id="tl-q" placeholder="Tìm trong mẫu…" value="' + esc(f.q) + '"></div>' + sel('tl-st', [['ACTIVE', 'Đang dùng và chờ duyệt'], ['DANG_DUNG', 'Đang dùng'], ['CHO_DUYET', 'Chờ duyệt'], ['DA_THAY', 'Đã thay'], ['NGUNG_DUNG', 'Ngừng dùng'], ['', 'Tất cả']], f.st) + '</div>';
+    var h = '<div class="top tbar" style="flex-wrap:wrap"><div class="search">' + ic('search') + '<input id="tl-q" placeholder="Tìm trong mẫu…" value="' + esc(f.q) + '"></div>' + sel('tl-st', [['ACTIVE', 'Đang dùng và chờ duyệt'], ['DANG_DUNG', 'Đang dùng'], ['CHO_DUYET', 'Chờ duyệt'], ['DA_THAY', 'Đã thay'], ['NGUNG_DUNG', 'Ngừng dùng'], ['', 'Tất cả']], f.st) + '</div>';
     h += '<div class="chips">' + [['', 'Tất cả']].concat(Object.keys(NHOM).map(function (k) { return [k, NHOM[k]] })).map(function (x) { return '<button class="chip ' + (f.nhom === x[0] ? 'on' : '') + '" data-tlg="' + x[0] + '">' + x[1] + '<em>' + all.filter(function (t) { return !x[0] || t.nhom === x[0] }).length + '</em></button>' }).join('') + '</div>';
     h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Mẫu</th><th>Nhóm</th><th>Bước</th><th>Trạng thái</th><th>Đã dùng</th><th style="min-width:190px"></th></tr></thead><tbody>' + L.map(function (x) {
       var st = TPLST[x.trang_thai] || ['t-new', x.trang_thai], btn = function (k, t) { return '<button class="btn b3" data-tp' + k + '="' + esc(x.ma) + '" style="min-height:36px;font-size:13px">' + t + '</button>' };
@@ -1329,17 +1347,28 @@ var ASMIMG = (function () {
   /* ================= KIỂM TRA GỌI & NHẮN (mức 1: dấu hiệu để quản lý kiểm tra, KHÔNG phải bằng chứng) ================= */
   AS.nv = { tu: '', den: '', rows: null, loading: false, err: '' };
   function isoD(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) }
+  function nvScore(r) { var n = 0; ['nhanh', 'roi_ngan', 'dot_bien', 'trung_ghi_chu'].forEach(function (k) { if (Number(r[k]) > 0) n += Number(r[k]) }); if (Number(r.ty_le_khong_nghe) >= 70 && r.tong >= 10) n += 1; return n }
+  function nvTags(r) {
+    var o = []; [['Lưu nhanh', r.nhanh], ['Rời app ngắn', r.roi_ngan], ['Dồn dập', r.dot_bien], ['Trùng ghi chú', r.trung_ghi_chu]].forEach(function (x) { if (Number(x[1]) > 0) o.push(tag('t-late', x[0] + ' ×' + x[1])) });
+    if (Number(r.ty_le_khong_nghe) >= 70 && r.tong >= 10) o.push(tag('t-late', 'Không nghe ' + r.ty_le_khong_nghe + '%')); return o.join('')
+  }
   function pgNv() {
-    var t = AS.nv; if (!t.tu) { t.den = isoD(new Date()); t.tu = isoD(new Date(Date.now() - 6 * 864e5)) }
+    var t = AS.nv, today = isoD(new Date()); if (!t.tu) { t.den = today; t.tu = isoD(new Date(Date.now() - 6 * 864e5)) }
     if (!t.rows && !t.loading && !t.err) { t.loading = true; rpc('u_asm_nghi_van', { p_tu: t.tu, p_den: t.den }).then(function (r) { t.rows = r || []; t.loading = false; render() }, function (e) { t.loading = false; t.err = (e && e.message) || 'Không tải được báo cáo.'; render() }) }
-    var h = head('Kiểm tra gọi & nhắn', 'Dấu hiệu bất thường trong cách nhân viên ghi nhận kết quả. Đây là công cụ để quản lý kiểm tra, không phải bằng chứng một nhân viên gian lận: có thể nhân viên gọi bằng máy khác hoặc nhắn Zalo trên máy tính.', '');
-    h += '<div class="card"><div class="row" style="flex-wrap:wrap;gap:10px;align-items:end"><label class="field" style="margin:0">Từ ngày<input type="date" id="nv-tu" value="' + esc(t.tu) + '"></label><label class="field" style="margin:0">Đến ngày<input type="date" id="nv-den" value="' + esc(t.den) + '"></label><button class="btn b1" id="nv-go">Xem báo cáo</button></div></div>';
+    var h = head('Kiểm tra gọi & nhắn', 'Dấu hiệu bất thường trong cách nhân viên ghi nhận kết quả. Công cụ để quản lý kiểm tra, không phải bằng chứng gian lận.', '');
+    var cur = function (n) { return t.den === today && t.tu === isoD(new Date(Date.now() - (n - 1) * 864e5)) }, preset = cur(7) || cur(14) || cur(30);
+    h += '<div class="chips ov">' + [7, 14, 30].map(function (n) { return '<button class="chip ' + (cur(n) ? 'on' : '') + '" data-nvr="' + n + '">' + n + ' ngày</button>' }).join('') +
+      '<details class="xp"><summary class="chip ' + (preset ? '' : 'on') + '">' + (preset ? 'Chọn ngày' : esc(t.tu) + ' → ' + esc(t.den)) + '</summary><div class="xpm nvr"><label class="field" style="margin:0">Từ ngày<input type="date" id="nv-tu" value="' + esc(t.tu) + '"></label><label class="field" style="margin:0">Đến ngày<input type="date" id="nv-den" value="' + esc(t.den) + '"></label><button class="btn b1" id="nv-go">Xem báo cáo</button></div></details></div>';
     if (t.err) return h + '<div class="ro" style="background:var(--bad-bg);color:var(--bad)">' + esc(t.err) + '</div>';
     if (t.loading || !t.rows) return h + '<div class="card"><div class="meta">Đang tải…</div></div>';
-    var c = function (n, bad) { return Number(n) > 0 ? tag(bad ? 't-late' : 't-new', n) : '<span class="meta">0</span>' };
-    h += '<div class="card" style="padding:6px 8px"><div class="tw"><table><thead><tr><th>Nhân viên</th><th>Số lần ghi</th><th>Lưu nhanh<small>dưới 30 giây sau bấm Gọi</small></th><th>Rời app ngắn<small>dưới 5 giây</small></th><th>Dồn dập<small>từ 6 kết quả trong 10 phút</small></th><th>Trùng ghi chú<small>nội dung lặp từ 3 lần</small></th><th>Không nghe, bận<small>% các lần ghi</small></th><th>Ghi cách cũ<small>không có dấu bấm Gọi</small></th></tr></thead><tbody>' +
-      (t.rows.length ? t.rows.map(function (r) { return '<tr><td><b>' + esc(r.ho_ten) + '</b><small>' + esc(r.ma_tk) + '</small></td><td>' + r.tong + '</td><td>' + c(r.nhanh, 1) + '</td><td>' + c(r.roi_ngan, 1) + '</td><td>' + c(r.dot_bien, 1) + '</td><td>' + c(r.trung_ghi_chu, 1) + '</td><td>' + (Number(r.ty_le_khong_nghe) >= 70 && r.tong >= 10 ? tag('t-late', r.ty_le_khong_nghe + '%') : r.ty_le_khong_nghe + '%') + '</td><td>' + c(r.cach_cu, 0) + '</td></tr>' }).join('') : '<tr><td colspan="8" class="meta">Chưa có kết quả nào trong khoảng ngày này.</td></tr>') + '</tbody></table></div></div>';
-    h += '<div class="ro"><b>Cách đọc:</b> một dòng có nhiều ô cam chưa nói lên điều gì chắc chắn, chỉ nên là lý do để quản lý gọi lại vài khách của nhân viên đó, hoặc đối chiếu với dữ liệu tiêm thực tế. App chỉ biết nhân viên đã bấm nút Gọi hoặc Nhắn, không biết cuộc gọi hay tin nhắn có thật sự xảy ra.</div>';
+    var rows = t.rows, flagged = rows.filter(function (r) { return nvScore(r) > 0 }).sort(function (a, b) { return nvScore(b) - nvScore(a) || b.tong - a.tong }), sumTong = 0, sumFlag = 0;
+    rows.forEach(function (r) { sumTong += Number(r.tong) || 0; sumFlag += nvScore(r) });
+    h += '<div class="kp3"><div class="card kp-m' + (flagged.length ? ' bad' : '') + '"><div class="l">Cần xem</div><div class="v">' + flagged.length + '<small> /' + rows.length + '</small></div></div><div class="card kp-m"><div class="l">Lượt ghi</div><div class="v">' + sumTong + '</div></div><div class="card kp-m"><div class="l">Dấu hiệu</div><div class="v">' + sumFlag + '</div></div></div>';
+    h += '<div class="card"><h2>Nên xem trước</h2>' + (flagged.length ? '<div class="nvl">' + flagged.slice(0, 5).map(function (r) { return '<div class="nvr"><div class="nvh"><b>' + esc(r.ho_ten) + '</b><span class="meta">' + r.tong + ' lần ghi</span></div><div class="nvt">' + nvTags(r) + '</div></div>' }).join('') + '</div>' + (flagged.length > 5 ? '<div class="meta" style="margin-top:6px">Còn ' + (flagged.length - 5) + ' nhân viên khác trong bảng chi tiết bên dưới.</div>' : '') : '<div class="alert"><i>✓</i><div><b>Chưa thấy dấu hiệu bất thường</b><small>Trong khoảng ngày đang chọn.</small></div></div>') + '</div>';
+    var c = function (n, bad) { return Number(n) > 0 ? tag(bad ? 't-late' : 't-new', n) : '<span class="meta">0</span>' }, open = t.open != null ? t.open : window.innerWidth >= 960;
+    h += '<details class="card nvd"' + (open ? ' open' : '') + '><summary>Bảng chi tiết từng nhân viên <span class="meta">(' + rows.length + ')</span></summary><div class="tw"><table class="rt rtb" style="--c:4"><thead><tr><th>Nhân viên</th><th>Số lần ghi</th><th>Lưu nhanh<small>dưới 30 giây sau bấm Gọi</small></th><th>Rời app ngắn<small>dưới 5 giây</small></th><th>Dồn dập<small>từ 6 kết quả trong 10 phút</small></th><th>Trùng ghi chú<small>nội dung lặp từ 3 lần</small></th><th>Không nghe, bận<small>% các lần ghi</small></th><th>Ghi cách cũ<small>không có dấu bấm Gọi</small></th></tr></thead><tbody>' +
+      (rows.length ? rows.map(function (r) { return '<tr><td class="rh"><b>' + esc(r.ho_ten) + '</b><small>' + esc(r.ma_tk) + '</small></td><td data-label="Lần ghi">' + r.tong + '</td><td data-label="Nhanh">' + c(r.nhanh, 1) + '</td><td data-label="Rời app">' + c(r.roi_ngan, 1) + '</td><td data-label="Dồn dập">' + c(r.dot_bien, 1) + '</td><td data-label="Trùng">' + c(r.trung_ghi_chu, 1) + '</td><td data-label="Không nghe">' + (Number(r.ty_le_khong_nghe) >= 70 && r.tong >= 10 ? tag('t-late', r.ty_le_khong_nghe + '%') : r.ty_le_khong_nghe + '%') + '</td><td data-label="Cách cũ">' + c(r.cach_cu, 0) + '</td></tr>' }).join('') : '<tr><td colspan="8" class="empty meta">Chưa có kết quả nào trong khoảng ngày này.</td></tr>') + '</tbody></table></div></details>';
+    h += '<details class="ro nvh"><summary>Cách đọc báo cáo này</summary>Một dòng có nhiều ô cam chưa nói lên điều gì chắc chắn, chỉ nên là lý do để quản lý gọi lại vài khách của nhân viên đó, hoặc đối chiếu với dữ liệu tiêm thực tế. App chỉ biết nhân viên đã bấm nút Gọi hoặc Nhắn, không biết cuộc gọi hay tin nhắn có thật sự xảy ra. Có thể nhân viên gọi bằng máy khác hoặc nhắn Zalo trên máy tính.</details>';
     return h
   }
   X.pages.a_nv = pgNv;
@@ -1412,6 +1441,11 @@ var ASMIMG = (function () {
     all('[data-tklock]', function (b) { b.onclick = function () { lockAsm(byAcc(b.dataset.tklock)) } });
     all('[data-tkdel]', function (b) { b.onclick = function () { delAsm(byAcc(b.dataset.tkdel)) } });
     all('[data-setql]', function (b) { b.onclick = function () { setQl(b.dataset.setql) } });
+    /* nhớ nhóm Shop nào đang mở để vẽ lại không bị gập */
+    all('.shg > summary', function (sm) { sm.addEventListener('click', function () { var d = sm.parentNode; setTimeout(function () { AS.tk.open[d.getAttribute('data-s')] = d.open }, 0) }) });
+    all('#hrbox > summary', function (sm) { sm.addEventListener('click', function () { var d = sm.parentNode; setTimeout(function () { AS.tk.hrOpen = d.open }, 0) }) });
+    all('.nvd > summary', function (sm) { sm.addEventListener('click', function () { var d = sm.parentNode; setTimeout(function () { AS.nv.open = d.open }, 0) }) });
+    all('[data-nvr]', function (b) { b.onclick = function () { var t = AS.nv, n = Number(b.dataset.nvr); t.den = isoD(new Date()); t.tu = isoD(new Date(Date.now() - (n - 1) * 864e5)); t.rows = null; t.err = ''; t.loading = false; render() } });
     all('[data-tltab]', function (b) { b.onclick = function () { AS.tl.tab = b.dataset.tltab; render() } });
     all('[data-tlg]', function (b) { b.onclick = function () { AS.tl.nhom = b.dataset.tlg; render() } });
     on('#tl-st', 'onchange', function (x) { AS.tl.st = x.value; render() });
