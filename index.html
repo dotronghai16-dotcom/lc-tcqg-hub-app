@@ -196,6 +196,15 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
 .tag.t-prog{background:#D8EEF0;color:var(--navy)}
 .kcards{display:grid;gap:8px}.kc{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:10px 12px;min-height:60px}.kc.picked{background:var(--tint);border-color:var(--teal)}.kc input{width:22px;height:22px;accent-color:var(--teal)}.kb{min-width:0}.kb b{display:block;font-size:15px}.kb small{display:block;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:959px){.kd input{width:130px}.kf select{flex:1 1 140px}}
+/* ===== Đợt A 26/11: chặn nội dung bị cắt ở Tổng quan (lưới phải có cột co được) ===== */
+@media(max-width:959px){
+ .tier{grid-template-columns:minmax(0,1fr)}.tier>*{min-width:0}
+ .kp{grid-template-columns:repeat(3,minmax(0,1fr))}.kp-m .l{white-space:normal}
+ .shl{grid-template-columns:minmax(0,1fr)}
+ .shn,.pgbar,.shtool,.shtool .row2{flex-wrap:wrap;min-width:0}
+ .shh{flex-wrap:wrap;min-width:0}.shh b{flex:1 1 auto;white-space:normal}
+}
+@media(min-width:960px){.only-m.shl{display:none}}
 </style>
 </head>
 <body>
@@ -457,6 +466,6 @@ document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126h"></script>
+<script src="app.js?v=20261126i"></script>
 </body>
 </html>
