@@ -254,6 +254,11 @@ body[data-role=asm] main{display:flex;flex-direction:column;gap:14px}
 .tbar2 select,.tbar2 input[type=date]{min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0 10px;color:var(--ink);flex:1 1 140px;max-width:100%;min-width:0}
 .tbar2 .search{flex:1 1 180px;min-width:0}
 @media(min-width:960px){.tbar2 select{flex:0 1 220px}}
+@media(max-width:959px){
+ .tbar2{flex-wrap:nowrap}.tbar2 select{flex:1 1 0;min-width:0;text-overflow:ellipsis}.tbar2 .search{flex:1.3 1 0;padding:0 10px;gap:6px}.tbar2 .xp>summary.btn{padding:0 12px;white-space:nowrap}
+ .stk .row2{flex-wrap:nowrap}.stk .row2>.greet{flex:1;min-width:0}.stk .row2>.btn{width:auto;flex:none;padding:0 14px}.stk .row2 .bt{display:none}
+ .chips.ov .chip,.chips.ov .xp>summary.chip{padding:0 10px}
+}
 /* hộp thả xuống (Xuất file, Chọn ngày, Bộ lọc) */
 .chips.ov{overflow:visible;flex-wrap:wrap;position:relative}.kf{position:relative}
 .xp{position:static}.xp>summary{list-style:none;cursor:pointer}.xp>summary::-webkit-details-marker{display:none}
@@ -266,12 +271,12 @@ body[data-role=asm] main{display:flex;flex-direction:column;gap:14px}
 }
 /* cảnh báo gọn: ba ô một hàng, bấm cả ô */
 .svg3{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px}
-.svg3 .sv{display:grid;grid-template-columns:minmax(0,1fr);justify-items:start;align-content:start;gap:2px;margin:0;padding:10px;border-left-width:0;border-top-width:4px;border-top-style:solid;border-radius:12px;text-align:left;cursor:pointer;min-height:92px;font:inherit;color:inherit}
-.svg3 .sv .sn{font-size:26px;min-width:0;text-align:left;line-height:1.1}.svg3 .sv .sb{font-size:12.5px;font-weight:600;line-height:1.25;color:var(--ink)}.svg3 .sl{font-size:10.5px;margin:0 0 2px}
+.svg3 .sv{display:grid;grid-template-columns:minmax(0,1fr);justify-items:start;align-content:start;gap:2px;margin:0;padding:10px;border-style:none;border-width:0;border-top-style:solid;border-top-width:4px;border-radius:12px;text-align:left;cursor:pointer;min-height:92px;font:inherit;color:inherit}
+.svg3 .sv .sn{font-size:26px;min-width:0;text-align:left;line-height:1.1}.svg3 .sv .sb{font-size:12.5px;font-weight:600;line-height:1.25;color:var(--ink)}.svg3 .sl{font-size:10.5px;margin:0 0 2px;white-space:nowrap;padding:1px 7px;letter-spacing:.03em}
 /* bảng Shop gọn trên điện thoại: chỉ giữ Shop, Hoàn thành, Quá hạn */
 @media(max-width:959px){
  .shtb{display:table;width:100%}.shtb th:nth-child(2),.shtb th:nth-child(3),.shtb th:nth-child(5),.shtb td:nth-child(2),.shtb td:nth-child(3),.shtb td:nth-child(5){display:none}
- .shtb td.nm{min-width:0}.shtb td.nm small{display:none}.shtb td.nm b{display:inline;max-width:none;white-space:normal}.shtb .bar2{width:40px;margin-right:6px}.shtb td{padding:9px 6px}.shtb th{padding:6px}.shtb td.nm .tag{margin:2px 0 0 0}
+ .shtb td.nm{min-width:0}.shtb td.nm small{display:none}.shtb td.nm b{display:inline;max-width:none;white-space:normal;font-size:14px}.shtb .bar2{display:none}.shtb td{padding:9px 4px}.shtb th{padding:6px 4px;font-size:10.5px;letter-spacing:.02em}.shtb td.nm .tag{margin:2px 0 0 0}.shtb td.pc,.shtb th.on,.shtb td.num{white-space:nowrap}.shtb td.pc span{font-weight:600}
 }
 /* báo cáo, kiểm tra: ô số liệu, thanh kết quả, danh sách cần xem */
 .kp3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.kp3 .kp-m small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
@@ -289,7 +294,7 @@ body[data-role=asm] main{display:flex;flex-direction:column;gap:14px}
 .hrbox{border:1px dashed var(--line);border-radius:14px;background:var(--card)}.hrbox>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0 14px;min-height:48px;font-weight:600;color:var(--teal-d)}.hrbox>summary::-webkit-details-marker{display:none}.hrbox>.card{margin:0 8px 8px;box-shadow:none}
 @media(max-width:959px){
  /* thẻ nhân sự gọn: tên + email, 3 nhãn một hàng, SĐT, bốn nút một hàng */
- .rta tr{grid-template-columns:auto auto minmax(0,1fr);gap:6px 8px}.rta td.rh{order:0}.rta td:nth-child(2){order:1}.rta td:nth-child(5){order:2}.rta td:nth-child(6){order:3}.rta td:nth-child(3){order:4;grid-column:1/-1}.rta td.ra{order:5}
+ .rta tr{grid-template-columns:auto auto auto;justify-content:start;gap:6px 8px}.rta .tag{white-space:nowrap}.rta td.nl{font-size:13px}.rta td.rh{order:0}.rta td:nth-child(2){order:1}.rta td:nth-child(5){order:2}.rta td:nth-child(6){order:3}.rta td:nth-child(3){order:4;grid-column:1/-1}.rta td.ra{order:5}
  .rta td:nth-child(4),.rta td:nth-child(7){display:none}.rta td.nl::before{display:none!important}.rta td.nl{align-self:center}.rta td.mk small{display:none}.rta td.mk .tag::before{content:"MK "}
  .rta td.rp::before{display:inline!important;margin:0 6px 0 0}.rta td.ra .row{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.rta td.ra .btn{padding:0 2px;font-size:12.5px!important}
  /* ô số liệu nằm ngang trong thẻ (báo cáo, kiểm tra) */
@@ -558,6 +563,6 @@ document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126m"></script>
+<script src="app.js?v=20261126n"></script>
 </body>
 </html>
