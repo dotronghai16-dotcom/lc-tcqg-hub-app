@@ -230,8 +230,8 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
  .kp-m{padding:10px 8px}.kp-m .l{font-size:11.5px}.kp-m .v{font-size:22px}
  .kp2{flex-wrap:nowrap;gap:6px;overflow-x:auto;scrollbar-width:none}.kp2::-webkit-scrollbar{display:none}.kp2 button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:12px;white-space:nowrap;text-align:center}.kp2 b{font-size:13px}
  /* thứ tự trên điện thoại: lời chào → việc cần xử lý ngay → tổng quan (+ biểu đồ) → phân tích */
- main>.row2{order:-10}.tops,.tops>.t2{display:contents}.tops>.tl{order:-9}.tops .cal{order:-8}.tov{order:-7}.tops .cch{order:-6}
- body[data-role=asm] main .pgbar .btn{min-width:44px}
+ main>.stk{order:-10}.tops,.tops>.t2{display:contents}.tops>.tl{order:-9}.tops .cal{order:-8}.tov{order:-7}.tops .cch{order:-6}
+ body[data-role=asm] main .pgbar .btn,body[data-role=asm] main [data-pg]{min-width:44px}
  .rt td:not(.rh) small{display:none}
  /* vùng chạm tối thiểu 44px (chỉ ASM, chỉ trong nội dung chính) */
  body[data-role=asm] .mtop .ibtn,body[data-role=asm] .mtop .ava{width:44px;height:44px}
@@ -243,6 +243,58 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
 .cf-n,.cf-ten,.cf-gy{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--card);min-height:44px}
 .cf-dd,.cf-f{width:22px;height:22px;accent-color:var(--teal);flex:none}
 .cf-r label.meta{display:inline-flex;align-items:center;gap:8px;min-height:44px}
+/* ===== Đợt B2 26/11: góp ý của Hải sau khi thử bản demo (chỉ ASM) ===== */
+/* khung nội dung ASM dùng flex dọc để ghim (sticky) được cụm đầu trang */
+body[data-role=asm] main{display:flex;flex-direction:column;gap:14px}
+.stk{position:sticky;top:var(--toph,0px);z-index:9;background:var(--bg);display:grid;gap:8px;padding:8px 0 8px}
+.stk>*{min-width:0}
+@media(max-width:959px){body[data-role=asm] main{gap:12px}.stk{margin:0 -12px;padding:6px 12px 8px}.stk .greet p{display:none}.stk .greet h1{font-size:19px}.stk .row2{align-items:center;gap:8px}.top.tbar{display:flex}}
+@media(min-width:960px){.stk{top:0;margin:-8px 0 0}}
+.tbar2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:relative}
+.tbar2 select,.tbar2 input[type=date]{min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0 10px;color:var(--ink);flex:1 1 140px;max-width:100%;min-width:0}
+.tbar2 .search{flex:1 1 180px;min-width:0}
+@media(min-width:960px){.tbar2 select{flex:0 1 220px}}
+/* hộp thả xuống (Xuất file, Chọn ngày, Bộ lọc) */
+.chips.ov{overflow:visible;flex-wrap:wrap;position:relative}.kf{position:relative}
+.xp{position:static}.xp>summary{list-style:none;cursor:pointer}.xp>summary::-webkit-details-marker{display:none}
+.xpm{position:absolute;top:calc(100% + 6px);right:0;z-index:8;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(8,42,62,.18);padding:10px;display:grid;gap:8px;min-width:230px}
+.chips.ov .xpm{left:0;right:0}.xpm .btn{width:100%}.xpm label.field{font-weight:600}.xpm input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:0 10px;background:var(--bg)}
+/* Kho Data: ô tìm và nút Bộ lọc cùng một hàng; bộ lọc mở thành hộp thả xuống, không đẩy danh sách */
+@media(max-width:959px){
+ .kf{flex-wrap:nowrap}.kf .search{flex:1 1 auto;min-width:0}.kfa{flex:0 0 auto;position:static}.kfa summary{white-space:nowrap}
+ .kfa[open]>.kfb{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:8;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(8,42,62,.18);padding:12px;max-height:min(60vh,430px);overflow:auto}
+}
+/* cảnh báo gọn: ba ô một hàng, bấm cả ô */
+.svg3{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px}
+.svg3 .sv{display:grid;grid-template-columns:minmax(0,1fr);justify-items:start;align-content:start;gap:2px;margin:0;padding:10px;border-left-width:0;border-top-width:4px;border-top-style:solid;border-radius:12px;text-align:left;cursor:pointer;min-height:92px;font:inherit;color:inherit}
+.svg3 .sv .sn{font-size:26px;min-width:0;text-align:left;line-height:1.1}.svg3 .sv .sb{font-size:12.5px;font-weight:600;line-height:1.25;color:var(--ink)}.svg3 .sl{font-size:10.5px;margin:0 0 2px}
+/* bảng Shop gọn trên điện thoại: chỉ giữ Shop, Hoàn thành, Quá hạn */
+@media(max-width:959px){
+ .shtb{display:table;width:100%}.shtb th:nth-child(2),.shtb th:nth-child(3),.shtb th:nth-child(5),.shtb td:nth-child(2),.shtb td:nth-child(3),.shtb td:nth-child(5){display:none}
+ .shtb td.nm{min-width:0}.shtb td.nm small{display:none}.shtb td.nm b{display:inline;max-width:none;white-space:normal}.shtb .bar2{width:40px;margin-right:6px}.shtb td{padding:9px 6px}.shtb th{padding:6px}.shtb td.nm .tag{margin:2px 0 0 0}
+}
+/* báo cáo, kiểm tra: ô số liệu, thanh kết quả, danh sách cần xem */
+.kp3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.kp3 .kp-m small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
+.kqs{display:grid;gap:8px;margin-top:10px}.kqr{display:grid;grid-template-columns:minmax(90px,1.1fr) minmax(0,2fr) auto;gap:10px;align-items:center;font-size:14px}.kqb{height:10px;border-radius:99px;background:var(--bg);overflow:hidden;display:block}.kqb i{display:block;height:100%;background:var(--teal);border-radius:99px}.kqx .kqb i{background:#C9D6DD}.kqr b{min-width:24px;text-align:right}
+.nvl{display:grid;gap:8px}.nvr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card)}.nvh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.nvt{margin-top:4px}
+.nvd>summary,.nvh2>summary{cursor:pointer;font-weight:700;list-style:none}.nvd>summary::-webkit-details-marker{display:none}.nvd>.tw{margin-top:8px}
+.nvh>summary{cursor:pointer;font-weight:700;list-style:none}.nvh>summary::-webkit-details-marker{display:none}
+/* Nhân sự: nhóm theo Shop, mở/thu gọn */
+.shgs{display:grid;gap:8px}
+.shg{border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.shg>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;min-height:56px}.shg>summary::-webkit-details-marker{display:none}
+.shg>summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 4px 4px 2px;flex:none;transition:transform .15s}.shg[open]>summary::after{transform:rotate(-135deg);margin-bottom:-2px}
+.shn1{display:grid;gap:2px;min-width:0;flex:1}.shn1 b{font-size:15px;overflow-wrap:anywhere}.shn1 small{color:var(--muted);font-size:13px;overflow-wrap:anywhere}.shcnt{font-size:12.5px;font-weight:700;color:var(--teal-d);background:var(--tint);border-radius:99px;padding:3px 10px;white-space:nowrap}
+.shb{padding:0 12px 12px}.shbt{display:flex;justify-content:flex-end;padding:0 0 8px}
+.hrbox{border:1px dashed var(--line);border-radius:14px;background:var(--card)}.hrbox>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0 14px;min-height:48px;font-weight:600;color:var(--teal-d)}.hrbox>summary::-webkit-details-marker{display:none}.hrbox>.card{margin:0 8px 8px;box-shadow:none}
+@media(max-width:959px){
+ /* thẻ nhân sự gọn: tên + email, 3 nhãn một hàng, SĐT, bốn nút một hàng */
+ .rta tr{grid-template-columns:auto auto minmax(0,1fr);gap:6px 8px}.rta td.rh{order:0}.rta td:nth-child(2){order:1}.rta td:nth-child(5){order:2}.rta td:nth-child(6){order:3}.rta td:nth-child(3){order:4;grid-column:1/-1}.rta td.ra{order:5}
+ .rta td:nth-child(4),.rta td:nth-child(7){display:none}.rta td.nl::before{display:none!important}.rta td.nl{align-self:center}.rta td.mk small{display:none}.rta td.mk .tag::before{content:"MK "}
+ .rta td.rp::before{display:inline!important;margin:0 6px 0 0}.rta td.ra .row{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.rta td.ra .btn{padding:0 2px;font-size:12.5px!important}
+ /* ô số liệu nằm ngang trong thẻ (báo cáo, kiểm tra) */
+ .rtb tr{grid-template-columns:repeat(var(--c,4),minmax(0,1fr));gap:6px 8px}.rtb td.rh{grid-column:1/-1}.rtb td[data-label]::before{font-size:11.5px}
+}
 </style>
 </head>
 <body>
@@ -500,10 +552,12 @@ addEventListener('resize',function(){if(ME&&D)render()});
 function dsig(){return D?D.turns.length+':'+D.tt.length+':'+D.turns.map(function(t){return t.ma_luot+t.trang_thai+(t.d_xong||'')}).join(','):''}
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&ME&&D&&Date.now()-loadedAt>30000){var s0=dsig();load(true).then(function(){if(dsig()!==s0)render()},function(){})}});
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.closest('#lkside')&&window.MSG)MSG.lookup()});
+/* hộp thả xuống Xuất file: bấm một lựa chọn thì đóng hộp */
+document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&e.target.closest('.xpm .btn');if(b&&b.id!=='nv-go'){var d=b.closest('details');if(d)setTimeout(function(){d.open=false},0)}});
 /* bấm vào bất kỳ chỗ nào của ô ngày thì mở bảng chọn lịch */
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126k"></script>
+<script src="app.js?v=20261126m"></script>
 </body>
 </html>
