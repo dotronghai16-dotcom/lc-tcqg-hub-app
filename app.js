@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261126a) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261126b) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -295,7 +295,7 @@ var ASM = (function () {
   function shell() {
     function b(x) { return '<button class="nav ' + (S.page === x[0] ? 'on' : '') + '" data-p="' + x[0] + '">' + ic(x[2]) + x[1] + '</button>' }
     $('#side').innerHTML = '<div class="brand">' + LOGO + '</div><div class="grp">Điều phối</div>' + NAV.slice(0, 3).map(b).join('') + '<div class="grp">Dữ liệu</div>' + NAV.slice(3, 5).map(b).join('') + '<div class="grp">Nhân sự &amp; nội dung</div>' + NAV.slice(5, 8).map(b).join('') + '<div class="grp">Hệ thống</div>' + NAV.slice(8).map(b).join('') +
-      '<div class="me"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>ASM · Giám đốc kinh doanh KV</small></div></div><div class="vx" style="padding:8px 4px 0;font-size:11px">' + BRAND.line() + '</div>';
+      '<div class="grp">Công cụ</div><button class="nav" id="lkside">' + ic('book') + 'Từ điển vaccine</button><div class="me"><div class="ava">' + esc(ini(ME.ho_ten)) + '</div><div><b>' + esc(ME.ho_ten) + '</b><small>ASM · Giám đốc kinh doanh KV</small></div></div><div class="vx" style="padding:8px 4px 0;font-size:11px">' + BRAND.line() + '</div>';
     var mob = NAV.filter(function (x) { return MOBILE.indexOf(x[0]) >= 0 }), inMore = MOBILE.indexOf(S.page) < 0;
     $('#tabs').style.setProperty('--n', mob.length + 1);
     $('#tabs').innerHTML = mob.map(function (x) { return '<button class="tab ' + (S.page === x[0] ? 'on' : '') + '" data-p="' + x[0] + '">' + ic(x[2]) + x[1].replace('Nhân sự & tài khoản', 'Nhân sự') + '</button>' }).join('') + '<button class="tab ' + (inMore ? 'on' : '') + '" id="tmore">' + ic('more') + 'Thêm</button>';
@@ -1387,10 +1387,10 @@ var MSG = (function () {
 .btn.bo{border:1.5px solid var(--teal);color:var(--teal-d);background:var(--card);min-height:44px}
 
 /* ---- khung màn soạn tin: kính mờ, tông teal/navy của Long Châu ---- */
-.modal.mm{align-items:end;background:rgba(6,24,36,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.modal.mm.first{animation:mfade .2s ease}.modal.mm.first .msheet{animation:mup .3s cubic-bezier(.2,.8,.2,1)}
-@keyframes mfade{from{opacity:0}to{opacity:1}}@keyframes mup{from{transform:translateY(28px);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion:reduce){.modal.mm.first,.modal.mm.first .msheet{animation:none}.abt,.ithumb,.mcard,.mrow{transition:none}}
+.modal.mm{align-items:end;background:rgba(6,24,36,.55);overscroll-behavior:none;touch-action:none}.modal.mm .msheet{touch-action:pan-y}
+.modal.mm.first{animation:mslide .2s ease-out}
+@keyframes mslide{from{transform:translateY(18px)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.modal.mm.first{animation:none}.abt,.ithumb,.mcard,.mrow{transition:none}}
 .msheet{width:100%;max-width:580px;max-height:94vh;max-height:94dvh;display:flex;flex-direction:column;background:var(--bg);border-radius:26px 26px 0 0;overflow:hidden;box-shadow:0 -14px 48px rgba(6,24,36,.38)}
 @media(min-width:960px){.modal.mm{align-items:center}.msheet{border-radius:26px;max-height:90vh}}
 .mhd{position:relative;flex:none;padding:14px 16px 14px;color:#fff;background:radial-gradient(120% 150% at 0% 0%,rgba(0,187,186,.5),transparent 55%),radial-gradient(90% 130% at 100% 0%,rgba(253,130,6,.2),transparent 52%),linear-gradient(160deg,#0c3b50,#082A3E 62%,#0a2233)}
@@ -2058,10 +2058,12 @@ var MSG = (function () {
   }
   function lookup(opts) {
     if (lkHost) return; opts = opts || {}; LK = { tab: opts.tab || 'tim', q: opts.q || '', age: '', benh: '', lim: 30, sel: null, fromSheet: !!(S && host), am: 'nam', av: '', done: {}, doneOpen: false, cp: {} };
-    lkHost = document.createElement('div'); lkHost.className = 'modal mm first'; lkHost.style.zIndex = 60; lkHost.onclick = function (e) { if (e.target === lkHost) lkClose() }; document.body.appendChild(lkHost);
+    lkLock(true); lkHost = document.createElement('div'); lkHost.className = 'modal mm first'; lkHost.style.zIndex = 60; lkHost.onclick = function (e) { if (e.target === lkHost) lkClose() }; document.body.appendChild(lkHost);
     document.addEventListener('keydown', lkKey); setTimeout(function () { if (lkHost) lkHost.classList.remove('first') }, 450); loadLib(); lkDraw()
   }
-  function lkClose() { document.removeEventListener('keydown', lkKey); if (lkHost) lkHost.remove(); lkHost = null; LK = null }
+  var LKY = 0;
+  function lkLock(on) { var b = document.body; if (on) { LKY = window.pageYOffset || 0; b.style.position = 'fixed'; b.style.top = (-LKY) + 'px'; b.style.left = '0'; b.style.right = '0'; b.style.width = '100%' } else if (b.style.position === 'fixed') { b.style.position = ''; b.style.top = ''; b.style.left = ''; b.style.right = ''; b.style.width = ''; window.scrollTo(0, LKY) } }
+  function lkClose() { document.removeEventListener('keydown', lkKey); if (lkHost) lkHost.remove(); lkHost = null; LK = null; lkLock(false) }
   function lkKey(e) { if (e.key === 'Escape' && lkHost) { if (LK.sel) { LK.sel = null; lkDraw() } else lkClose() } }
   function lkDraw() {
     if (!lkHost || !LK) return; var b = lkHost.querySelector('.mbody'), top = b ? b.scrollTop : 0; if (LK.sel) lkDetail(); else if (LK.tab === 'tuoi') lkAgeView(); else lkList(); if (top && !LK.sel) { var nb = lkHost.querySelector('.mbody'); if (nb) nb.scrollTop = top }
