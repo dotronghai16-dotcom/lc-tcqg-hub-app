@@ -196,7 +196,7 @@ var S={page:'today',tab:'need',sel:null,open:false,scope:'mine',filter:'',q:''},
 function nav(){var a=[['today','Hôm nay','home'],['data','Data được giao','list']];if(ME.vai_tro==='QUAN_LY')a.push(['team','Đội ngũ','team']);a.push(['hist','Lịch sử','clock'],['kpi','KPI','chart'],['acc','Tài khoản','user']);return a}
 function shell(){var n=nav(),open=D.turns.filter(function(t){return mine_(t)&&open_(t)&&catOf(t)==='need'}).length,sg=S.page+'|'+open+'|'+n.length+'|'+ME.ma_tk;if(S.ssig===sg&&$('#tabs').children.length&&$('#side').children.length)return;S.ssig=sg;
  function b(x){return '<button class="nav '+(S.page===x[0]?'on':'')+'" data-p="'+x[0]+'">'+ic(x[2])+x[1]+(x[0]==='today'&&open?'<span class="n">'+open+'</span>':'')+'</button>'}
- var ql=ME.vai_tro==='QUAN_LY';$('#side').innerHTML='<div class="brand">'+LOGO+'</div><div class="grp">Công việc</div>'+n.slice(0,ql?3:2).map(b).join('')+'<div class="grp">Hiệu quả</div>'+n.slice(ql?3:2,ql?5:4).map(b).join('')+'<div class="grp">Hệ thống</div>'+n.slice(-1).map(b).join('')+'<div class="me"><div class="ava">'+esc(ini(ME.ho_ten))+'</div><div><b>'+esc(ME.ho_ten)+'</b><small>'+(ql?'Quản lý':'Nhân viên')+' · '+esc(shopName(ME.id_shop))+'</small></div></div>';
+ var ql=ME.vai_tro==='QUAN_LY';$('#side').innerHTML='<div class="brand">'+LOGO+'</div><div class="grp">Công việc</div>'+n.slice(0,ql?3:2).map(b).join('')+'<div class="grp">Hiệu quả</div>'+n.slice(ql?3:2,ql?5:4).map(b).join('')+'<div class="grp">Hệ thống</div>'+n.slice(-1).map(b).join('')+'<div class="grp">Công cụ</div><button class="nav" id="lkside">'+ic('book')+'Từ điển vaccine</button><div class="me"><div class="ava">'+esc(ini(ME.ho_ten))+'</div><div><b>'+esc(ME.ho_ten)+'</b><small>'+(ql?'Quản lý':'Nhân viên')+' · '+esc(shopName(ME.id_shop))+'</small></div></div>';
  var mob=n.length>5?n.slice(0,4):n,rest_=n.length>5?n.slice(4):[],inMore=rest_.some(function(x){return x[0]===S.page});$('#tabs').style.setProperty('--n',mob.length+(rest_.length?1:0));$('#tabs').innerHTML=mob.map(function(x){return '<button class="tab '+(S.page===x[0]?'on':'')+'" data-p="'+x[0]+'">'+ic(x[2])+x[1].replace(' được giao','')+'</button>'}).join('')+(rest_.length?'<button class="tab '+(inMore?'on':'')+'" id="tmore">'+ic('more')+'Thêm</button>':'');
  var tm=$('#tmore');if(tm)tm.onclick=function(){var d=document.createElement('div');d.className='modal';d.innerHTML='<div class="card" style="width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom))"><h2 style="font-size:17px;margin:2px 4px 8px">Thêm</h2>'+rest_.map(function(x){return '<button class="nav '+(S.page===x[0]?'on':'')+'" data-mp="'+x[0]+'">'+ic(x[2])+x[1]+'</button>'}).join('')+'</div>';document.body.appendChild(d);d.onclick=function(e){if(e.target===d)d.remove()};[].slice.call(d.querySelectorAll('[data-mp]')).forEach(function(b){b.onclick=function(){S.page=b.dataset.mp;S.sel=null;S.open=false;d.remove();render()}})};
  document.querySelectorAll('[data-p]').forEach(function(e){e.onclick=function(){S.page=e.dataset.p;S.sel=null;S.open=false;render()}})}
@@ -386,10 +386,11 @@ $('#lf').onsubmit=function(ev){ev.preventDefault();var b=$('#lbtn');b.disabled=t
 addEventListener('resize',function(){if(ME&&D)render()});
 function dsig(){return D?D.turns.length+':'+D.tt.length+':'+D.turns.map(function(t){return t.ma_luot+t.trang_thai+(t.d_xong||'')}).join(','):''}
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&ME&&D&&Date.now()-loadedAt>30000){var s0=dsig();load(true).then(function(){if(dsig()!==s0)render()},function(){})}});
+document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.closest('#lkside')&&window.MSG)MSG.lookup()});
 /* bấm vào bất kỳ chỗ nào của ô ngày thì mở bảng chọn lịch */
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126a"></script>
+<script src="app.js?v=20261126b"></script>
 </body>
 </html>
