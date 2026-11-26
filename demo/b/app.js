@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126o) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126p) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -331,7 +331,9 @@ var ASM = (function () {
   function stick(m) {
     var kids = [].slice.call(m.children), grab = [], i;
     for (i = 0; i < kids.length; i++) { var k = kids[i]; if ((i === 0 && k.classList.contains('row2')) || (i > 0 && k.matches && k.matches('.kf,.chips,.top,.tbar2,.seg2'))) grab.push(k); else break }
-    if (!grab.length) return; var w = document.createElement('div'); w.className = 'stk'; m.insertBefore(w, grab[0]); grab.forEach(function (k) { w.appendChild(k) })
+    if (!grab.length) return; var w = document.createElement('div'); w.className = 'stk'; m.insertBefore(w, grab[0]); grab.forEach(function (k) { w.appendChild(k) });
+    /* dòng mô tả trang cuộn đi bình thường, chỉ tiêu đề + công cụ được ghim */
+    var pp = w.querySelector('.greet p'); if (pp) { var d = document.createElement('div'); d.className = 'pgd'; d.innerHTML = pp.innerHTML; pp.parentNode.removeChild(pp); w.parentNode.insertBefore(d, w.nextSibling) }
   }
   var LASTDAYS = null;
   function fitChart() {
@@ -411,7 +413,7 @@ var ASM = (function () {
     var pages = Math.max(1, Math.ceil(all.length / PAGEN())); ST.pg = Math.min(ST.pg, pages); var rows = all.slice((ST.pg - 1) * PAGEN(), ST.pg * PAGEN()), n = Object.keys(ST.sel).length;
     var h = head('Kho Data', 'Toàn bộ khách. Lọc, chọn nhiều khách rồi bấm Phân công.', '');
     var SHK = shops(), staffK = ST.kShop ? staffOf(ST.kShop) : [], act = !!(ST.q || ST.band || ST.f || ST.kShop || ST.kNv || ST.kFrom || ST.kTo);
-    var nAct = [ST.kShop, ST.kNv, ST.kFrom, ST.kTo, ST.band].filter(Boolean).length, kopen = ST.kOpen != null ? ST.kOpen : window.innerWidth >= 960;
+    var nAct = [ST.kShop, ST.kNv, ST.kFrom, ST.kTo, ST.band].filter(Boolean).length, kopen = !!ST.kOpen;
     h += '<div class="kf"><div class="search">' + ic('search') + '<input id="kq" placeholder="Tìm tên, mã khách, SĐT…" aria-label="Tìm khách" value="' + esc(ST.q) + '"></div><details class="kfa" id="kfa"' + (kopen ? ' open' : '') + '><summary>Bộ lọc' + (nAct ? ' · ' + nAct + ' đang bật' : '') + '</summary><div class="kfb">' +
       sel('kshop', [['', 'Mọi Shop']].concat(SHK.map(function (x) { return [x.id_shop, x.ten_shop] })), ST.kShop) +
       '<select id="knv" aria-label="Nhân viên"' + (ST.kShop ? '' : ' disabled') + '><option value="">' + (ST.kShop ? 'Mọi nhân viên' : 'Chọn Shop trước') + '</option>' + staffK.map(function (a) { return '<option value="' + esc(a.ma_tk) + '"' + (ST.kNv === a.ma_tk ? ' selected' : '') + '>' + esc(a.ho_ten) + '</option>' }).join('') + '</select>' +
