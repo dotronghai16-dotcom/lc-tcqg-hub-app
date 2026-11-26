@@ -235,6 +235,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
  .rt td:not(.rh) small{display:none}
  /* vùng chạm tối thiểu 44px (chỉ ASM, chỉ trong nội dung chính) */
  body[data-role=asm] .mtop .ibtn,body[data-role=asm] .mtop .ava{width:44px;height:44px}
+ body[data-role=asm] .shtb .srt{min-height:44px}body[data-role=asm] .chips.ov .xp>summary.chip,body[data-role=asm] .stk .row2>.btn{min-width:44px}
  body[data-role=asm] main .chip,body[data-role=asm] .kp2 button,body[data-role=asm] main .pgbar select,body[data-role=asm] main .pgbar .btn,body[data-role=asm] main summary,body[data-role=asm] main .kd input{min-height:44px}
  body[data-role=asm] main select,body[data-role=asm] main input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]){min-height:44px}
  body[data-role=asm] main :is([style*="min-height:32px"],[style*="min-height:34px"],[style*="min-height:36px"],[style*="min-height:38px"],[style*="min-height:40px"],[style*="min-height:42px"]){min-height:44px!important}
@@ -266,9 +267,11 @@ body[data-role=asm] main{display:flex;flex-direction:column;gap:14px}
 .chips.ov .xpm{left:0;right:0}.xpm .btn{width:100%}.xpm label.field{font-weight:600}.xpm input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:0 10px;background:var(--bg)}
 /* Kho Data: ô tìm và nút Bộ lọc cùng một hàng; bộ lọc mở thành hộp thả xuống, không đẩy danh sách */
 @media(max-width:959px){
- .kf{flex-wrap:nowrap}.kf .search{flex:1 1 auto;min-width:0}.kfa{flex:0 0 auto;position:static}.kfa summary{white-space:nowrap}
- .kfa[open]>.kfb{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:8;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(8,42,62,.18);padding:12px;max-height:min(60vh,430px);overflow:auto}
 }
+.kf{flex-wrap:nowrap}.kf .search{flex:1 1 auto;min-width:0}.kfa,.kfa[open]{flex:0 0 auto;position:static}.kfa summary,.kfa[open] summary{display:flex;white-space:nowrap;margin:0}
+.kfa[open]>.kfb{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:8;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(8,42,62,.18);padding:12px;max-height:min(60vh,430px);overflow:auto}
+.pgd{color:var(--muted);font-size:14px;margin-top:-4px;max-width:760px}
+@media(max-width:959px){.pgd{display:none}}
 /* cảnh báo gọn: ba ô một hàng, bấm cả ô */
 .svg3{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px}
 .svg3 .sv{display:grid;grid-template-columns:minmax(0,1fr);justify-items:start;align-content:start;gap:2px;margin:0;padding:9px 8px;border-style:none;border-width:0;border-top-style:solid;border-top-width:4px;border-radius:12px;text-align:left;cursor:pointer;min-height:92px;font:inherit;color:inherit}
@@ -563,6 +566,6 @@ document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126o"></script>
+<script src="app.js?v=20261126p"></script>
 </body>
 </html>
