@@ -110,7 +110,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
 }
 
 /* ===== Giao diện điện thoại: không tràn ngang, chữ gọn, thanh menu dưới kiểu app ===== */
-html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{overflow-x:clip}}select,input,textarea{max-width:100%}.row2>div,.row2 .field{min-width:0;max-width:100%}.row2 select{min-width:0;width:100%;text-overflow:ellipsis}
+@media (max-width:959px){input,select,textarea{font-size:16px!important}input[type=checkbox],input[type=radio]{font-size:inherit!important}}html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{overflow-x:clip}}select,input,textarea{max-width:100%}.row2>div,.row2 .field{min-width:0;max-width:100%}.row2 select{min-width:0;width:100%;text-overflow:ellipsis}
 .stats6{grid-template-columns:repeat(6,1fr)}.stats4{grid-template-columns:repeat(4,1fr)}
 @media(max-width:959px){
  body{font-size:15px}
@@ -375,10 +375,10 @@ function bind(){var gq=$('#gq');if(gq)gq.oninput=function(){S.q=gq.value;var pos
  var ch=$('#chia');if(ch)ch.onclick=chiaSheet;document.querySelectorAll('[data-nhan]').forEach(function(b){b.onclick=function(e){e.stopPropagation();var t=D.turns.filter(function(x){return x.ma_luot===b.dataset.nhan})[0];if(t&&window.MSG)MSG.open(t,0)}});document.querySelectorAll('a[href^="tel:"]').forEach(function(a){a.addEventListener('click',function(){var el=a.closest('[data-id]');tapGoi(el?el.dataset.id:S.sel)})});document.querySelectorAll('[data-ghi]').forEach(function(b){b.onclick=function(e){e.stopPropagation();var t=D.turns.filter(function(x){return x.ma_luot===b.dataset.ghi})[0];if(t)ghiSheet(t)}});var lkb=$('#lkbtn');if(lkb)lkb.onclick=function(){if(window.MSG)MSG.lookup()};var cw=$('#cpw');if(cw)cw.onclick=pwModal;var vxc=$('#vxc');if(vxc)vxc.onclick=function(){copy(BRAND.app+' '+BRAND.vtext()+' · bản dựng '+BRAND.build());toast('Đã sao chép phiên bản')};var sv=$('#sdtsave');if(sv)sv.onclick=saveMyPhone;var o=$('#out');if(o)o.onclick=logout}
 function toast(t,u,bad){clearTimeout(timer);var e=$('#toast');e.className='toast on'+(bad?' bad':'');$('#tt').textContent=t;$('#undo').hidden=true;timer=setTimeout(function(){e.classList.remove('on')},bad?5000:2200)}
 /* ===== Đăng nhập, khởi động ===== */
-function showLogin(msg){ME=null;D=null;$('#shell').hidden=true;$('#tabs').hidden=true;$('#login').hidden=false;$('#llogo').innerHTML=LOGO;var e=$('#lerr');e.hidden=!msg;e.textContent=msg||''}
+var LFN=null;function showLogin(msg){if(!$('#lf')&&LFN)$('#login').appendChild(LFN);ME=null;D=null;$('#shell').hidden=true;$('#tabs').hidden=true;$('#login').hidden=false;$('#llogo').innerHTML=LOGO;var e=$('#lerr');e.hidden=!msg;e.textContent=msg||''}
 function logout(){var mb=$('#mbar');if(mb){mb.hidden=true;mb.dataset.u='';mb.innerHTML=''}setSess(null);showLogin('')}
 function start(){var s=sess();if(!s){showLogin('');return}
- $('#login').hidden=true;$('#shell').hidden=false;$('#tabs').hidden=false;$('#main').innerHTML='<div class="mtop">'+LOGO+'</div><div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+ var lf=$('#lf');if(lf){LFN=lf;lf.remove()}$('#login').hidden=true;$('#shell').hidden=false;$('#tabs').hidden=false;$('#main').innerHTML='<div class="mtop">'+LOGO+'</div><div class="skel"></div><div class="skel"></div><div class="skel"></div>';
  rest('accounts?select=*&auth_uid=eq.'+s.uid).then(function(r){if(!r.length)throw {code:'AUTH'};ME=r[0];return load(true)}).then(function(){S.page=ME.vai_tro==='ASM'?'a_tq':'today';S.sel=null;render()},function(e){if(e&&e.code==='AUTH')showLogin('Phiên đăng nhập đã hết.');else{$('#main').innerHTML='<div class="card empty">'+esc((e&&e.message)||'Lỗi kết nối.')+'<br><br><button class="btn b1" onclick="start()">Thử lại</button></div>'}})}
 $('#lf').onsubmit=function(ev){ev.preventDefault();var b=$('#lbtn');b.disabled=true;b.textContent='Đang đăng nhập…';
  http('POST','/auth/v1/token?grant_type=password',{email:$('#em').value.trim().toLowerCase(),password:$('#pw').value}).then(function(r){b.disabled=false;b.textContent='Đăng nhập';if(r.status!==200){var e=$('#lerr');e.hidden=false;e.textContent='Email hoặc mã PIN không đúng.';return}
@@ -391,6 +391,6 @@ document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126b"></script>
+<script src="app.js?v=20261126c"></script>
 </body>
 </html>
