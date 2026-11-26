@@ -46,7 +46,7 @@ main{min-width:0;display:grid;gap:14px;align-content:start}main>*{min-width:0;ma
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line);padding:16px}.card h2{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.st{padding:14px}.st .l{color:var(--muted);font-size:13.5px}.st .v{font-size:28px;font-weight:700;letter-spacing:-.8px}
 .pill{font-size:11.5px;background:var(--tint);color:var(--teal-d);border-radius:99px;padding:2px 9px;font-weight:600}
-html{overscroll-behavior-y:none}
+@media (pointer:fine){html{overscroll-behavior-y:none}}
 
 th small{display:block;font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted);margin-top:2px;line-height:1.3}
 .ghm{position:fixed;inset:0;z-index:70}.gscrim{position:absolute;inset:0;background:rgba(8,42,62,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:gfade .25s}
@@ -110,7 +110,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
 }
 
 /* ===== Giao diện điện thoại: không tràn ngang, chữ gọn, thanh menu dưới kiểu app ===== */
-@media (max-width:959px){input,select,textarea{font-size:16px!important}input[type=checkbox],input[type=radio]{font-size:inherit!important}}html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{overflow-x:clip}}select,input,textarea{max-width:100%}.row2>div,.row2 .field{min-width:0;max-width:100%}.row2 select{min-width:0;width:100%;text-overflow:ellipsis}
+@media (max-width:959px){input,select,textarea{font-size:16px!important}input[type=checkbox],input[type=radio]{font-size:inherit!important}}img[src*="Tiem"],.brand img,.mtop img,#llogo img{width:auto;max-width:100%}button,a,input,select,textarea,summary,label{touch-action:manipulation}:focus-visible{outline:2px solid var(--teal);outline-offset:2px}@media (hover:hover){.btn:hover,.abt:hover,.chip:hover,.pill2:hover,.ibtn:hover,.ib2:hover,.iconb:hover,.mcard:hover,.mrow:hover,.card.q:hover{filter:brightness(.97)}.tab:hover{color:var(--teal-d)}}html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{overflow-x:clip}}select,input,textarea{max-width:100%}.row2>div,.row2 .field{min-width:0;max-width:100%}.row2 select{min-width:0;width:100%;text-overflow:ellipsis}
 .stats6{grid-template-columns:repeat(6,1fr)}.stats4{grid-template-columns:repeat(4,1fr)}
 @media(max-width:959px){
  body{font-size:15px}
@@ -150,7 +150,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
 <header class="mbar" id="mbar" hidden></header>
 <div class="shell" id="shell" hidden><aside class="side" id="side"></aside><main id="main"></main></div>
 <nav class="tabs" id="tabs" hidden></nav>
-<div class="toast" id="toast"><span id="tt"></span><button id="undo" hidden>Hoàn tác</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="tt"></span><button id="undo" hidden>Hoàn tác</button></div>
 <script>
 /* ===== Cấu hình ===== */
 var URL_='https://wtipqzmbxifbuzbdnxud.supabase.co',KEY='sb_publishable_F6DtdfdQ8Q1fL9EQa4Rb9A_vyf2tbwQ',SK='lc_sb_session_v2',LATE_DAYS=3;
@@ -159,7 +159,7 @@ var pad=function(n){return n<10?'0'+n:''+n};function loc(s){if(!s)return null;va
 function ago(d){if(!d)return '';var m=Math.round((Date.now()-d)/60000);if(m<1)return 'vừa xong';if(m<60)return m+' phút trước';var h=Math.round(m/60);if(h<24)return h+' giờ trước';var dd=Math.round(h/24);return dd+' ngày trước'}
 function dstr(d){return d?pad(d.getDate())+'/'+pad(d.getMonth()+1)+' '+pad(d.getHours())+':'+pad(d.getMinutes()):''}
 function ageDays(d){return d?Math.floor((Date.now()-d)/86400000):0}
-var LOGO='<img alt="Tiêm chủng Long Châu" src="https://cdn.tiemchunglongchau.com.vn/Size_XL_56px_Color_Blue_Logo_Position_Left_Logo_Text2_Line_Digital_Information_Note_False_Show_FPT_Retail_True_476b85e044.svg" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="fb">LC</div>';
+var LOGO='<img alt="Tiêm chủng Long Châu" width="223" height="56" src="https://cdn.tiemchunglongchau.com.vn/Size_XL_56px_Color_Blue_Logo_Position_Left_Logo_Text2_Line_Digital_Information_Note_False_Show_FPT_Retail_True_476b85e044.svg" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="fb">LC</div>';
 var IC={more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',home:'<path d="M4 12l8-8 8 8M6 10v10h12V10"/>',list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',team:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.3 2.2 3.8 5"/>',call:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',msg:'<path d="M4 5h16v11H8l-4 4z"/>',back:'<path d="m15 18-6-6 6-6"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'};
 function ic(n){return '<svg class="i" viewBox="0 0 24 24">'+IC[n]+'</svg>'}
 var PERF=window.__perf=[];
@@ -248,7 +248,7 @@ function chiaSheet(){var ok=D.turns.filter(function(t){return t.recipient_type==
   rpc('u_shop_assign',{p_ma_luots:ok.map(function(t){return t.ma_luot}),p_nguoi_nhan:who,p_req:rid()}).then(function(r){d.remove();toast('Đã chia '+r.so_luot+' khách cho '+who.length+' người');return load(true)}).then(render,function(e){d.remove();fail(e)})}}
 /* ===== Chi tiết ===== */
 function detail(t){var c=D.cus[t.ma_khach]||{},l=(D.links[t.ma_khach]||[])[0]||{},ro=!mine_(t),tel=String(l.sdt||'').replace(/\s/g,''),openT=open_(t)&&!ro,age=ageDays(t.d_giao),last=D.lastAny[t.ma_luot];
- var h='<div class="hd"><button class="iconb" id="bk">'+ic('back')+'</button><div><div class="name">'+esc(c.ho_ten)+'</div><div class="meta">'+esc(ageOf(c))+' · '+esc(l.ho_ten||'')+'</div></div></div>';
+ var h='<div class="hd"><button class="iconb" id="bk" aria-label="Quay lại">'+ic('back')+'</button><div><div class="name">'+esc(c.ho_ten)+'</div><div class="meta">'+esc(ageOf(c))+' · '+esc(l.ho_ten||'')+'</div></div></div>';
  var links=D.links[t.ma_khach]||[];h+='<div class="card sec" style="padding:6px 14px">'+(links.length?links.map(function(x,i){var tl=String(x.sdt||'').replace(/\s/g,'');return '<div class="person"><div><div class="meta">'+esc(x.quan_he||'Liên hệ')+(x.ho_ten?' · '+esc(x.ho_ten):'')+'</div><div class="phone">'+esc(x.sdt||'—')+'</div></div>'+(ro?'':'<div class="acts" style="flex-direction:column"><a class="btn b1" href="tel:'+esc(tl)+'">'+ic('call')+'Gọi</a><button class="btn bo" data-msg="'+i+'">'+ic('msg')+'Gợi ý tin nhắn</button></div>')+'</div>'}).join(''):'<div class="meta" style="padding:10px 0">Chưa có người liên hệ.</div>')+'</div>';
  if(ro)h+='<div class="ro">'+(t.recipient_type==='SHOP'?'Lượt giao chung cho Shop':'Lượt của <b>'+esc(nm(t.ma_tk_nhan))+'</b>')+': chỉ xem, không ghi thay.</div>';
  else if(t.trang_thai==='THU_HOI')h+='<div class="ro">Lượt này đã bị ASM thu hồi, không ghi thêm được. Lịch sử vẫn giữ.</div>';
@@ -391,6 +391,6 @@ document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126d"></script>
+<script src="app.js?v=20261126e"></script>
 </body>
 </html>
