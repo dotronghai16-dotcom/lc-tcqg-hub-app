@@ -258,7 +258,7 @@ body[data-role=asm] main{display:flex;flex-direction:column;gap:14px}
 @media(max-width:959px){
  .tbar2{flex-wrap:nowrap}.tbar2 select{flex:1 1 0;min-width:0;text-overflow:ellipsis}.tbar2 .search{flex:1.3 1 0;padding:0 10px;gap:6px}.tbar2 .xp>summary.btn{padding:0 12px;white-space:nowrap}
  .stk .row2{flex-wrap:wrap}.stk .row2>.greet{flex:1 1 auto;min-width:0}.stk .row2>.btn{width:auto;flex:none;padding:0 14px}.stk .row2 .bt{display:none}
- .chips.ov .chip,.chips.ov .xp>summary.chip{padding:0 8px;font-size:12.5px}.chips.ov .xp>summary.chip svg{width:18px;height:18px}
+ .chips.ov{gap:6px}.chips.ov .chip,.chips.ov .xp>summary.chip{padding:0 7px;font-size:12.5px}.chips.ov .xp>summary.chip svg{width:18px;height:18px}
 }
 /* hộp thả xuống (Xuất file, Chọn ngày, Bộ lọc) */
 .chips.ov{overflow:visible;flex-wrap:wrap;position:relative}.kf{position:relative}
@@ -303,6 +303,13 @@ body[data-role=asm] main{display:flex;flex-direction:column;gap:14px}
  /* ô số liệu nằm ngang trong thẻ (báo cáo, kiểm tra) */
  .rtb tr{grid-template-columns:repeat(var(--c,4),minmax(0,1fr));gap:6px 8px}.rtb td.rh{grid-column:1/-1}.rtb td[data-label]::before{font-size:11.5px}
 }
+/* Đợt B3: ô số liệu bấm được, danh sách hiện tại chỗ có nút qua lại */
+button.kp-m{font:inherit;color:inherit;text-align:left;cursor:pointer;display:block;width:100%}.kp-m .l,.kp-m .v{display:block}
+.kp-m.on,.svg3 .sv.on{outline:2px solid var(--teal);outline-offset:1px}
+.dtp{margin-top:8px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:4px 12px 10px}
+.dth{display:flex;align-items:center;gap:8px;min-height:44px}.dth b{font-size:14.5px}.dtx{width:44px;height:44px;border:0;background:none;display:grid;place-items:center;color:var(--muted)}
+.dti{padding:8px 0;border-top:1px solid var(--line)}.dti b{display:block;font-size:14.5px;overflow-wrap:anywhere}.dti small{display:block;color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.dtf{display:flex;align-items:center;gap:10px;padding-top:8px;border-top:1px solid var(--line)}.dtf .dtn{width:44px;min-width:44px;padding:0}.dtf .sp{flex:1}
 </style>
 </head>
 <body>
@@ -566,6 +573,6 @@ document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126p"></script>
+<script src="app.js?v=20261126r"></script>
 </body>
 </html>
