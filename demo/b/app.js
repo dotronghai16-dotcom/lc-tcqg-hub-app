@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126p) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js, icons.js (build 20261126r) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -363,6 +363,25 @@ var ASM = (function () {
     return rows
   }
   function sortTh(key, label, num) { var on = (ST.ssort || 'qh') === key, dir = ST.sdir || -1; return '<th class="' + (num ? 'num ' : '') + (on ? 'on' : '') + '"><button class="srt" data-sort="' + key + '" aria-label="Sắp xếp theo ' + esc(label) + '">' + esc(label) + '<i>' + (on ? (dir < 0 ? '▼' : '▲') : '') + '</i></button></th>' }
+  /* Danh sách đằng sau mỗi ô số liệu ở Tổng quan: hiện tại chỗ (không nhảy màn hình), có nút qua lại */
+  var DT_N = 5, DT_TT = { mo: 'Đang xử lý', dy: 'Hẹn / tiêm', qh: 'Quá hạn gọi', chia: 'Lượt chờ chia', kho: 'Khách chưa giao' };
+  function dtItems(k) {
+    var T = D.turns.filter(function (t) { return !ST.shop || t.id_shop === ST.shop });
+    function who(t) { return t.recipient_type === 'SHOP' ? 'Cả Shop (chưa chia)' : nm(t.ma_tk_nhan) }
+    function cus(t) { return (D.cus[t.ma_khach] || {}).ho_ten || t.ma_khach }
+    if (k === 'kho') { var tc = turnsByCust(); return Object.keys(D.cus).filter(function (m) { return custState(tc[m]) === 'kho' }).sort().map(function (m) { var c = D.cus[m]; return { a: c.ho_ten, b: [ageTxt(c), c.ma_tcqg || c.ma_khach].filter(Boolean).join(' · ') } }) }
+    var L = k === 'mo' ? T.filter(open_) : k === 'dy' ? T.filter(yes) : k === 'qh' ? T.filter(function (t) { return overdueDays(t) > 0 }).sort(function (a, b) { return overdueDays(b) - overdueDays(a) }) : T.filter(function (t) { return t.recipient_type === 'SHOP' && t.trang_thai === 'DA_GIAO' });
+    return L.map(function (t) { var d = overdueDays(t); return { a: cus(t), b: [shopName(t.id_shop), who(t), d ? 'quá hạn ' + d + ' ngày' : ''].filter(Boolean).join(' · ') } })
+  }
+  function dtOn(k, src) { return ST.dt === k && ST.dtSrc === src ? ' on' : '' }
+  function dtPanel(src) {
+    var k = ST.dt; if (!k || ST.dtSrc !== src) return '';
+    var L = dtItems(k), pages = Math.max(1, Math.ceil(L.length / DT_N)); ST.dtPg = Math.min(Math.max(1, ST.dtPg || 1), pages);
+    var rows = L.slice((ST.dtPg - 1) * DT_N, ST.dtPg * DT_N), go = k === 'kho' ? 'a_kho' : k === 'chia' ? 'a_pc' : 'late';
+    return '<div class="dtp"><div class="dth"><b>' + DT_TT[k] + '</b><span class="meta">' + L.length + ' mục</span><span class="sp"></span><button class="ibtn dtx" data-dtx="1" aria-label="Đóng danh sách">' + ic('x') + '</button></div>' +
+      (rows.length ? rows.map(function (r) { return '<div class="dti"><b>' + esc(r.a) + '</b><small>' + esc(r.b) + '</small></div>' }).join('') : '<div class="meta" style="padding:8px 2px">Không có mục nào.</div>') +
+      '<div class="dtf"><button class="btn b3 dtn" data-dtp="-1"' + (ST.dtPg <= 1 ? ' disabled' : '') + ' aria-label="Trang trước">' + ic('back') + '</button><span class="meta">' + ST.dtPg + ' / ' + pages + '</span><button class="btn b3 dtn" data-dtp="1"' + (ST.dtPg >= pages ? ' disabled' : '') + ' aria-label="Trang sau">' + ic('chev') + '</button><span class="sp"></span><button class="btn b3" data-dtgo="' + go + '">' + (k === 'kho' ? 'Mở Kho Data' : k === 'chia' ? 'Mở Phân công' : 'Xem theo Shop') + '</button></div></div>'
+  }
   function pgTq() {
     var tc = turnsByCust(), kho = 0, tot = Object.keys(D.cus).length; Object.keys(D.cus).forEach(function (k) { if (custState(tc[k]) === 'kho') kho++ });
     var all = statsFor(ST.shop), first = ME.ho_ten.trim().split(/\s+/).pop(), SH = shops(), ptr = pct(all.xong, all.luot);
@@ -370,14 +389,14 @@ var ASM = (function () {
       '<div style="display:flex;gap:8px;align-items:center"><span class="meta">Shop:</span>' + sel('fshop', [['', 'Tất cả Shop']].concat(SH.map(function (s) { return [s.id_shop, s.ten_shop] })), ST.shop) + '</div>');
     /* Tầng 1: tổng quan, 1 chỉ số chính + 3 chỉ số quan trọng + 2 chỉ số phụ */
     h += '<section class="tier tov"><h2 class="tl">Tổng quan</h2><div class="kp"><div class="card kp-hero"><div class="l">Tiến độ xử lý</div><div class="big">' + ptr + '<small>%</small></div><div class="pb" role="progressbar" aria-valuenow="' + ptr + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + ptr + '%"></i></div><div class="meta">' + all.xong + ' / ' + all.luot + ' lượt đã hoàn thành</div></div>' +
-      '<div class="card kp-m"><div class="l">Đang xử lý</div><div class="v">' + all.mo + '</div></div><div class="card kp-m"><div class="l">Hẹn / tiêm</div><div class="v ok">' + all.dy + '</div></div><div class="card kp-m' + (all.qh ? ' bad' : '') + '"><div class="l">Quá hạn gọi</div><div class="v">' + all.qh + '</div></div></div>' +
+      '<button class="card kp-m' + dtOn('mo', 'kp') + '" data-dt="mo" data-src="kp"><span class="l">Đang xử lý</span><span class="v">' + all.mo + '</span></button><button class="card kp-m' + dtOn('dy', 'kp') + '" data-dt="dy" data-src="kp"><span class="l">Hẹn / tiêm</span><span class="v ok">' + all.dy + '</span></button><button class="card kp-m' + (all.qh ? ' bad' : '') + dtOn('qh', 'kp') + '" data-dt="qh" data-src="kp"><span class="l">Quá hạn gọi</span><span class="v">' + all.qh + '</span></button></div>' + dtPanel('kp') +
       '<div class="kp2"><button data-go="a_kho"><b>' + tot + '</b> trong kho</button><button data-go="a_kho"><b>' + kho + '</b> chưa giao</button><button data-go="a_pc"><b>' + all.chia + '</b> chờ chia</button></div></section>';
     /* Tầng 2: điều hành */
     var sv = '', tl = [];
-    if (all.qh) tl.push('<button class="sv sv1" data-late="1" title="Tính từ Ngày cần liên hệ của từng lượt"><span class="sl">Khẩn</span><span class="sn">' + all.qh + '</span><span class="sb">quá hạn gọi</span></button>');
-    if (all.chia) tl.push('<button class="sv sv2" data-go="a_pc" title="Quản lý chia khi bạn bật quyền cho lần giao đó"><span class="sl">Cần làm</span><span class="sn">' + all.chia + '</span><span class="sb">lượt chờ chia</span></button>');
-    if (kho) tl.push('<button class="sv sv3" data-go="a_kho" title="Khách đang nằm trong kho"><span class="sl">Nên làm</span><span class="sn">' + kho + '</span><span class="sb">chưa giao</span></button>');
-    if (tl.length) sv = '<div class="svg3" style="--n:' + tl.length + '">' + tl.join('') + '</div>';
+    if (all.qh) tl.push('<button class="sv sv1' + dtOn('qh', 'al') + '" data-dt="qh" data-src="al" title="Tính từ Ngày cần liên hệ của từng lượt"><span class="sl">Khẩn</span><span class="sn">' + all.qh + '</span><span class="sb">quá hạn gọi</span></button>');
+    if (all.chia) tl.push('<button class="sv sv2' + dtOn('chia', 'al') + '" data-dt="chia" data-src="al" title="Quản lý chia khi bạn bật quyền cho lần giao đó"><span class="sl">Cần làm</span><span class="sn">' + all.chia + '</span><span class="sb">lượt chờ chia</span></button>');
+    if (kho) tl.push('<button class="sv sv3' + dtOn('kho', 'al') + '" data-dt="kho" data-src="al" title="Khách đang nằm trong kho"><span class="sl">Nên làm</span><span class="sn">' + kho + '</span><span class="sb">chưa giao</span></button>');
+    if (tl.length) sv = '<div class="svg3" style="--n:' + tl.length + '">' + tl.join('') + '</div>' + dtPanel('al');
     var days = series(ST.shop, 14), w1 = 0, w0 = 0; days.forEach(function (x, i) { if (i >= 7) w1 += x.xong; else w0 += x.xong }); var dl = w1 - w0;
     var narrow = window.innerWidth < 960, shown = narrow ? days.slice(-7) : days; LASTDAYS = shown;
     h += '<section class="tier tops"><h2 class="tl">Điều hành</h2><div class="t2"><div class="card cal"><h2>Cần xử lý ngay</h2>' + (sv || '<div class="alert"><i>✓</i><div><b>Chưa có gì cần xử lý</b></div></div>') + '</div>' +
@@ -436,20 +455,22 @@ var ASM = (function () {
     var m = { kieu: 'NHAN_VIEN', who: {}, shopSel: {}, ql: false, giaolai: false };
     var d = document.createElement('div'); d.className = 'modal';
     function draw() {
+      var oldCard = d.querySelector('.card'), keepTop = oldCard ? oldCard.scrollTop : 0;
       var SH = shops(), nWho = Object.keys(m.who).length, nShop = Object.keys(m.shopSel).length, n = m.kieu === 'SHOP' ? nShop : nWho, per = n ? Math.ceil((ks.length - (m.giaolai ? 0 : openN)) / n) : 0;
       d.innerHTML = '<div class="card" style="width:100%;max-width:640px;border-radius:22px 22px 0 0;padding:18px;max-height:92vh;overflow:auto"><h2 style="font-size:19px;margin:0 0 4px">Phân công ' + ks.length + ' khách</h2><div class="meta" style="margin-bottom:12px">Chia đều cho những người hoặc Shop bạn chọn. Mỗi khách một lượt giao riêng, giữ nguyên mã khách.</div>' +
         '<div class="chips" style="margin-bottom:10px"><button class="chip ' + (m.kieu === 'NHAN_VIEN' ? 'on' : '') + '" data-kieu="NHAN_VIEN">Đích danh nhân viên</button><button class="chip ' + (m.kieu === 'SHOP' ? 'on' : '') + '" data-kieu="SHOP">Cả Shop</button></div>' +
-        (m.kieu === 'NHAN_VIEN' ? SH.map(function (s) { var st = staffOf(s.id_shop); return st.length ? '<div class="sec"><h3>' + esc(s.ten_shop) + ' <a href="#" data-allshop="' + esc(s.id_shop) + '" style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--teal-d)">chọn cả Shop</a></h3><div style="display:grid;gap:6px">' + st.map(function (a) { return '<label class="row" style="cursor:pointer"><input type="checkbox" data-w="' + esc(a.ma_tk) + '" ' + (m.who[a.ma_tk] ? 'checked' : '') + ' style="width:20px;height:20px;accent-color:var(--teal)"><span>' + esc(a.ho_ten) + ' <span class="meta">· ' + (a.vai_tro === 'QUAN_LY' ? 'Quản lý' : 'Nhân viên') + '</span></span></label>' }).join('') + '</div></div>' : '' }).join('')
+        (m.kieu === 'NHAN_VIEN' ? SH.map(function (s) { var st = staffOf(s.id_shop); return st.length ? '<div class="sec"><h3>' + esc(s.ten_shop) + ' <a href="#" data-allshop="' + esc(s.id_shop) + '" style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--teal-d)">' + (st.every(function (a) { return m.who[a.ma_tk] }) ? 'bỏ chọn cả Shop' : 'chọn cả Shop') + ' (' + st.filter(function (a) { return m.who[a.ma_tk] }).length + '/' + st.length + ')</a></h3><div style="display:grid;gap:6px">' + st.map(function (a) { return '<label class="row" style="cursor:pointer"><input type="checkbox" data-w="' + esc(a.ma_tk) + '" ' + (m.who[a.ma_tk] ? 'checked' : '') + ' style="width:20px;height:20px;accent-color:var(--teal)"><span>' + esc(a.ho_ten) + ' <span class="meta">· ' + (a.vai_tro === 'QUAN_LY' ? 'Quản lý' : 'Nhân viên') + '</span></span></label>' }).join('') + '</div></div>' : '' }).join('')
           : '<div class="sec"><h3>Chọn Shop nhận</h3><div style="display:grid;gap:6px">' + SH.map(function (s) { return '<label class="row" style="cursor:pointer"><input type="checkbox" data-sh="' + esc(s.id_shop) + '" ' + (m.shopSel[s.id_shop] ? 'checked' : '') + ' style="width:20px;height:20px;accent-color:var(--teal)"><span>' + esc(s.ten_shop) + ' <span class="meta">· Quản lý ' + esc(qlOf(s.id_shop)) + '</span></span></label>' }).join('') + '</div></div>' +
             '<label class="sw"><input type="checkbox" id="mql" ' + (m.ql ? 'checked' : '') + '><div><b>Cho phép Quản lý chia lại cho nhân viên</b><small>Chỉ áp cho lần giao này. Bạn tắt được bất cứ lúc nào ở mục Phân công.</small></div></label>') +
         '<div class="form2"><div><label class="meta">Chủ đề</label>' + sel('mcd', [['', '— chọn —']].concat(topics.map(function (c) { return [c.ma_dm, c.ten] })), '') + '</div><div><label class="meta">Hạn liên hệ</label><input type="date" id="mhan" value="' + new Date().toISOString().slice(0, 10) + '"></div></div>' +
         (openN ? '<label class="sw" style="margin-top:8px"><input type="checkbox" id="mgl" ' + (m.giaolai ? 'checked' : '') + '><div><b>Vẫn giao ' + openN + ' khách đang có lượt mở</b><small>Mặc định bỏ qua để tránh nhiều người cùng gọi một khách. Bật là giao ngoại lệ.</small></div></label>' : '') +
         '<div class="alert" style="margin-top:10px"><i>Σ</i><div><b>' + (n ? 'Giao ' + (ks.length - (m.giaolai ? 0 : openN)) + ' khách cho ' + n + (m.kieu === 'SHOP' ? ' Shop' : ' người') + ' · khoảng ' + per + ' khách mỗi nơi' : 'Chưa chọn người nhận') + '</b></div></div>' +
         '<div class="acts" style="margin-top:6px"><button class="btn b3" id="mx" style="flex:1">Hủy</button><button class="btn b1" id="mok" style="flex:1.4" ' + (n ? '' : 'disabled') + '>Xác nhận giao</button></div></div>';
+      var newCard = d.querySelector('.card'); if (newCard) newCard.scrollTop = keepTop;
       d.querySelectorAll('[data-kieu]').forEach(function (b) { b.onclick = function () { m.kieu = b.dataset.kieu; draw() } });
       d.querySelectorAll('[data-w]').forEach(function (b) { b.onchange = function () { b.checked ? m.who[b.dataset.w] = 1 : delete m.who[b.dataset.w]; draw() } });
       d.querySelectorAll('[data-sh]').forEach(function (b) { b.onchange = function () { b.checked ? m.shopSel[b.dataset.sh] = 1 : delete m.shopSel[b.dataset.sh]; draw() } });
-      d.querySelectorAll('[data-allshop]').forEach(function (a) { a.onclick = function (e) { e.preventDefault(); staffOf(a.dataset.allshop).forEach(function (x) { m.who[x.ma_tk] = 1 }); draw() } });
+      d.querySelectorAll('[data-allshop]').forEach(function (a) { a.onclick = function (e) { e.preventDefault(); var st = staffOf(a.dataset.allshop), all = st.every(function (x) { return m.who[x.ma_tk] }); st.forEach(function (x) { if (all) delete m.who[x.ma_tk]; else m.who[x.ma_tk] = 1 }); draw() } });
       var q = d.querySelector('#mql'); if (q) q.onchange = function () { m.ql = q.checked; draw() }; var g = d.querySelector('#mgl'); if (g) g.onchange = function () { m.giaolai = g.checked; draw() };
       d.querySelector('#mx').onclick = function () { d.remove() };
       d.querySelector('#mok').onclick = function () {
@@ -547,11 +568,15 @@ var ASM = (function () {
     document.body.setAttribute('data-role', 'asm'); shell(); var m = $('#main'), p = S.page; m.innerHTML = ({ a_tq: pgTq, a_kho: pgKho, a_pc: pgPc, a_nap: pgNap, a_bc: pgBc, acc: pgAcc }[p] || X.pages[p] || pgTq)(); stick(m); fitChart();
     var x, on = function (sel, ev, fn) { var el = $(sel); if (el) el[ev] = function (e) { return fn.call(el, el, e) } };
     document.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { S.page = b.dataset.go; render() } });
-    on('#fshop', 'onchange', function (x) { ST.shop = x.value; render() });
+    on('#fshop', 'onchange', function (x) { ST.shop = x.value; ST.dtPg = 1; render() });
     document.querySelectorAll('[data-shop]').forEach(function (r) { r.onclick = function () { ST.shop = ST.shop === r.dataset.shop ? '' : r.dataset.shop; render() } });
     document.querySelectorAll('[data-sort]').forEach(function (b) { b.onclick = function (e) { e.stopPropagation(); var k = b.dataset.sort; if ((ST.ssort || 'qh') === k) ST.sdir = -(ST.sdir || -1); else { ST.ssort = k; ST.sdir = k === 'ten' ? 1 : -1 } render() } });
     on('#sq', 'oninput', function (x) { ST.sq = x.value; var pos = x.selectionStart; render(); var n = $('#sq'); n.focus(); n.setSelectionRange(pos, pos) });
     on('#slate', 'onclick', function () { ST.late = !ST.late; render() });
+    document.querySelectorAll('[data-dt]').forEach(function (b) { b.onclick = function () { var y = window.scrollY, k = b.dataset.dt, sc = b.dataset.src; if (ST.dt === k && ST.dtSrc === sc) { ST.dt = ''; ST.dtSrc = '' } else { ST.dt = k; ST.dtSrc = sc; ST.dtPg = 1 } render(); window.scrollTo(0, y) } });
+    document.querySelectorAll('[data-dtp]').forEach(function (b) { b.onclick = function () { var y = window.scrollY; ST.dtPg = Math.max(1, (ST.dtPg || 1) + Number(b.dataset.dtp)); render(); window.scrollTo(0, y) } });
+    document.querySelectorAll('[data-dtx]').forEach(function (b) { b.onclick = function () { var y = window.scrollY; ST.dt = ''; ST.dtSrc = ''; render(); window.scrollTo(0, y) } });
+    document.querySelectorAll('[data-dtgo]').forEach(function (b) { b.onclick = function () { var g = b.dataset.dtgo; if (g === 'late') { ST.late = true; render(); var t = $('.shtb'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' }) } else { S.page = g; render() } } });
     document.querySelectorAll('[data-late]').forEach(function (b) { b.onclick = function () { ST.late = true; render(); var t = $('.shtb'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' }) } });
     on('#kq', 'oninput', function (x) { ST.q = x.value; ST.pg = 1; var pos = x.selectionStart; render(); var n = $('#kq'); n.focus(); n.setSelectionRange(pos, pos) });
     on('#fband', 'onchange', function (x) { ST.band = x.value; ST.pg = 1; render() });
