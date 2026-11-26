@@ -132,6 +132,36 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;lett
  .toast{top:max(10px,env(safe-area-inset-top))}
  .alert .btn{white-space:nowrap;min-height:38px;padding:0 12px;font-size:14px}
 }
+
+/* ===== GIAO DIỆN 26/11/2026: nhận diện Long Châu, thanh trái 72px, thang chữ (Hải duyệt) ===== */
+:root{--brand:#04959B;--teal:#067A84;--teal-d:#055C65;--navy:#022383;--orange:#EF7422}
+@media (prefers-color-scheme:light),(prefers-color-scheme:no-preference){:root{--ink:#0B2A3E;--soft:#5E7080;--tint:#E3F5F6}}
+.nav .n{color:var(--navy)}
+.brand{background:var(--brand);border-radius:14px;padding:12px 14px;margin:0 0 10px}.brand img{height:36px;width:auto}.fb{background:#fff;color:var(--brand)}
+#llogo{display:inline-flex;background:var(--brand);padding:12px 16px;border-radius:14px}#llogo img{height:40px;width:auto}
+@media (max-width:959px){
+ .mbar{background:var(--brand);border-bottom:0;padding:calc(8px + env(safe-area-inset-top)) 14px 8px}
+ .mtop img{height:38px;width:auto}
+ .mtop .ibtn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);color:#fff}
+ .mtop .ava{background:#fff;color:var(--navy);width:40px;height:40px}
+ .shell{padding:0 0 0 72px}
+ main{padding:12px 12px 24px}
+ .tabs{display:flex;flex-direction:column;align-items:center;gap:6px;position:fixed;top:var(--mbb,var(--mbh,64px));bottom:0;left:0;right:auto;width:72px;grid-template-columns:none;background:var(--card);border:0;border-right:1px solid var(--line);border-radius:0;padding:10px 0 calc(10px + env(safe-area-inset-bottom));box-shadow:none;overflow-y:auto;z-index:10}
+ .tab{width:64px;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;padding:2px 0 4px;min-height:56px;font-size:11.5px;font-weight:600;letter-spacing:0;color:var(--muted);border-radius:0}
+ .tab svg.i{box-sizing:content-box;width:24px;height:24px;padding:3px 14px;border-radius:15px;transition:background .15s}
+ .tab.on{background:none;color:var(--teal-d)}.tab.on svg.i{background:var(--tint)}
+ #tmore{margin-top:auto}
+ /* thang chữ: tiêu đề 20 > tên 15 > nội dung 14 > phụ 13 > nhãn 11,5 */
+ .greet h1{font-size:20px;line-height:1.25;letter-spacing:-.2px}.greet p{font-size:13px}
+ .name{font-size:15px;font-weight:600}.phone{font-size:15px}.meta{font-size:13px}
+ .card.cp .name{font-size:15px}.card.cp .meta{font-size:13px}
+ .card.foc{padding:12px;border-radius:16px;box-shadow:0 4px 16px rgba(2,35,131,.06);gap:10px}.fav{width:40px;height:40px;border-radius:12px}
+ .btn{font-size:14px;min-height:44px;padding:0 12px;border-radius:12px;font-weight:600}.chip{font-size:13px;min-height:40px}
+ .tag{font-size:12px;font-weight:600}.lbl{font-size:11.5px}
+ .card{padding:12px}.card h2{font-size:14.5px}
+ .alert{flex-wrap:wrap;font-size:13.5px}.alert>div{flex:1 1 120px;min-width:0}.alert .btn{flex:1 0 100%;white-space:normal}
+ .card.cp{gap:10px;padding:10px}.card.cp .fav{width:40px;height:40px;border-radius:12px}.ib2{width:38px;height:38px;border-radius:12px}.ca{gap:6px}
+}
 </style>
 </head>
 <body>
@@ -159,7 +189,7 @@ var pad=function(n){return n<10?'0'+n:''+n};function loc(s){if(!s)return null;va
 function ago(d){if(!d)return '';var m=Math.round((Date.now()-d)/60000);if(m<1)return 'vừa xong';if(m<60)return m+' phút trước';var h=Math.round(m/60);if(h<24)return h+' giờ trước';var dd=Math.round(h/24);return dd+' ngày trước'}
 function dstr(d){return d?pad(d.getDate())+'/'+pad(d.getMonth()+1)+' '+pad(d.getHours())+':'+pad(d.getMinutes()):''}
 function ageDays(d){return d?Math.floor((Date.now()-d)/86400000):0}
-var LOGO='<img alt="Tiêm chủng Long Châu" width="223" height="56" src="https://cdn.tiemchunglongchau.com.vn/Size_XL_56px_Color_Blue_Logo_Position_Left_Logo_Text2_Line_Digital_Information_Note_False_Show_FPT_Retail_True_476b85e044.svg" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="fb">LC</div>';
+var LOGO='<img alt="Tiêm chủng Long Châu" width="396" height="97" src="https://cdn.tiemchunglongchau.com.vn/Property_1_Mac_dinh_Device_Desktop_cf9a76e5c9.png" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="fb">LC</div>';
 var IC={more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',home:'<path d="M4 12l8-8 8 8M6 10v10h12V10"/>',list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',team:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.3 2.2 3.8 5"/>',call:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',msg:'<path d="M4 5h16v11H8l-4 4z"/>',back:'<path d="m15 18-6-6 6-6"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'};
 function ic(n){return '<svg class="i" viewBox="0 0 24 24">'+IC[n]+'</svg>'}
 var PERF=window.__perf=[];
@@ -202,7 +232,9 @@ function shell(){var n=nav(),open=D.turns.filter(function(t){return mine_(t)&&op
  document.querySelectorAll('[data-p]').forEach(function(e){e.onclick=function(){S.page=e.dataset.p;S.sel=null;S.open=false;render()}})}
 function ini(s){var p=String(s||'?').replace(/\s*\([^)]*\)/g,'').trim().split(/\s+/);return (p[0][0]||'')+(p.length>1?p[p.length-1][0]:'')}
 function mtop(){return ''}
-function mbarSet(){var b=$('#mbar');if(!b)return;b.hidden=false;if(b.dataset.u===ME.ma_tk)return;b.dataset.u=ME.ma_tk;b.innerHTML='<div class="mtop">'+LOGO+'<div class="sp"></div><button class="ibtn" id="lkbtn" aria-label="Từ điển vaccine" title="Từ điển vaccine">'+ic('book')+'</button><div class="ava">'+esc(ini(ME.ho_ten))+'</div></div>';var k=$('#lkbtn');if(k)k.onclick=function(){if(window.MSG)MSG.lookup()}}
+function mbarSet(){var b=$('#mbar');if(!b)return;b.hidden=false;if(b.dataset.u===ME.ma_tk){mbarH();return}b.dataset.u=ME.ma_tk;b.innerHTML='<div class="mtop">'+LOGO+'<div class="sp"></div><button class="ibtn" id="lkbtn" aria-label="Từ điển vaccine" title="Từ điển vaccine">'+ic('book')+'</button><div class="ava">'+esc(ini(ME.ho_ten))+'</div></div>';var k=$('#lkbtn');if(k)k.onclick=function(){if(window.MSG)MSG.lookup()};mbarH()}
+function mbarH(){var b=$('#mbar');if(b&&!b.hidden){var r=b.getBoundingClientRect(),st=document.documentElement.style;st.setProperty('--mbh',b.offsetHeight+'px');st.setProperty('--mbb',Math.max(0,Math.round(r.bottom))+'px')}}
+addEventListener('resize',function(){mbarH()});addEventListener('scroll',function(){mbarH()},{passive:true});
 /* ===== Hôm nay ===== */
 function today(){var M=D.turns.filter(mine_),ql=ME.vai_tro==='QUAN_LY',now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
  var cnt={need:0,back:0,done:0};M.forEach(function(t){cnt[catOf(t)]++});
@@ -391,6 +423,6 @@ document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126e"></script>
+<script src="app.js?v=20261126f"></script>
 </body>
 </html>
