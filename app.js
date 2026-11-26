@@ -1,4 +1,4 @@
-/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261125x) */
+/* LC TCQG HUB: gộp từ các module pager.js, lib-parse.js, asm.js, asm-lib.js, scan-engine.js, asm-scan.js, asm-hr.js, asm-img.js, asm-admin.js, msg.js (build 20261126a) */
 
 /* ===== pager.js ===== */
 /* PHÂN TRANG CHUNG: mọi bảng và danh sách thẻ trong màn chính đều tự có "số dòng mỗi trang" (10 / 15 / 20) và nút trang trước/sau.
@@ -1464,7 +1464,7 @@ var MSG = (function () {
 .lbtn{background:none;border:0;text-align:left;color:inherit;padding:0;cursor:pointer;font:inherit}
 .sdtbox{display:flex;gap:8px;padding:2px 14px 12px 64px}.sdtbox input,.fvi{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);min-height:44px;font:inherit;color:var(--ink)}.sdtbox input{flex:1;min-width:0}.fvi{display:block;width:100%;margin-top:6px}
 .mp.zero{background:var(--warn-bg);color:var(--warn)}.mp.lkw{white-space:normal;line-height:1.35;border-radius:12px;text-align:left;max-width:100%}
-.lkdp{margin:2px 0 10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.lkdi{font-size:13px;line-height:1.45;margin-bottom:8px}.lkch{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}.lkchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:8px 12px;font-weight:600;font-size:14px;background:var(--card)}.lkchip:has(input:checked){background:var(--teal);border-color:var(--teal);color:#fff}.lkdt{display:grid;gap:4px;margin-bottom:8px}.lkdt input{width:100%}.lkres2{font-size:13.5px;line-height:1.5;color:var(--ink)}.lkt{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}.lkt summary{list-style:none;cursor:pointer;padding:11px 13px;display:grid;gap:3px}.lkt summary::-webkit-details-marker{display:none}.lkt summary b{font-size:14.5px;line-height:1.35}.lkt summary small{color:var(--muted);font-size:12.5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.lkt[open] summary small{display:none}.lkx{padding:0 13px 6px;font-size:14px;line-height:1.55}.lkt .mlink{margin:2px 13px 11px}
+.lkit{display:flex;gap:10px;align-items:flex-start;padding:8px 0}.lkit input{margin-top:3px}.lkit span{display:grid;gap:1px}.lkds{color:var(--teal-d);font-weight:600;font-size:12.5px}.lkds:empty{display:none}.lkpin{color:var(--teal-d);margin-top:4px}.lkdp{margin:2px 0 10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.lkdi{font-size:13px;line-height:1.45;margin-bottom:8px}.lkch{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}.lkchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:8px 12px;font-weight:600;font-size:14px;background:var(--card)}.lkchip:has(input:checked){background:var(--teal);border-color:var(--teal);color:#fff}.lkdt{display:grid;gap:4px;margin-bottom:8px}.lkdt input{width:100%}.lkres2{font-size:13.5px;line-height:1.5;color:var(--ink)}.lkt{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}.lkt summary{list-style:none;cursor:pointer;padding:11px 13px;display:grid;gap:3px}.lkt summary::-webkit-details-marker{display:none}.lkt summary b{font-size:14.5px;line-height:1.35}.lkt summary small{color:var(--muted);font-size:12.5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.lkt[open] summary small{display:none}.lkx{padding:0 13px 6px;font-size:14px;line-height:1.55}.lkt .mlink{margin:2px 13px 11px}
 .lkn{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.lkn::-webkit-scrollbar{display:none}.lkn button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:7px 12px;font-size:13px;font-weight:600;min-height:36px}
 .lkage{display:grid;grid-template-columns:1fr 1.3fr;gap:8px;margin-bottom:6px}.lkage select,.lkage input{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:44px;color:var(--ink);min-width:0;font-size:15px}.mcard.vac .mtags{margin-top:0}.mcard.vac .mc1{align-items:center}
 .psw{display:flex;gap:6px;margin-top:10px}.psw button{flex:1;border:1.5px solid var(--line);background:var(--card);border-radius:13px;min-height:42px;font-weight:600;font-size:13.5px;color:var(--ink);transition:border-color .15s,background .15s}.psw button.on{border-color:var(--teal);background:var(--tint);color:var(--teal-d)}
@@ -2103,7 +2103,8 @@ var MSG = (function () {
     var h = '<div class="msheet">' + lkHead(lkSubline(rows)) + '<div class="mbody"><div class="lkage"><select id="lam" aria-label="Cách nhập tuổi">' + LK_MODES.map(function (m) { return '<option value="' + m[0] + '"' + (m[0] === LK.am ? ' selected' : '') + '>' + esc(m[1]) + '</option>' }).join('') + '</select>' + (LK.am === 'ngay' ? '<input id="lav" type="date" min="1900-01-01" max="' + lkIso(new Date()) + '" value="' + esc(LK.av) + '" aria-label="Ngày sinh">' : '<input id="lav" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" placeholder="' + esc(mode[2]) + '" value="' + esc(LK.av) + '" aria-label="' + esc(mode[1]) + '" autocomplete="off">') + '</div>' + lkDoneBox(rows, pdOn_, pa);
     h += '<div id="lkres">' + lkAgeBody(rows, pdOn_, pa) + '</div></div></div>'; lkHost.innerHTML = h; lkBindHead();
     var am = lkHost.querySelector('#lam'); am.onchange = function () { LK.am = am.value; LK.av = ''; lkDraw(); var n = lkHost.querySelector('#lav'); if (n) n.focus() };
-    var av = lkHost.querySelector('#lav'), tm = null, upd = function () { LK.av = av.value; var pa2 = lkParseAge(LK.am, LK.av), r = lkHost.querySelector('#lkres'); if (r) r.innerHTML = lkAgeBody(lkRows(), true, pa2); lkDoneRefresh(pa2) };
+    LK.pa = pa; var rs = lkHost.querySelector('#lkres'); if (rs) rs.onclick = function (e) { var b = e.target.closest ? e.target.closest('[data-lk]') : null; if (b) { LK.sel = b.getAttribute('data-lk'); lkDraw(); var nb = lkHost.querySelector('.mbody'); if (nb) nb.scrollTop = 0 } };
+    var av = lkHost.querySelector('#lav'), tm = null, upd = function () { LK.av = av.value; var pa2 = lkParseAge(LK.am, LK.av); LK.pa = pa2; var r = lkHost.querySelector('#lkres'); if (r) r.innerHTML = lkAgeBody(lkRows(), true, pa2); lkDoneRefresh(pa2) };
     av.oninput = function () { clearTimeout(tm); tm = setTimeout(upd, 250) }; av.onchange = function () { clearTimeout(tm); upd() };
     var dn = lkHost.querySelector('#lkdone'); if (dn) { dn.ontoggle = function () { LK.doneOpen = dn.open }; dn.onchange = function (e) { lkDoneChange(e.target, upd) } }
     if (!LK.av && !LK.sel && LK.tab === 'tuoi' && LK.am !== 'ngay') av.focus()
@@ -2163,23 +2164,23 @@ var MSG = (function () {
   function lkDoneChange(el, upd) {
     if (!el || !el.getAttribute) return; var dn = lkHost.querySelector('#lkdone'), pn = el.closest ? el.closest('.lkdp') : null;
     if (el.hasAttribute('data-d')) {
-      var id = el.getAttribute('data-d'), lab = el.closest('label'), row = lkRows().filter(function (r) { return r.id === id })[0];
-      if (el.checked && row) { LK.done[id] = { m: {}, d: '' }; lab.insertAdjacentHTML('afterend', lkDosePanel(row)) }
-      else { delete LK.done[id]; var old = dn.querySelector('.lkdp[data-p="' + id + '"]'); if (old) old.remove() }
+      var id = el.getAttribute('data-d'), row = lkRows().filter(function (r) { return r.id === id })[0];
+      if (el.checked && row) LK.done[id] = { m: {}, d: '' }; else delete LK.done[id];
+      var bx = dn.querySelector('#lkdl'); bx.innerHTML = lkDoneList(lkRows(), LK.pa); bx.scrollTop = 0;
       var n = Object.keys(LK.done).length, sm = dn.querySelector('summary b'); if (sm) sm.textContent = 'Khách đã tiêm vaccine nào?' + (n ? ' (' + n + ')' : ''); upd(); return
     }
     if (pn && (el.hasAttribute('data-m') || el.hasAttribute('data-dd'))) {
       var pid = pn.getAttribute('data-p'), st = LK.done[pid], rw = lkRows().filter(function (r) { return r.id === pid })[0]; if (!st || !rw) return;
       if (el.hasAttribute('data-m')) { var k = +el.getAttribute('data-m'); if (el.checked) st.m[k] = 1; else delete st.m[k] } else st.d = el.value || '';
-      pn.querySelector('.lkres2').innerHTML = lkDoseInfo(rw, st).html; upd()
+      var inf2 = lkDoseInfo(rw, st); pn.querySelector('.lkres2').innerHTML = inf2.html; var sd = dn.querySelector('.lkds[data-s="' + pid + '"]'); if (sd) sd.textContent = inf2.short; upd()
     }
   }
   function lkDoneList(rows, pa) {
-    var ok = pa && !pa.err ? function (r) { return lkElig(r, pa.a) > 0 || LK.done[r.id] } : function () { return true };
+    var ok = pa && !pa.err ? function (r) { return lkElig(r, pa.a) > 0 } : function () { return true };
+    function item(r) { var st = LK.done[r.id]; return '<label class="lkit"><input type="checkbox" data-d="' + esc(r.id) + '"' + (st ? ' checked' : '') + '><span><b>' + esc(r.name) + '</b><small class="lkds" data-s="' + esc(r.id) + '">' + (st ? esc(lkDoseInfo(r, st).short) : '') + '</small></span></label>' + (st ? lkDosePanel(r) : '') }
     function group(list) { var by = {}, ord = []; list.forEach(function (r) { var g = oneLine(r.d.nhom_vaccine) || 'Khác'; if (!by[g]) { by[g] = []; ord.push(g) } by[g].push(r) }); return ord.map(function (g) { return '<div class="mh" style="margin-top:8px">' + esc(g) + '</div>' + by[g].map(item).join('') }).join('') }
-    function item(r) { return '<label style="display:flex;gap:8px;align-items:center;padding:6px 0"><input type="checkbox" data-d="' + esc(r.id) + '"' + (LK.done[r.id] ? ' checked' : '') + '> ' + esc(r.name) + '</label>' + (LK.done[r.id] ? lkDosePanel(r) : '') }
-    var a = rows.filter(ok), b = rows.filter(function (r) { return !ok(r) });
-    return group(a) + (b.length ? '<details class="lkt" style="margin-top:10px"><summary><b>Vaccine ngoài độ tuổi hiện tại (' + b.length + ')</b><small>Dùng khi khách đã tiêm hồi nhỏ</small></summary><div style="padding:0 10px 10px">' + group(b) + '</div></details>' : '')
+    var sel = rows.filter(function (r) { return LK.done[r.id] }), rest = rows.filter(function (r) { return !LK.done[r.id] }), a = rest.filter(ok), b = rest.filter(function (r) { return !ok(r) });
+    return (sel.length ? '<div class="mh lkpin">Đã chọn (' + sel.length + ')</div>' + sel.map(item).join('') : '') + group(a) + (b.length ? '<details class="lkt" style="margin-top:10px"><summary><b>Vaccine ngoài độ tuổi hiện tại (' + b.length + ')</b><small>Dùng khi khách đã tiêm hồi nhỏ</small></summary><div style="padding:0 10px 10px">' + group(b) + '</div></details>' : '')
   }
   function lkDoneRefresh(pa) {
     var box = lkHost && lkHost.querySelector('#lkdl'); if (!box) return; var sig = pa && !pa.err ? pa.a.join(',') : ''; if (sig === LK.dsig) return; LK.dsig = sig; box.innerHTML = lkDoneList(lkRows(), pa)
