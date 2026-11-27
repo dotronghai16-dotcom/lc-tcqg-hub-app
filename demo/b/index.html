@@ -307,9 +307,22 @@ body[data-role=asm] main{display:flex;flex-direction:column;gap:14px}
 button.kp-m{font:inherit;color:inherit;text-align:left;cursor:pointer;display:block;width:100%}.kp-m .l,.kp-m .v{display:block}
 .kp-m.on,.svg3 .sv.on{outline:2px solid var(--teal);outline-offset:1px}
 .dtp{margin-top:8px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:4px 12px 10px}
-.dth{display:flex;align-items:center;gap:8px;min-height:44px}.dth b{font-size:14.5px}.dtx{width:44px;height:44px;border:0;background:none;display:grid;place-items:center;color:var(--muted)}
+.dth{display:flex;align-items:center;gap:8px;min-height:44px}.dth b{font-size:14.5px}.dth .dtx{width:44px;height:44px;border:0;background:none;display:grid;place-items:center;color:var(--muted)}
 .dti{padding:8px 0;border-top:1px solid var(--line)}.dti b{display:block;font-size:14.5px;overflow-wrap:anywhere}.dti small{display:block;color:var(--muted);font-size:13px;overflow-wrap:anywhere}
 .dtf{display:flex;align-items:center;gap:10px;padding-top:8px;border-top:1px solid var(--line)}.dtf .dtn{width:44px;min-width:44px;padding:0}.dtf .sp{flex:1}
+/* Đợt C-NV 27/11: sửa lỗi màn nhân viên trên điện thoại (không áp cho ASM) */
+@media(max-width:959px){
+ body:not([data-role=asm]) .card.cp .name,body:not([data-role=asm]) .card.cp .meta{white-space:normal;overflow:visible;text-overflow:clip}
+ body:not([data-role=asm]) .mtop .ibtn,body:not([data-role=asm]) .mtop .ava{width:44px;height:44px}
+ body:not([data-role=asm]) main .chips .chip{min-height:44px}
+ body:not([data-role=asm]) main .ib2{width:44px;height:44px}
+ body:not([data-role=asm]) main .pgbar select,body:not([data-role=asm]) main .pgbar .btn{min-height:44px}
+ body:not([data-role=asm]) main .pgbar .btn{min-width:44px}
+ .dtb.hid2 th:nth-child(2),.dtb.hid2 td:nth-child(2){display:none}
+ .modal.mm .mclose,.modal.ghm .gx{width:44px;height:44px}
+ .modal.mm .mchips button,.modal.mm .mseg button,.modal.mm .mtabs button,.modal.mm .mlink,.modal.ghm .gc,.modal.ghm .gmini{min-height:44px}
+ .modal.mm .mpv .ed .eh{flex-wrap:wrap;row-gap:2px}
+}
 </style>
 </head>
 <body>
@@ -534,7 +547,7 @@ function dataPage(){var ql=ME.vai_tro==='QUAN_LY',M=D.turns.filter(function(t){r
  var h=mtop()+'<div class="greet"><h1>Data được giao</h1><p>'+(ql?'Bạn xem được cả Shop. Lượt của người khác chỉ xem.':'Các lượt giao cho bạn.')+'</p></div><div class="top"><div class="search">'+ic('search')+'<input id="gq" placeholder="Tìm khách, số điện thoại…" value="'+esc(S.q)+'"></div></div>';
  if(ql)h+='<div class="chips"><button class="chip '+(S.scope==='mine'?'on':'')+'" data-s="mine">Của tôi</button><button class="chip '+(S.scope==='shop'?'on':'')+'" data-s="shop">Cả Shop</button></div>';
  h+='<div class="chips">'+[['','Tất cả'],['MO','Đang mở'],['HOAN_THANH','Hoàn thành'],['THU_HOI','Đã thu hồi']].map(function(x){return '<button class="chip '+(f===x[0]?'on':'')+'" data-f="'+x[0]+'">'+x[1]+'<em>'+cnt(x[0])+'</em></button>'}).join('')+'</div>';
- h+='<div class="card" style="padding:6px 8px"><table><thead><tr><th>Khách hàng</th><th>Người nhận</th><th>Trạng thái</th></tr></thead><tbody>'+M.slice(0,100).map(function(t){var c=D.cus[t.ma_khach]||{},l=(D.links[t.ma_khach]||[])[0]||{};return '<tr class="click" data-id="'+esc(t.ma_luot)+'"><td><b>'+esc(c.ho_ten)+'</b><small>'+esc(l.sdt||'')+'</small></td><td>'+(mine_(t)?'Bạn':esc(holder(t)))+(mine_(t)?'':' <span class="tag t-new">chỉ xem</span>')+'</td><td>'+(t.trang_thai==='HOAN_THANH'?'<span class="tag t-ok">'+esc((cat(t.ma_ket_qua)||{}).ten||'Hoàn thành')+'</span>':t.trang_thai==='THU_HOI'?'<span class="tag t-bad">Đã thu hồi</span>':'<span class="tag t-new">'+(t.trang_thai==='DA_GIAO'?'Chưa xử lý':'Đang xử lý')+'</span>')+'</td></tr>'}).join('')+(M.length?'':'<tr><td colspan="3" class="empty">Không có khách phù hợp.</td></tr>')+'</tbody></table></div><div class="work" style="display:block"><div class="detail" id="detail"></div></div>';return h}
+ h+='<div class="card" style="padding:6px 8px"><table class="dtb'+(ME.vai_tro==='QUAN_LY'?'':' hid2')+'"><thead><tr><th>Khách hàng</th><th>Người nhận</th><th>Trạng thái</th></tr></thead><tbody>'+M.slice(0,100).map(function(t){var c=D.cus[t.ma_khach]||{},l=(D.links[t.ma_khach]||[])[0]||{};return '<tr class="click" data-id="'+esc(t.ma_luot)+'"><td><b>'+esc(c.ho_ten)+'</b><small>'+esc(l.sdt||'')+'</small></td><td>'+(mine_(t)?'Bạn':esc(holder(t)))+(mine_(t)?'':' <span class="tag t-new">chỉ xem</span>')+'</td><td>'+(t.trang_thai==='HOAN_THANH'?'<span class="tag t-ok">'+esc((cat(t.ma_ket_qua)||{}).ten||'Hoàn thành')+'</span>':t.trang_thai==='THU_HOI'?'<span class="tag t-bad">Đã thu hồi</span>':'<span class="tag t-new">'+(t.trang_thai==='DA_GIAO'?'Chưa xử lý':'Đang xử lý')+'</span>')+'</td></tr>'}).join('')+(M.length?'':'<tr><td colspan="3" class="empty">Không có khách phù hợp.</td></tr>')+'</tbody></table></div><div class="work" style="display:block"><div class="detail" id="detail"></div></div>';return h}
 function histPage(){var it=[];D.events.forEach(function(e){it.push({d:e.d,a:(({GIAO:'Giao lượt',BAT_DAU_XU_LY:'Bắt đầu xử lý',HOAN_THANH:'Hoàn thành',THU_HOI:'Thu hồi',CHUYEN_SHOP_SANG_EMPLOYEE:'Chia cho nhân viên'})[e.loai]||e.loai),m:e.ma_luot,who:e.nguoi_thuc_hien,x:e.ly_do})});D.tt.forEach(function(x){it.push({d:x.d,a:((cat(x.loai_tuong_tac)||{}).ten||'Liên hệ')+' · '+((cat(x.ket_qua_lien_lac)||{}).ten||''),m:x.ma_luot,who:x.ma_tk,x:x.ghi_chu})});
  it.sort(function(a,b){return (b.d||0)-(a.d||0)});var T={};D.turns.forEach(function(t){T[t.ma_luot]=t});
  return mtop()+'<div class="greet"><h1>Lịch sử xử lý</h1><p>50 hoạt động gần nhất trong phạm vi của bạn.</p></div><div class="card" style="padding:6px 8px"><table><thead><tr><th>Thời gian</th><th>Khách</th><th>Hoạt động</th></tr></thead><tbody>'+it.slice(0,50).map(function(x){var t=T[x.m]||{},c=D.cus[t.ma_khach]||{};return '<tr><td>'+dstr(x.d)+'</td><td><b>'+esc(c.ho_ten)+'</b><small>'+esc(x.m)+'</small></td><td>'+esc(x.a)+'<small>'+esc(nm(x.who))+(x.x?' · '+esc(x.x):'')+'</small></td></tr>'}).join('')+'</tbody></table></div>'}
@@ -573,6 +586,6 @@ document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261126r"></script>
+<script src="app.js?v=20261127a"></script>
 </body>
 </html>
