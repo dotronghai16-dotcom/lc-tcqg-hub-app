@@ -323,13 +323,19 @@ button.kp-m{font:inherit;color:inherit;text-align:left;cursor:pointer;display:bl
  .modal.mm .mchips button,.modal.mm .mseg button,.modal.mm .mtabs button,.modal.mm .mlink,.modal.ghm .gc,.modal.ghm .gmini{min-height:44px}
  .modal.mm .mpv .ed .eh{flex-wrap:wrap;row-gap:2px}
 }
+/* Đăng nhập 27/11: dải logo rộng hết thẻ, chỗ cho mascot (ảnh gốc mascot-login.png, tự ẩn nếu chưa có) */
+.lcard{padding:0;overflow:hidden}
+.lcard>:not(#llogo){margin-left:26px;margin-right:26px}
+.lcard>#llogo{display:flex;justify-content:center;border-radius:0;padding:28px 16px;margin:0 0 4px;background:var(--brand)}
+.lcard>#lmas{display:block;height:130px;width:auto;max-width:70%;object-fit:contain;margin:14px auto 0}
+.lcard>:last-child{margin-bottom:24px}
 </style>
 </head>
 <body>
 <div class="env" id="env">Bản thử · dữ liệu giả · Supabase Singapore</div>
 <section class="login" id="login" hidden>
   <form class="lcard" id="lf" autocomplete="on">
-    <div id="llogo"></div><h1>Đăng nhập</h1><p>Vaxora Care · Khu làm việc chăm sóc khách hàng</p>
+    <div id="llogo"></div><img id="lmas" src="mascot-login.png" alt="" onerror="this.remove()"><h1>Đăng nhập</h1><p>Vaxora Care · Khu làm việc chăm sóc khách hàng</p>
     <label class="field">Email công ty<input id="em" type="email" autocomplete="username" required placeholder="ten@congty.vn"></label>
     <label class="field">Mã PIN / mật khẩu<input id="pw" type="password" autocomplete="current-password" required></label>
     <div class="err" id="lerr" hidden></div>
@@ -586,6 +592,6 @@ document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.matches&&t.matches('input[type=date],input[type=datetime-local],input[type=month],input[type=time]')&&!t.disabled&&!t.readOnly&&typeof t.showPicker==='function'){try{t.showPicker()}catch(x){}}});
 start();
 </script>
-<script src="app.js?v=20261127a"></script>
+<script src="app.js?v=20261127b"></script>
 </body>
 </html>
